@@ -1,7 +1,7 @@
 # wires-builds
 
 
-# On dev PC
+## On dev PC
 
 update the npm build version 
 https://docs.npmjs.com/updating-your-published-package-version-number
@@ -27,9 +27,9 @@ unzip 0.0.0
 
 
 
-# On the host
+## On the host
 
-## clone and unzip the repo and other
+### clone and unzip the repo and other
 
 ```
 wget https://github.com/NubeIO/wires-builds/archive/0.0.0.zip
@@ -41,7 +41,7 @@ sudo mkdir /data && sudo chown -R pi:pi /data
 ```
 
 
-## Installed nodejs
+### Installed nodejs
 
 ```
 sudo apt install curl
@@ -49,7 +49,7 @@ curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
 sudo apt install nodejs
 ```
 
-## run wires
+### run wires
 
 ```
 npm run start:prod
