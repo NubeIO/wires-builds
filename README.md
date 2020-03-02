@@ -3,6 +3,11 @@
 
 # On dev PC
 
+update the npm build version 
+https://docs.npmjs.com/updating-your-published-package-version-number
+
+```
+npm version patch
 ```
 sudo npm run build --prod --target=edge28
 ```
