@@ -10,8 +10,9 @@ sudo apt install nodejs
 
 #### Download and Start snapshot
 
-- Download that `.zip` file into your x86 bit of machine and extract project where user have permission to `R/W/E`
-- Make sure you have directory with writable permission `/data` (`sudo mkdir /data && sudo chown -R pi:pi /data` for db store, `pi` is the user)
+- Download release file into your x86 bit of machine: `wget https://github.com/NubeIO/wires-builds/archive/${tag}.zip` 
+- Extract project where user have permission to `R/W/E` (home location would be a location)
+- Make sure you have directory with writable permission `/data` (If you don't have `sudo mkdir /data && sudo chown -R pi:pi /data` for db store, `pi` is the user)
 - `npm run start:prod`
 - Other scripts:
   - `npm run stop:prod`
