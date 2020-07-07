@@ -9,30 +9,7 @@
 - install Node.js v8.4 or higher: [https://nodejs.org/en/download/](https://nodejs.org/en/download/)
 - reboot
 
-**Install rubix Wires:**
 
-- git clone https://github.com/NubeIO/rubix-wires
-- cd rubix-wires
-- npm install
-
-## **How to build:**
-
-- npm run build (it creates static frontend distribution files)
-
-## **How to build and run for testing only**
-
-- npm run build (it creates static frontend distribution files)
-- update the `start` in `package.json`
-
-#### to:
-
-`cross-env NODE_ENV=production node dist/app.js`
-
-#### from:
-
-`node dist/app.js`
-
-Change back once finished to `node dist/app.js`
 
 ## **How to run:**
 
@@ -67,10 +44,7 @@ Change back once finished to `node dist/app.js`
 
 We need the user for running commands.
 
-#### Create snapshot
 
-- `npm install`
-- `npm run build --prod --target=x86` (Create production `.zip` file for the deployment)
 
 #### Upload download snapshot
 
