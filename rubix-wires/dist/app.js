@@ -100,6 +100,7 @@ class App {
             if (containers[0])
                 contCount--;
             log.info('Imported ' + contCount + ' containers, ' + nodesCount + ' nodes from database');
+            setTimeout(() => this.startBackend(), 1);
         });
     }
     startBackend() {

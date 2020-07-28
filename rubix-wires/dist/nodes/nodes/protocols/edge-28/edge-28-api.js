@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../../node");
 const container_1 = require("../../../container");
 const container_node_1 = require("../../../container-node");
+const unitsJson_1 = require("../../../utils/data-types/src/valueFormats/unitsJson");
 const utils_1 = require("../../../utils");
 const axios_1 = require("axios");
 const edge_utils_1 = require("./edge-utils");
@@ -20,6 +21,9 @@ class Edge28ApiNode extends container_node_1.ContainerNode {
     constructor(container) {
         super(container);
         this.pointNodes = [];
+        this.units = unitsJson_1.unitRefs.map(e => {
+            return { value: e.value, text: e.text };
+        });
         this.inAlarmTrigger = 0;
         this.inHistoryTrigger = 1;
         this.inInput = 2;
@@ -29,10 +33,51 @@ class Edge28ApiNode extends container_node_1.ContainerNode {
         this.outAlarm = 3;
         this.title = 'Edge 28 api';
         this.description = '';
-        this.addInput('ping', node_1.Type.BOOLEAN);
-        this.addOutput('connected', node_1.Type.BOOLEAN);
+        this.addInput('[alarm trigger]', node_1.Type.BOOLEAN);
+        this.addInput('[history trigger]', node_1.Type.BOOLEAN);
+        this.addOutput('out', node_1.Type.NUMBER);
         this.addOutput('error', node_1.Type.STRING);
+        this.addOutput('message', node_1.Type.STRING);
         this.addOutput('alarm', node_1.Type.BOOLEAN);
+        this.properties['pointVal'] = null;
+        this.settings['pointEnable'] = {
+            description: 'Point enable',
+            value: false,
+            type: node_1.SettingType.BOOLEAN,
+        };
+        this.settings['valRaw'] = {
+            description: 'Raw value',
+            value: '',
+            type: node_1.SettingType.READONLY,
+        };
+        this.settings['valOffset'] = {
+            description: 'Out value offset',
+            value: 1000,
+            type: node_1.SettingType.NUMBER,
+        };
+        this.setSettingsConfig({
+            groups: [
+                { address: {}, offset: {}, pointTimeout: {} },
+                { dataType: {}, dataEndian: {} },
+                { pointLimitEnable: {}, limitLow: {}, limitHigh: {} },
+                { mathFunc: {}, mathValue: {} },
+                { valOffset: {}, valPrecision: {} },
+            ],
+            conditions: {
+                offset: setting => {
+                    const val = setting['pointType'].value;
+                    return ![5, 6].includes(val);
+                },
+                dataType: setting => {
+                    const val = setting['pointType'].value;
+                    return ![1, 2, 5, 15].includes(val);
+                },
+                dataEndian: setting => {
+                    const val = setting['pointType'].value;
+                    return ![1, 2, 5, 15].includes(val);
+                },
+            },
+        });
     }
     fetchPointValue(host, port, apiVer, pointType) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -49,6 +94,7 @@ class Edge28ApiNode extends container_node_1.ContainerNode {
         if (this.side !== container_1.Side.server)
             return;
         this.onInputUpdated();
+        this.getParentNode();
     }
     sendPayloadToPointNodesFunc() {
         for (let pointNode of this.pointNodes) {
@@ -89,6 +135,10 @@ class Edge28ApiNode extends container_node_1.ContainerNode {
                 .catch(err => this.debugInfo(`ERROR: getting edge point type: ${_di} ${err}`));
             this.sendPayloadToPointNodesFunc();
         });
+    }
+    updateTitle() {
+        this.title = `MB Pnt (FC: ${this.settings['pointType'].value}, AD: ${this.settings['address'].value}, ID: ${this.container.id}_${this.id})`;
+        this.broadcastSettingsToClients();
     }
     onAfterSettingsChange() {
         this.onInputUpdated();

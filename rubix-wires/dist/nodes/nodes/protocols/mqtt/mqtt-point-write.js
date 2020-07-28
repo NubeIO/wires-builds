@@ -9,17 +9,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const container_1 = require("../../../container");
-const constants_1 = require("../../../constants");
-const node_1 = require("../../../node");
-const mqtt_utils_1 = require("./mqtt-utils");
-const utils_1 = require("../../../utils");
 const mqtt = require("mqtt");
-var HistoryMode;
-(function (HistoryMode) {
-    HistoryMode[HistoryMode["COV"] = 0] = "COV";
-    HistoryMode[HistoryMode["TRIGGERED"] = 1] = "TRIGGERED";
-})(HistoryMode || (HistoryMode = {}));
+const constants_1 = require("../../../constants");
+const container_1 = require("../../../container");
+const node_1 = require("../../../node");
+const utils_1 = require("../../../utils");
+const point_model_1 = require("../model/point-model");
+const mqtt_utils_1 = require("./mqtt-utils");
 class MqttPointWriteNode extends node_1.Node {
     constructor() {
         super();
@@ -86,11 +82,11 @@ class MqttPointWriteNode extends node_1.Node {
             type: node_1.SettingType.DROPDOWN,
             config: {
                 items: [
-                    { value: HistoryMode.COV, text: 'Change Of Value (COV)' },
-                    { value: HistoryMode.TRIGGERED, text: 'Triggered' },
+                    { value: point_model_1.HistoryMode.COV, text: 'Change Of Value (COV)' },
+                    { value: point_model_1.HistoryMode.TRIGGERED, text: 'Triggered' },
                 ],
             },
-            value: HistoryMode.COV,
+            value: point_model_1.HistoryMode.COV,
         };
         this.settings['threshold'] = {
             description: 'COV Threshold',
@@ -109,7 +105,8 @@ class MqttPointWriteNode extends node_1.Node {
                     return setting['enableHistory'].value;
                 },
                 threshold: setting => {
-                    return setting['enableHistory'].value && setting['historyMode'].value === HistoryMode.COV;
+                    return setting['enableHistory'].value && setting['historyMode'].value ===
+                        point_model_1.HistoryMode.COV;
                 },
                 maxRecords: setting => {
                     return setting['enableHistory'].value;
@@ -211,7 +208,7 @@ class MqttPointWriteNode extends node_1.Node {
             this.client.publish(`${this.settings['topic'].value}/res`, JSON.stringify(json), {
                 retain: true,
             });
-            if (this.checkCOV() || this.settings['historyMode'].value === HistoryMode.TRIGGERED) {
+            if (this.checkCOV() || this.settings['historyMode'].value === point_model_1.HistoryMode.TRIGGERED) {
                 this.addHistory(brokerStatus, val, priority);
             }
         }
@@ -245,7 +242,7 @@ class MqttPointWriteNode extends node_1.Node {
         const enableHistory = this.settings['enableHistory'].value;
         const historyMode = this.settings['historyMode'].value;
         if (historyMode !== this.historyMode || enableHistory !== this.enableHistory) {
-            if (historyMode === HistoryMode.TRIGGERED && enableHistory) {
+            if (historyMode === point_model_1.HistoryMode.TRIGGERED && enableHistory) {
                 this.addInput('storeHistory', node_1.Type.BOOLEAN);
                 this.hasStoreHistoryInputSlot = true;
             }
@@ -308,7 +305,7 @@ class MqttPointWriteNode extends node_1.Node {
         }
     }
     checkCOV() {
-        if (this.settings['historyMode'].value === HistoryMode.COV) {
+        if (this.settings['historyMode'].value === point_model_1.HistoryMode.COV) {
             const output = this.outputs[this.value].data;
             const threshold = this.settings['threshold'].value;
             if (threshold === 0 && output !== this.lastHistoryValue)
@@ -317,8 +314,9 @@ class MqttPointWriteNode extends node_1.Node {
             if (output !== this.lastHistoryValue) {
                 if (typeof this.lastHistoryValue !== 'number' ||
                     !isNumber ||
-                    (isNumber && Math.abs(output - this.lastHistoryValue) >= this.settings['threshold'].value))
+                    (isNumber && Math.abs(output - this.lastHistoryValue) >= this.settings['threshold'].value)) {
                     return true;
+                }
             }
         }
         return false;
@@ -364,10 +362,11 @@ class MqttPointWriteNode extends node_1.Node {
         this.setOutputData(this.priority, null);
     }
     disconnectFromBroker() {
-        if (this.client)
+        if (this.client) {
             this.client.end(true, null, () => {
                 this.debugInfo('MQTT connection is closed closed');
             });
+        }
     }
     updateTitle() {
         this.title = `MQTT Point Write (${this.settings['topic'].value})`;

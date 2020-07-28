@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const container_node_1 = require("../../nodes/container-node");
 const container_1 = require("../../nodes/container");
 const renderer_1 = require("./renderer");
 const editor_client_socket_1 = require("./editor-client-socket");
@@ -50,12 +49,8 @@ class Editor extends events_1.EventEmitter {
     setMiniMapPositionAndSize() {
         if (!this.miniMapRenderer)
             return;
-        this.miniMapRenderer.offset = [
-            this.miniMapRenderer.DEFAULT_OFFSET,
-            this.miniMapRenderer.DEFAULT_OFFSET,
-        ];
-        if (this.renderer.container.id != 0 &&
-            this.renderer.container.id !== this.miniMapRenderer.container.id) {
+        this.miniMapRenderer.offset = [this.miniMapRenderer.DEFAULT_OFFSET, this.miniMapRenderer.DEFAULT_OFFSET];
+        if (this.renderer.container.id != 0 && this.renderer.container.id !== this.miniMapRenderer.container.id) {
             this.miniMapRenderer.openContainer(this.renderer.container);
         }
         const totalHeight = this.miniMapRenderer.MAX_OFFSET_HEIGHT + this.miniMapRenderer.DEFAULT_OFFSET;
@@ -88,6 +83,11 @@ class Editor extends events_1.EventEmitter {
             return log.error('Cant open. Container id [' + id + '] not found');
         this.renderer.openContainer(cont, false);
         this.socket.sendJoinContainerRoom(this.renderer.container.id);
+    }
+    focusNode(id, parentId) {
+        if (this.renderer.container.id != parentId)
+            return;
+        this.renderer.focusNode(id);
     }
     closeContainer() {
         if (this.renderer.container.id != 0) {
@@ -156,14 +156,16 @@ class Editor extends events_1.EventEmitter {
         this.renderer.toggleNodePanel(width, show);
     }
     conditionalEditorChangeContainer(node) {
-        if (node instanceof container_node_1.ContainerNode)
-            this.emit('editorChangeContainer', this.renderer.container);
+        this.emit('editorChangeContainer', this.renderer.container);
     }
     editorChangeContainer() {
         this.emit('editorChangeContainer', this.renderer.container);
     }
     displayMessage(message) {
         this.emit('display-message', message);
+    }
+    displayError(message) {
+        this.emit('display-error', message);
     }
     onImport(cid, selectedNodes, message) {
         this.renderer.changeSelectedNodes(selectedNodes);
@@ -211,8 +213,7 @@ class Editor extends events_1.EventEmitter {
         minimap_opened = true;
         const miniWindow = document.createElement('div');
         miniWindow.className = 'mini-window';
-        miniWindow.innerHTML =
-            "<canvas class='mini-map' width='" + w + "' height='" + h + "'></canvas>";
+        miniWindow.innerHTML = "<canvas class='mini-map' width='" + w + "' height='" + h + "'></canvas>";
         const canvas = miniWindow.querySelector('.mini-map');
         this.miniMapRenderer = new renderer_1.Renderer(this, canvas, this.rootContainer, renderer_themes_1.themes[this.themeId], false, true);
         this.miniMapRenderer.onOffsetChangedCallback(pageOffset => {

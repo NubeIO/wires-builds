@@ -10,11 +10,25 @@ class JsonFilterMultiple extends node_1.Node {
         this.description = 'Filter a json object to multiple outputs';
         this.addInput('input', node_1.Type.STRING);
         this.addOutput('error', node_1.Type.STRING);
+        this.settings['outputsUpdate'] = {
+            description: 'Outputs Update',
+            type: node_1.SettingType.DROPDOWN,
+            config: {
+                items: [
+                    { value: 'ALL', text: 'ALL' },
+                    { value: 'FOUND', text: 'FOUND' },
+                ],
+            },
+            value: 'ALL',
+        };
         this.settings['filter'] = {
             description: "Example (comma separated, '.' to denote level):\nnodeID, values.temperature, values.voltage",
             value: '',
             type: node_1.SettingType.STRING,
         };
+    }
+    onAdded() {
+        this.filterKeys = this.settings['filter'].value.replace(/ /g, '').split(',');
     }
     onInputUpdated() {
         let input = this.getInputData(0);
@@ -37,13 +51,18 @@ class JsonFilterMultiple extends node_1.Node {
                     }
                 }
             }
-            return newObject.hasOwnProperty(key) && newObject[key] !== undefined ? newObject[key] : null;
+            return newObject.hasOwnProperty(key) && newObject[key] !== undefined ? newObject[key] : undefined;
         }
         try {
             input = JSON.parse(input);
             for (let i = 0; i < this.filterKeys.length; i++) {
                 let out = findVal(input, this.filterKeys[i]);
-                this.setOutputData(i + 1, out);
+                if (out !== undefined) {
+                    this.setOutputData(i + 1, out);
+                }
+                else if (this.settings.outputsUpdate.value === 'ALL') {
+                    this.setOutputData(i + 1, null);
+                }
             }
             this.setOutputData(0, null);
         }

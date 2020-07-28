@@ -17,25 +17,29 @@ const setting_utils_1 = require("../setting-utils");
 const crypto_utils_1 = require("../crypto-utils");
 const node_utils_1 = require("../../utils/node-utils");
 const axios_1 = require("axios");
-var Influx = require('influx');
-let moment = require('moment-timezone');
+const Influx = require('influx');
+const moment = require('moment-timezone');
 class HistoryConfig {
     static addHistorySettings(self) {
         self.addInput('histTrigger', node_1.Type.BOOLEAN);
         self.addOutput('histError', node_1.Type.ANY);
         self.addOutput('storedHistCount', node_1.Type.NUMBER);
         self.addOutput('lastHistExport', node_1.Type.STRING);
-        for (var input in self.inputs) {
-            if (self.inputs[input].name == 'histTrigger')
-                self.histTriggerInput = input;
+        for (let input in self.inputs) {
+            if (self.inputs.hasOwnProperty(input)) {
+                if (self.inputs[input].name == 'histTrigger')
+                    self.histTriggerInput = input;
+            }
         }
-        for (var output in self.outputs) {
-            if (self.outputs[output].name == 'histError')
-                self.histErrorOutput = output;
-            else if (self.outputs[output].name == 'storedHistCount')
-                self.storedHistCountOutput = output;
-            else if (self.outputs[output].name == 'lastHistExport')
-                self.lastHistExportOutput = output;
+        for (let output in self.outputs) {
+            if (self.outputs.hasOwnProperty(output)) {
+                if (self.outputs[output].name == 'histError')
+                    self.histErrorOutput = output;
+                else if (self.outputs[output].name == 'storedHistCount')
+                    self.storedHistCountOutput = output;
+                else if (self.outputs[output].name == 'lastHistExport')
+                    self.lastHistExportOutput = output;
+            }
         }
         self.settings['history_group'] = {
             description: 'History Settings',
@@ -230,12 +234,15 @@ class HistoryConfig {
         self.properties['isOutput'] = isOutput;
     }
     static historyOnCreated(self) {
-        self.timeoutFunc;
         self.useInterval = false;
+        self.properties['alarmsCount'] = 0;
+        self.properties['tagsCount'] = 0;
+        self.properties['valueInput'] = 0;
+        self.properties['isOutput'] = true;
+        self.properties['pointName'] = 'undefined';
         self.properties['obj'] = [];
         self.properties['lastHistoryValue'] = null;
-        self.properties['dynamicInputStartPosition'] = self.getInputsCount();
-        self.properties['pointName'] = self.settings['pointName'].value || 'undefined';
+        self.properties['dynamicInputStartPosition'] = 2;
     }
     static doHistoryFunctions(self) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -260,7 +267,6 @@ class HistoryConfig {
             if (decimals > 5)
                 decimals = 5;
             var points = [];
-            console.log('OBJ \n', self.properties['obj']);
             self.properties['obj'].forEach(log => {
                 if (typeof log.payload == 'number')
                     log.payload = log.payload.toFixed(decimals);
@@ -314,8 +320,7 @@ class HistoryConfig {
                     url: 'https://pgr.nube-io.com/histories',
                     data: multiPointPost,
                 })
-                    .then(function (response) {
-                })
+                    .then(function () { })
                     .catch(function (error) {
                     self.setOutputData(self.histErrorOutput, String(error));
                     errorFlag = true;
@@ -333,7 +338,6 @@ class HistoryConfig {
                     username: self.settings['authentication'].value ? self.settings['user'].value : '',
                     password: self.settings['authentication'].value ? crypto_utils_1.default.decrypt(self.settings['password'].value) : '',
                 });
-                console.log('POINTS \n', points);
                 yield client.writePoints(points, writeOptions).catch(err => {
                     self.setOutputData(self.histErrorOutput, String(err.code));
                     errorFlag = true;
@@ -348,21 +352,23 @@ class HistoryConfig {
             }
         });
     }
-    static historyFunctionsForAfterSettingsChange(self, pointName = 'undefined') {
-        return __awaiter(this, void 0, void 0, function* () {
-            self.properties['pointName'] = pointName;
-            if (self.settings['databaseType'].value == 0) {
-                self.settings['alarms_count'].value = 0;
-                self.settings['tags_count'].value = 0;
-            }
-            yield HistoryConfig.changeAlarmsCount(self, self.settings['alarms_count'].value);
-            yield HistoryConfig.renameAlarmInputs(self);
-            yield HistoryConfig.changeTagsCount(self, self.settings['tags_count'].value);
-            HistoryConfig.setPeriodicLogging(self);
+    static historyFunctionsForAfterSettingsChange(self, pointName, save = true) {
+        self.properties['pointName'] = pointName;
+        if (self.settings['databaseType'].value == 0) {
+            self.settings['alarms_count'].value = 0;
+            self.settings['tags_count'].value = 0;
+        }
+        HistoryConfig.changeAlarmsCount(self, self.settings['alarms_count'].value);
+        setTimeout(() => {
+            HistoryConfig.renameAlarmInputs(self);
+        }, 100);
+        HistoryConfig.changeTagsCount(self, self.settings['tags_count'].value);
+        HistoryConfig.setPeriodicLogging(self);
+        if (save) {
             node_utils_1.default.persistProperties(self, true, true, true);
-            if (self.properties['isOutput'])
-                self.onInputUpdated();
-        });
+        }
+        if (self.properties['isOutput'])
+            self.onInputUpdated();
     }
     static storeLogEntry(self, input) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -415,28 +421,26 @@ class HistoryConfig {
         });
     }
     static setPeriodicLogging(self) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (self.settings['historyMode'].value == 1 && !self.useInterval) {
-                self.useInterval = true;
-                let interval = self.settings['period'].value;
-                interval = time_utils_1.default.timeConvert(interval, self.settings['periodUnits'].value);
-                self.timeoutFunc = setInterval(() => __awaiter(this, void 0, void 0, function* () {
-                    let input = null;
-                    if (self.properties['isOutput'])
-                        input = self.getInputData(self.properties['valueInput']);
-                    else
-                        input = self.outputs[self.properties['valueInput']].data;
-                    yield HistoryConfig.storeLogEntry(self, input);
-                    if (self.properties['obj'].length > 0)
-                        yield HistoryConfig.trySendStoredData(self);
-                    self.setOutputData(self.storedHistCountOutput, self.properties['obj'].length);
-                }), interval);
-            }
-            else if (self.settings['historyMode'].value != 1 && self.useInterval) {
-                self.useInterval = false;
-                clearInterval(self.timeoutFunc);
-            }
-        });
+        if (self.settings['historyMode'].value == 1 && !self.useInterval) {
+            self.useInterval = true;
+            let interval = self.settings['period'].value;
+            interval = time_utils_1.default.timeConvert(interval, self.settings['periodUnits'].value);
+            self.timeoutFunc = setInterval(() => __awaiter(this, void 0, void 0, function* () {
+                let input = null;
+                if (self.properties['isOutput'])
+                    input = self.getInputData(self.properties['valueInput']);
+                else
+                    input = self.outputs[self.properties['valueInput']].data;
+                yield HistoryConfig.storeLogEntry(self, input);
+                if (self.properties['obj'].length > 0)
+                    yield HistoryConfig.trySendStoredData(self);
+                self.setOutputData(self.storedHistCountOutput, self.properties['obj'].length);
+            }), interval);
+        }
+        else if (self.settings['historyMode'].value != 1 && self.useInterval) {
+            self.useInterval = false;
+            clearInterval(self.timeoutFunc);
+        }
     }
     static nearestFutureMinutes(interval, someMoment) {
         const roundedMinutes = Math.ceil(someMoment.minute() / interval) * interval;
@@ -446,94 +450,88 @@ class HistoryConfig {
             .second(0);
     }
     static changeAlarmsCount(self, target_count) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (target_count > 10) {
-                target_count = 10;
-                self.settings['alarms_count'].value = 10;
+        if (target_count > 10) {
+            target_count = 10;
+            self.settings['alarms_count'].value = 10;
+        }
+        else if (target_count < 0) {
+            target_count = 0;
+            self.settings['alarms_count'].value = 0;
+        }
+        self.properties['alarmsCount'] = Number(self.properties['alarmsCount']);
+        let diff = target_count - self.properties['alarmsCount'];
+        if (diff == 0)
+            return;
+        self.changeInputsCount(target_count + self.properties['dynamicInputStartPosition'], node_1.Type.STRING);
+        var alarmsToAdd = {};
+        if (diff > 0) {
+            for (let i = self.properties['alarmsCount'] + 1; i <= target_count; i++) {
+                alarmsToAdd['alarm' + i] = {
+                    description: 'Alarm ' + i,
+                    value: '',
+                    type: node_1.SettingType.STRING,
+                };
             }
-            else if (target_count < 0) {
-                target_count = 0;
-                self.settings['alarms_count'].value = 0;
+            if (self.properties['alarmsCount'] <= 0)
+                self.settings = setting_utils_1.default.insertIntoObjectAtPosition(self.settings, alarmsToAdd, 'alarms_count');
+            else
+                self.settings = setting_utils_1.default.insertIntoObjectAtPosition(self.settings, alarmsToAdd, 'alarm' + self.properties['alarmsCount']);
+        }
+        else if (diff < 0) {
+            for (let i = self.properties['alarmsCount']; i > target_count; i--) {
+                delete self.settings['alarm' + i];
             }
-            self.properties['alarmsCount'] = Number(self.properties['alarmsCount']);
-            let diff = target_count - self.properties['alarmsCount'];
-            if (diff == 0)
-                return;
-            self.changeInputsCount(target_count + self.properties['dynamicInputStartPosition'], node_1.Type.STRING);
-            var alarmsToAdd = {};
-            if (diff > 0) {
-                for (let i = self.properties['alarmsCount'] + 1; i <= target_count; i++) {
-                    alarmsToAdd['alarm' + i] = {
-                        description: 'Alarm ' + i,
-                        value: '',
-                        type: node_1.SettingType.STRING,
-                    };
-                }
-                if (self.properties['alarmsCount'] <= 0)
-                    self.settings = setting_utils_1.default.insertIntoObjectAtPosition(self.settings, alarmsToAdd, 'alarms_count');
-                else
-                    self.settings = setting_utils_1.default.insertIntoObjectAtPosition(self.settings, alarmsToAdd, 'alarm' + self.properties['alarmsCount']);
-            }
-            else if (diff < 0) {
-                for (let i = self.properties['alarmsCount']; i > target_count; i--) {
-                    delete self.settings['alarm' + i];
-                }
-            }
-            self.properties['alarmsCount'] = target_count;
-        });
+        }
+        self.properties['alarmsCount'] = target_count;
     }
     static renameAlarmInputs(self) {
-        return __awaiter(this, void 0, void 0, function* () {
+        for (let i = 1; i <= self.properties['alarmsCount']; i++) {
+            let alarm = self.settings['alarm' + i].value;
+            if (alarm.length > 20)
+                alarm = '...' + alarm.substr(alarm.length - 20, 20);
+            self.inputs[self.properties['dynamicInputStartPosition'] + i - 1].name = 'alarm' + i + ' | ' + alarm;
+        }
+        if (self.side == container_1.Side.editor) {
             for (let i = 1; i <= self.properties['alarmsCount']; i++) {
-                let alarm = self.settings['alarm' + i].value;
-                if (alarm.length > 20)
-                    alarm = '...' + alarm.substr(alarm.length - 20, 20);
-                self.inputs[self.properties['dynamicInputStartPosition'] + i - 1].name = 'alarm' + i + ' | ' + alarm;
+                self.inputs[self.properties['dynamicInputStartPosition'] + i - 1].label =
+                    self.inputs[self.properties['dynamicInputStartPosition'] + i - 1].name;
             }
-            if (self.side == container_1.Side.editor) {
-                for (let i = 1; i <= self.properties['alarmsCount']; i++) {
-                    self.inputs[self.properties['dynamicInputStartPosition'] + i - 1].label =
-                        self.inputs[self.properties['dynamicInputStartPosition'] + i - 1].name;
-                }
-                self.setDirtyCanvas(true, true);
-            }
-        });
+            self.setDirtyCanvas(true, true);
+        }
     }
     static changeTagsCount(self, target_count) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (target_count > 10) {
-                target_count = 10;
-                self.settings['tags_count'].value = 10;
+        if (target_count > 10) {
+            target_count = 10;
+            self.settings['tags_count'].value = 10;
+        }
+        else if (target_count < 0) {
+            target_count = 0;
+            self.settings['tags_count'].value = 0;
+        }
+        self.properties['tagsCount'] = Number(self.properties['tagsCount']);
+        let diff = target_count - self.properties['tagsCount'];
+        if (diff == 0)
+            return;
+        var tagsToAdd = {};
+        if (diff > 0) {
+            for (let i = self.properties['tagsCount'] + 1; i <= target_count; i++) {
+                tagsToAdd['tag' + i] = {
+                    description: 'Tag ' + i,
+                    value: '',
+                    type: node_1.SettingType.STRING,
+                };
             }
-            else if (target_count < 0) {
-                target_count = 0;
-                self.settings['tags_count'].value = 0;
+            if (self.properties['tagsCount'] == 0)
+                self.settings = setting_utils_1.default.insertIntoObjectAtPosition(self.settings, tagsToAdd, 'tags_count');
+            else
+                self.settings = setting_utils_1.default.insertIntoObjectAtPosition(self.settings, tagsToAdd, 'tag' + self.properties['tagsCount']);
+        }
+        else if (diff < 0) {
+            for (let i = self.properties['tagsCount']; i > target_count; i--) {
+                delete self.settings['tag' + i];
             }
-            self.properties['tagsCount'] = Number(self.properties['tagsCount']);
-            let diff = target_count - self.properties['tagsCount'];
-            if (diff == 0 || target_count < 0)
-                return;
-            var tagsToAdd = {};
-            if (diff > 0) {
-                for (let i = self.properties['tagsCount'] + 1; i <= target_count; i++) {
-                    tagsToAdd['tag' + i] = {
-                        description: 'Tag ' + i,
-                        value: '',
-                        type: node_1.SettingType.STRING,
-                    };
-                }
-                if (self.properties['tagsCount'] == 0)
-                    self.settings = setting_utils_1.default.insertIntoObjectAtPosition(self.settings, tagsToAdd, 'tags_count');
-                else
-                    self.settings = setting_utils_1.default.insertIntoObjectAtPosition(self.settings, tagsToAdd, 'tag' + self.properties['tagsCount']);
-            }
-            else if (diff < 0) {
-                for (let i = self.properties['tagsCount']; i > target_count; i--) {
-                    delete self.settings['tag' + i];
-                }
-            }
-            self.properties['tagsCount'] = target_count;
-        });
+        }
+        self.properties['tagsCount'] = target_count;
     }
     static getDeviceID(self) {
         return new Promise((resolve, reject) => {

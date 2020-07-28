@@ -5,6 +5,7 @@ const container_node_1 = require("./container-node");
 const utils_1 = require("./utils");
 const container_utils_1 = require("./container-utils");
 const registry_1 = require("./registry");
+const lodash_1 = require("lodash");
 const log = require('logplease').create('container', { color: 5 });
 const doNothing = () => { };
 var Side;
@@ -40,6 +41,9 @@ class Container {
                 this.dashboard = rootContainer.dashboard;
         }
     }
+    static rootContainer() {
+        return this.containers[0];
+    }
     static clear() {
         Container.containers = {};
         Container.last_container_id = -1;
@@ -73,25 +77,19 @@ class Container {
         }
     }
     static getNodeTypesInCategory(category) {
-        let r = [];
-        for (let i in this.nodes_types)
-            if (category == '') {
-                if (this.nodes_types[i].category == null)
-                    r.push(this.nodes_types[i]);
-            }
-            else if (this.nodes_types[i].category == category)
-                r.push(this.nodes_types[i]);
-        return r;
+        return Object.values(this.nodes_types).filter(n => n.category == (category || null));
+    }
+    static getNodeTypes() {
+        return Object.values(this.nodes_types);
+    }
+    static nodeIsInCategory(category) {
+        return n => n.category == (category || null);
     }
     static getNodeTypesCategories() {
-        let categories = {};
-        for (let i in this.nodes_types)
-            if (this.nodes_types[i].category && this.nodes_types[i].show_in_menu)
-                categories[this.nodes_types[i].category] = true;
-        let result = [];
-        for (let i in categories)
-            result.push(i);
-        return result;
+        return lodash_1.uniq(Object.values(this.nodes_types)
+            .filter(n => !!n.category && n.show_in_menu)
+            .map(n => n.category)
+            .concat(['']));
     }
     clear() {
         this.stop();
@@ -185,8 +183,7 @@ class Container {
                 if (node.isUpdated) {
                     if (!node.UPDATE_INPUTS_INTERVAL ||
                         (node.UPDATE_INPUTS_INTERVAL && !node.updateInputsLastTime) ||
-                        (node.updateInputsLastTime &&
-                            now - node.updateInputsLastTime >= node.UPDATE_INPUTS_INTERVAL)) {
+                        (node.updateInputsLastTime && now - node.updateInputsLastTime >= node.UPDATE_INPUTS_INTERVAL)) {
                         if (node['onInputUpdated'])
                             node['onInputUpdated']();
                         node.isUpdated = false;
@@ -281,6 +278,11 @@ class Container {
             }
         }
     }
+    static setSettings(properties, node) {
+        if (properties && properties['settings']) {
+            container_utils_1.default.addSettingsProperties(node, properties['settings']);
+        }
+    }
     createNode(type, properties, serializedNode, force = false, callback = doNothing) {
         if (this.container_node && this.container_node.shouldRejectNodeType(type)) {
             this.debugErr('Trying to create non-compatible child node in container...');
@@ -319,8 +321,7 @@ class Container {
         if (node instanceof container_node_1.ContainerNode && properties && properties.sub_container) {
             node.sub_container = Container.containers[properties.sub_container.id];
             node.settings.name.value =
-                (node.settings && node.settings.name && node.settings.name.value) ||
-                    'Folder ' + properties.sub_container.id;
+                (node.settings && node.settings.name && node.settings.name.value) || 'Folder ' + properties.sub_container.id;
         }
         if (!node.title)
             node.title = node.type;
@@ -333,6 +334,7 @@ class Container {
         if (isNew || force) {
             if (node['init'])
                 node['init']();
+            Container.setSettings(properties, node);
             this.createNewNode(node).then(() => {
                 callNodeMethodOnAdded();
             });
@@ -389,6 +391,15 @@ class Container {
             }
         });
     }
+    removeBroadcasted(node) {
+        if (this.side === Side.server) {
+            this.remove(node);
+            this.server_editor_socket.emit('nodes-delete', { nodes: [node.id], cid: node.cid });
+            if (node.isDashboardNode) {
+                this.server_dashboard_socket.in('' + node.cid).emit('nodes-delete', { nodes: [node], cid: node.cid });
+            }
+        }
+    }
     remove(node) {
         if (typeof node == 'number') {
             node = this._nodes[node];
@@ -398,27 +409,10 @@ class Container {
         }
         if (node.ignore_remove)
             return;
-        this.onRemovedHandler(node);
-    }
-    onRemovedHandler(node) {
-        if (node['onRemoved']) {
-            const output = node['onRemoved']();
-            if (output && typeof output.then === 'function') {
-                output
-                    .then(() => {
-                    this.afterOnRemoved(node);
-                })
-                    .catch(err => {
-                    log.error(err);
-                });
-            }
-            else {
-                this.afterOnRemoved(node);
-            }
-        }
-        else {
-            this.afterOnRemoved(node);
-        }
+        const callback = lodash_1.get(node, 'onRemoved', () => { });
+        Promise.resolve(callback.call(node))
+            .then(() => this.afterOnRemoved(node))
+            .catch(err => log.error(err));
     }
     afterOnRemoved(node) {
         if (node.inputs)
@@ -492,8 +486,46 @@ class Container {
         }
         return r;
     }
+    getAllNodes(parent = this._nodes, parentId = 0) {
+        let list = [];
+        Object.keys(parent).forEach(id => {
+            const node = parent[id];
+            if (node instanceof container_node_1.ContainerNode) {
+                list.push({
+                    id: node.sub_container.id,
+                    name: node.sub_container.name,
+                    parentId,
+                    list: this.getAllNodes(node.sub_container._nodes, node.sub_container.id),
+                    isContainer: true,
+                });
+            }
+            else {
+                list.push({
+                    id: node.id,
+                    parentId,
+                    name: node.name ? `${node.name}: ${node.title}` : node.title,
+                    isContainer: false,
+                });
+            }
+        });
+        return list.sort((a, b) => {
+            if (a.isContainer && b.isContainer) {
+                return a.id - b.id;
+            }
+            else if (a.isContainer && !b.isContainer) {
+                return -1;
+            }
+            else
+                return 1;
+        });
+    }
     setDirtyCanvas(foreground, backgroud) {
         this.sendActionToRenderer('setDirty', [foreground, backgroud]);
+    }
+    runWithEditor(f) {
+        const editor = lodash_1.get(this, 'renderers[0].editor');
+        if (editor)
+            f(editor);
     }
     serialize(only_dashboard_nodes = false) {
         let data = {

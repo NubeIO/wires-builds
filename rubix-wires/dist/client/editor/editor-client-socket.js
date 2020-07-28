@@ -212,9 +212,8 @@ class EditorClientSocket {
             container_utils_1.default.removeBrokenLinks(container_1.Container.containers[res.convertedParamsCid]);
             this.editor.onMoveToContainer(selectedNodes, res.message);
         });
-        socket.on(events_1.ERROR, res => {
-            this.editor.displayMessage(res.error);
-        });
+        socket.on(events_1.ERROR, error => this.editor.displayError(error));
+        socket.on(events_1.NOTIFICATION, message => this.editor.displayMessage(message));
         socket.on('container-run', l => {
             this.editor.onContainerRun();
         });

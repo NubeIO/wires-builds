@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const mqtt_types_1 = require("./mqtt-types");
 const crypto_utils_1 = require("../../../utils/crypto-utils");
+const mqtt_types_1 = require("./mqtt-types");
 class MqttUtils {
     static addMqttWriter(parentNode, payload) {
         if (parentNode && parentNode['subscribe']) {

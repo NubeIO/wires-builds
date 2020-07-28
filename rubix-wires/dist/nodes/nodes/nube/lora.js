@@ -13,7 +13,7 @@ class LoraSensorDecoderNode extends node_1.Node {
         super();
         this.watchdogDelay = 3600000;
         this.nodeID = '';
-        this.title = `Lora Sensor Decoder (Droplet | ALL)`;
+        this.title = `Lora Sensor Decoder (Droplet | Micro)`;
         this.description =
             'This node is used to decode raw serial input messages to LORA sensor values. It should be used in conjunction with the protocols/serial-connector node. If a ‘nodeID’ is set, only messages from matching LORA sensors will be output;  if no ‘nodeID’ is set, all valid LORA sensor messages will be output.  Outputs that are not present in the raw serial input message will be ‘null’.  ‘lowBatteryAlm’ output will be ‘true’ if the LORA sensor has a battery ‘voltage’ value less than the ‘Low battery warning voltage’ setting; otherwise it will be ‘false’.  ‘watchdog’ output will be ‘true’ if there has been no valid message from the ‘nodeID’ LORA sensor for the ‘Watchdog Delay’; otherwise ‘watchdog’ output will be false.  Maximum ‘Watchdog Delay’ setting is 587 hours.  This node can be used for decoding Nube Droplet sensors, and Nube MicroEdge sensors.  The sensor type can be selected from settings.';
         this.settings['sensorType'] = {
@@ -135,8 +135,7 @@ class LoraSensorDecoderNode extends node_1.Node {
         let data = this.getInputData(0) || '';
         if (!data)
             return;
-        else if (data.length % 2 === 1 &&
-            (data[data.length - 1] === '\r' || data[data.length - 1] === '\n')) {
+        else if (data.length % 2 === 1 && (data[data.length - 1] === '\r' || data[data.length - 1] === '\n')) {
             data = data.substring(0, data.length - 1);
         }
         else if (data.substring(data.length - 2, data.length) === '\r\n') {

@@ -321,14 +321,13 @@ class ModbusSerialNetworkNode extends container_node_1.ContainerNode {
                 }
                 let errorOnModbusPointsExec = false;
                 for (let point of points) {
-                    const { pntAddr, pntType, pntOffset, pntVal, pntCid, pntId, pntDataType, pntDataEndian, } = point;
+                    const { pntAddr, pntType, pntOffset, pntVal, pntCid, pntId, pntDataType, pntDataEndian } = point;
                     yield utils_1.default.sleep(this.registerDelay || 50);
                     const pointNode = registry_1.default._nodes[registry_1.default.getId(pntCid, pntId)];
                     if (!pointNode)
                         return;
                     try {
                         const response = yield modbus_point_methods_1.default.modbusMethods(this.client, deviceAddress, pntType, pntAddr, pntOffset, pntVal, pntDataType, pntDataEndian);
-                        console.log(response);
                         modbus_functions_1.default.sendPointMessage(pointNode, response);
                         modbus_functions_1.default.sendPointError(pointNode, null);
                     }

@@ -20,12 +20,32 @@ class ConnectionLocalReceiverNode extends flexible_node_1.FlexibleNode {
             type: node_1.SettingType.NUMBER,
         };
     }
+    onCreated() {
+        this.properties['channel'] = 1;
+    }
     onAdded() {
         this.updateTitle();
+        this.onAfterSettingsChange();
     }
     onAfterSettingsChange() {
         super.onAfterSettingsChange();
         this.updateTitle();
+        if (this.properties['channel'] !== this.settings['channel'].value)
+            this.resetOutputs();
+        this.triggerTransmitterNodeUpdate();
+    }
+    triggerTransmitterNodeUpdate() {
+        let transmitters = container_1.Container.containers[0].getNodesByType('connection/link-transmitter', true);
+        transmitters.forEach(transmitter => {
+            if (transmitter.settings['channel'].value == this.settings['channel'].value) {
+                transmitter['onInputUpdated']();
+            }
+        });
+    }
+    resetOutputs() {
+        for (let i in this.outputs) {
+            this.setOutputData(+i, null);
+        }
     }
     updateTitle() {
         this.title = 'Link Receiver [' + this.settings['channel'].value + ']';

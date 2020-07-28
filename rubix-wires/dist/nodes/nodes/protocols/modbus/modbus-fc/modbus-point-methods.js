@@ -91,10 +91,7 @@ class ModbusMethods {
                 }
                 else if (type === 16) {
                     funcType = 'writeRegisters';
-                    methodType = [
-                        regAddr,
-                        modbus_point_byte_order_1.default.writeValue(nodeInputValue, pntDataType, pntDataEndian),
-                    ];
+                    methodType = [regAddr, modbus_point_byte_order_1.default.writeValue(nodeInputValue, pntDataType, pntDataEndian)];
                 }
                 return {
                     funcType: funcType,
@@ -109,31 +106,27 @@ class ModbusMethods {
 }
 exports.default = ModbusMethods;
 ModbusMethods.modbusMethods = (thisInstance, id, type, regAddr, regLength, nodeInputValue, pntDataType, pntDataEndian) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(`Modbus call @  ${id}, FC: ${type}, regAddr: ${regAddr}, length: ${regLength} , writeVal: ${nodeInputValue} , pntDataType: ${pntDataType}, pntDataEndian: ${pntDataEndian}`);
     let ft = yield ModbusMethods.pntSwitch(type, regAddr, regLength, nodeInputValue, pntDataType, pntDataEndian);
-    let dBug = true;
-    if (dBug) {
-        console.log(`Modbus pntSwitch FC-METHOD: ${ft.methodType}, @ ${id}, FC: ${ft.funcType}, regAddr: ${regAddr}, length: ${regLength} , writeVal: ${nodeInputValue} , pntDataType: ${pntDataType}, pntDataEndian: ${pntDataEndian}`);
-    }
     yield thisInstance.setID(id);
     yield utils_1.default.sleep(5);
     return yield new Promise((resolve, reject) => {
         thisInstance[ft.funcType](...ft.methodType).then((res) => {
-            console.log(111, res);
             if (pntDataType !== 0 && (type === 3 || type === 4)) {
-                console.log(2222222);
-                resolve(modbus_point_byte_order_1.default.readByteOrder(res.buffer, 0, pntDataType, pntDataEndian));
+                const payload = modbus_point_byte_order_1.default.readByteOrder(res.buffer, 0, pntDataType, pntDataEndian);
+                resolve({ res: res, payload: payload });
             }
             else if (type === 1 || type === 2 || type === 21 || type === 22) {
-                resolve(ModbusMethods.readBool(res));
+                const payload = ModbusMethods.readBool(res);
+                resolve({ res: res, payload: payload });
             }
             else if (type === 23 || type === 24) {
                 let nubeType = ModbusMethods.nubeAnalogueRead();
-                resolve(modbus_point_byte_order_1.default.readByteOrder(res.buffer, 0, nubeType[0], nubeType[1]));
+                const payload = modbus_point_byte_order_1.default.readByteOrder(res.buffer, 0, nubeType[0], nubeType[1]);
+                resolve({ res: res, payload: payload });
             }
             else if (type === 5 || type === 6 || type === 16 || type === 25 || type === 26) {
                 if (res) {
-                    resolve('writeOk');
+                    resolve({ res: res, payload: 'writeOk' });
                 }
             }
         });

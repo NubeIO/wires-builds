@@ -17,7 +17,7 @@ class ModbusPointNode extends container_node_1.ContainerNode {
         });
         this.dynamicInputsExist = false;
         this.dynamicSettingsExist = false;
-        this.dynamicInputStartPosition = 2;
+        this.dynamicInputStartPosition = 0;
         this.dynamicMinInputs = 0;
         this.nullableInputs = true;
         this.dynamicOutputsExist = false;
@@ -70,16 +70,23 @@ class ModbusPointNode extends container_node_1.ContainerNode {
                 ` This node is used as a modbus device point.\n ` +
                 ` The points for the device will be added inside the device node (right click and **open** on the network node to add the device and points) \n ` +
                 `   \n ` +
-                `### Enable\n ` +
+                `## Point Address\n ` +
+                `   \n ` +
+                `### Coils\n ` +
+                `   \n ` +
+                ` Valid Coil range is between 0 and 10001. This will allow any modbus client to read and write to those coli ranges\n ` +
+                `   \n ` +
+                `### Holding Register\n ` +
+                `   \n ` +
+                ` Valid Holding Register range is between 10001 and 19999. This will allow any modbus client to read and write to those coli ranges\n ` +
+                `   \n ` +
+                `## Enable\n ` +
                 `   \n ` +
                 ` This will enable/disable the point from polling \n ` +
                 `   \n `;
-        this.addInput('[alarm trigger]', node_1.Type.BOOLEAN);
-        this.addInput('[history trigger]', node_1.Type.BOOLEAN);
         this.addOutput('out', node_1.Type.NUMBER);
         this.addOutput('error', node_1.Type.STRING);
         this.addOutput('message', node_1.Type.STRING);
-        this.addOutput('alarm', node_1.Type.BOOLEAN);
         this.properties['pointVal'] = null;
         this.settings['pointEnable'] = {
             description: 'Point enable',
@@ -87,7 +94,7 @@ class ModbusPointNode extends container_node_1.ContainerNode {
             type: node_1.SettingType.BOOLEAN,
         };
         this.settings['value_group'] = {
-            description: 'value_group',
+            description: 'point settings',
             value: '',
             type: node_1.SettingType.GROUP,
         };
@@ -114,28 +121,8 @@ class ModbusPointNode extends container_node_1.ContainerNode {
                 items: this.units,
             },
         };
-        this.settings['pointLimit_group'] = {
-            description: 'pointLimit_group',
-            value: '',
-            type: node_1.SettingType.GROUP,
-        };
-        this.settings['pointLimitEnable'] = {
-            description: 'Limit enable',
-            value: false,
-            type: node_1.SettingType.BOOLEAN,
-        };
-        this.settings['limitLow'] = {
-            description: 'Out value low',
-            value: 0,
-            type: node_1.SettingType.NUMBER,
-        };
-        this.settings['limitHigh'] = {
-            description: 'Out value high',
-            value: 0,
-            type: node_1.SettingType.NUMBER,
-        };
         this.settings['math_group'] = {
-            description: 'math_group',
+            description: 'math settings',
             value: '',
             type: node_1.SettingType.GROUP,
         };
@@ -150,6 +137,7 @@ class ModbusPointNode extends container_node_1.ContainerNode {
                     { value: 3, text: 'multiply' },
                     { value: 4, text: 'divide' },
                     { value: 7, text: 'bool invert' },
+                    { value: 8, text: 'convert 1/0 to true/false' },
                     { value: 9, text: 'convert true/false to 1/0' },
                 ],
             },
@@ -161,7 +149,7 @@ class ModbusPointNode extends container_node_1.ContainerNode {
             type: node_1.SettingType.NUMBER,
         };
         this.settings['modbus_group'] = {
-            description: 'modbus_group',
+            description: 'modbus point settings',
             value: '',
             type: node_1.SettingType.GROUP,
         };
@@ -172,17 +160,11 @@ class ModbusPointNode extends container_node_1.ContainerNode {
             config: {
                 items: [
                     { value: 1, text: `Read Coil's` },
-                    { value: 21, text: `Read DO` },
                     { value: 2, text: `readDiscreteInput's` },
-                    { value: 22, text: `Read DI` },
                     { value: 3, text: `readHoldingRegister's` },
-                    { value: 23, text: `Read AO` },
                     { value: 4, text: `readInputRegister's` },
-                    { value: 24, text: `Read AI` },
                     { value: 5, text: `writeCoil` },
-                    { value: 25, text: `Write DO` },
                     { value: 6, text: `writeRegister` },
-                    { value: 26, text: `Write AO` },
                     { value: 16, text: `writeRegister's` },
                 ],
             },
@@ -269,10 +251,10 @@ class ModbusPointNode extends container_node_1.ContainerNode {
     onInputUpdated() {
         let pointType = this.settings['pointType'].value;
         if ([5, 6, 15, 16, 25, 26].includes(pointType)) {
-            let InputStartPosition = 2;
+            let InputStartPosition = 0;
             let inputValue;
             let priority;
-            for (let i = InputStartPosition; i < InputStartPosition + 16; i++) {
+            for (let i = InputStartPosition; i < InputStartPosition + 1; i++) {
                 inputValue = this.getInputData(i);
                 if (inputValue != null) {
                     priority = i;
@@ -303,7 +285,7 @@ class ModbusPointNode extends container_node_1.ContainerNode {
         let pointType = this.settings['pointType'].value;
         if (this.previousPointType !== pointType) {
             if ([5, 6, 15, 16, 25, 26].includes(pointType)) {
-                this.inputCount = 16;
+                this.inputCount = 1;
                 this.addDynamicInputsOnRange(save);
             }
             else {
@@ -321,8 +303,9 @@ class ModbusPointNode extends container_node_1.ContainerNode {
     }
     subscribe(payload) {
         let pointType = this.settings['pointType'].value;
+        this.setOutputData(this.outMessageJson, payload.res.data);
         if ([5, 6, 15, 16, 25, 26].includes(pointType)) {
-            if (payload === 'writeOk') {
+            if (payload.payload === 'writeOk') {
                 this.setOutputData(this.outVal, this.properties['pointVal']);
             }
             else {
@@ -334,14 +317,17 @@ class ModbusPointNode extends container_node_1.ContainerNode {
             const mathValue = this.settings['mathValue'].value;
             let out;
             if (mathFunc !== 0) {
-                if (pointFunc_1.default.validateNumbers(payload, mathValue)) {
-                    out = pointFunc_1.default.mathSwitch(mathFunc, payload, mathValue);
+                if (pointFunc_1.default.validateNumbers(payload.payload, mathValue)) {
+                    out = pointFunc_1.default.mathSwitch(mathFunc, payload.payload, mathValue);
                     this.setOutputData(this.outVal, out);
                 }
             }
             else {
-                if (typeof payload === 'number' || typeof payload === 'boolean') {
-                    this.setOutputData(this.outVal, payload);
+                if (typeof payload.payload === 'number') {
+                    this.setOutputData(this.outVal, payload.payload);
+                }
+                else if (typeof payload.payload === 'boolean') {
+                    this.setOutputData(this.outVal, payload.payload ? 1 : 0);
                 }
             }
         }

@@ -14,4 +14,5 @@ class PromiseActor {
     }
 }
 exports.PromiseActor = PromiseActor;
+exports.singleton = new PromiseActor();
 //# sourceMappingURL=promise-actor.js.map

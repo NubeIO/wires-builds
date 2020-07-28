@@ -11,15 +11,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../../node");
 const container_1 = require("../../../container");
-const container_node_1 = require("../../../container-node");
 const bacnet_utils_1 = require("./bacnet-utils");
 const constants_1 = require("../../../constants");
 const bacnet_constant_1 = require("./bacnet-constant");
 const utils_1 = require("../../../utils");
 const history_config_1 = require("../../../utils/points/history-config");
-class BACnetPoint extends container_node_1.ContainerNode {
-    constructor(ContainerNode) {
-        super(ContainerNode);
+class BACnetPoint extends node_1.Node {
+    constructor() {
+        super();
         this.dynamicInputsExist = false;
         this.dynamicSettingsExist = false;
         this.dynamicInputStartPosition = 2;
@@ -114,11 +113,7 @@ class BACnetPoint extends container_node_1.ContainerNode {
         history_config_1.default.historyOnCreated(this);
     }
     onAdded() {
-        const _super = Object.create(null, {
-            onAdded: { get: () => super.onAdded }
-        });
         return __awaiter(this, void 0, void 0, function* () {
-            _super.onAdded.call(this);
             this.name = `BACnet Point: cid_${this.container.id.toString()}_id${this.id.toString()}`;
             if (this.side !== container_1.Side.server)
                 return;
@@ -130,7 +125,6 @@ class BACnetPoint extends container_node_1.ContainerNode {
         });
     }
     onRemoved() {
-        super.onRemoved();
         bacnet_utils_1.default.removePoint(this.getParentNode(), this);
     }
     onInputUpdated() {
@@ -151,10 +145,12 @@ class BACnetPoint extends container_node_1.ContainerNode {
             objectType = selectPoint.type;
             objectInstance = selectPoint.instance;
         }
+        if (value === undefined)
+            return;
         bacnet_utils_1.default.writePresentValue(this.getParentNode(), [objectType, objectInstance, value, priority]);
     }
     onAfterSettingsChange() {
-        history_config_1.default.historyFunctionsForAfterSettingsChange(this, this.settings['pointName'].value).then();
+        history_config_1.default.historyFunctionsForAfterSettingsChange(this, this.settings['pointName'].value);
         this.getPresentValue();
         const getNetworkNumber = bacnet_utils_1.default.getNetworkSettings(this.getParentNode());
         if (getNetworkNumber) {

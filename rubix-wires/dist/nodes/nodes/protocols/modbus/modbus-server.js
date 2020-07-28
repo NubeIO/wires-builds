@@ -9,21 +9,46 @@ class ModbusServerNode extends node_1.Node {
         this.tcpServer = null;
         this.title = 'Modbus Server';
         this.description =
-            'Once the Port and Modbus Address settings are configured, when enabled, this node will create a Local Modbus TCP/IP Server.  The points on this created Modbus Server can be written to and read from with other Modbus Nodes, or from another device.  ';
+            `## Description\n ` +
+                ` This node is used to create a modbus server.\n ` +
+                ` Once the Port and Modbus Address settings are configured, when enabled, this node will create a Local Modbus TCP/IP Server.  The points on this created Modbus Server can be written to and read from with other Modbus Nodes, or from another device.\n ` +
+                `   \n ` +
+                `## Point Address\n ` +
+                `   \n ` +
+                `### Coils\n ` +
+                `   \n ` +
+                ` Valid Coil range is between 0 and 10001. This will allow any modbus client to read and write to those coli ranges\n ` +
+                `   \n ` +
+                `### Holding Register\n ` +
+                `   \n ` +
+                ` Valid Holding Register range is between 10001 and 19999. This will allow any modbus client to read and write to those coli ranges\n ` +
+                `   \n ` +
+                `### Enable\n ` +
+                `   \n ` +
+                ` This will enable/disable the modbus server \n ` +
+                `   \n ` +
+                `### Port\n ` +
+                `   \n ` +
+                ` This is the setting that the modbus server will listen on \n ` +
+                `   \n ` +
+                `### Modbus address\n ` +
+                `   \n ` +
+                ` This will set the modbus server modbus address (valid range between 0 and 255) \n ` +
+                `   \n `;
         this.addInput('connect', node_1.Type.BOOLEAN);
         this.addOutput('status', node_1.Type.BOOLEAN);
         this.addOutput('error', node_1.Type.STRING);
         this.addOutput('message', node_1.Type.STRING);
+        this.settings['serverEnable'] = {
+            description: 'Server enable',
+            value: false,
+            type: node_1.SettingType.BOOLEAN,
+        };
         this.settings['port'] = { description: 'port', value: 8502, type: node_1.SettingType.NUMBER };
         this.settings['address'] = {
             description: 'Modbus address',
             value: 1,
             type: node_1.SettingType.NUMBER,
-        };
-        this.settings['server-enable'] = {
-            description: 'Server enable',
-            value: false,
-            type: node_1.SettingType.BOOLEAN,
         };
     }
     onAdded() {
@@ -43,7 +68,7 @@ class ModbusServerNode extends node_1.Node {
             return;
         this.closeTcpServer();
         this.emitResult(false, false, 'close connection');
-        if (this.settings['server-enable'].value) {
+        if (this.settings['serverEnable'].value) {
             const coils = Buffer.alloc(160008, 0);
             const registers = Buffer.alloc(160008, 0);
             let unitId = this.settings['address'].value;
@@ -120,7 +145,6 @@ class ModbusServerNode extends node_1.Node {
                 server.listen(port);
             }
             else if (port.toString().length < 3) {
-                console.log('use a port >= 4');
                 this.emitResult(null, false, 'use a port >= 3');
             }
         }

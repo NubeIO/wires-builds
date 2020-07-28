@@ -34,6 +34,7 @@ class BACnetDevice extends container_node_1.ContainerNode {
         this.shouldPoll = true;
         this.delayBetweenDevice = 100;
         this.delayBetweenPoint = 30;
+        this.networkNumber = null;
         this.title = 'BACnet Device';
         this.description =
             'This node acts as a container for bacnet-point nodes. All bacnet-device nodes should be added within the bacnet-network container.  All bacnet-point nodes should be added within a bacnet-device container node.  Configuration of BACnet device connections are set from settings.  Both IP and MSTP BACnet devices can be configured from the bacnet-device settings.';
@@ -49,11 +50,6 @@ class BACnetDevice extends container_node_1.ContainerNode {
         this.settings['ip'] = { description: 'ip', value: '192.168.13.13', type: node_1.SettingType.STRING };
         this.settings['deviceId'] = { description: 'deviceId', value: 2508, type: node_1.SettingType.NUMBER };
         this.settings['port'] = { description: 'port', value: 47808, type: node_1.SettingType.NUMBER };
-        this.settings['objectIdentifier'] = {
-            description: 'BACnet Register address',
-            value: 1,
-            type: node_1.SettingType.NUMBER,
-        };
         this.settings['deviceTypeMstp'] = {
             description: 'BACnet MS/TP device',
             value: false,
@@ -66,7 +62,6 @@ class BACnetDevice extends container_node_1.ContainerNode {
         };
         this.settings['networkNumber'] = {
             description: 'BACnet network number ',
-            value: null,
             type: node_1.SettingType.READONLY,
         };
     }
@@ -83,7 +78,7 @@ class BACnetDevice extends container_node_1.ContainerNode {
             if (this.side !== container_1.Side.server)
                 return;
             bacnet_utils_1.default.addDevice(this.getParentNode(), this);
-            this.networkSettings = bacnet_utils_1.default.getNetworkSettings(this.getParentNode());
+            this.updateNetworkSettings();
             yield this.requestPoll();
         });
     }
@@ -95,6 +90,16 @@ class BACnetDevice extends container_node_1.ContainerNode {
         super.onRemoved();
         this.shouldPoll = false;
         bacnet_utils_1.default.removeDevice(this.getParentNode(), this);
+    }
+    updateNetworkSettings() {
+        if (this.side !== container_1.Side.server)
+            return;
+        const getNetworkSettings = bacnet_utils_1.default.getNetworkSettings(this.getParentNode());
+        this.networkSettings = getNetworkSettings;
+        this.networkNumber = this.networkSettings.networkNumber.value;
+        this.settings['networkNumber'].value = this.networkNumber;
+        this.broadcastSettingsToClients();
+        this.persistSettings();
     }
     requestPoll() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -132,6 +137,22 @@ class BACnetDevice extends container_node_1.ContainerNode {
             return;
         this.bacnetClient = bacnet_utils_1.default.getBacnetClient(this.getParentNode());
     }
+    writePresentValue(deviceAddress, type, instance, value, priority) {
+        if (!this.bacnetClient)
+            return;
+        if (this.settings['deviceTypeMstp'].value) {
+            this.bacnetClient.writeProperty({
+                address: deviceAddress,
+                net: this.networkNumber,
+                adr: [this.settings['macAddress'].value],
+            }, { type: type, instance: instance }, 85, [{ type: Bacnet.enum.ApplicationTags.REAL, value: value }], { priority: priority }, (err, value) => {
+                console.log(err, value);
+            });
+        }
+        else {
+            this.bacnetClient.writeProperty(deviceAddress, { type: type, instance: instance }, 85, [{ type: Bacnet.enum.ApplicationTags.REAL, value: value }], { priority: priority }, (err, value) => { });
+        }
+    }
     readObjectList(deviceAddress, deviceId, callback) {
         const requestArray = [
             {
@@ -141,12 +162,15 @@ class BACnetDevice extends container_node_1.ContainerNode {
         ];
         if (!this.bacnetClient)
             return;
-        this.bacnetClient.readPropertyMultiple(deviceAddress, requestArray, callback);
-    }
-    writePresentValue(deviceAddress, type, instance, value, priority) {
-        if (!this.bacnetClient)
-            return;
-        this.bacnetClient.writeProperty(deviceAddress, { type: type, instance: instance }, 85, [{ type: Bacnet.enum.ApplicationTags.REAL, value: value }], { priority: priority }, (err, value) => { });
+        if (this.settings['deviceTypeMstp'].value) {
+            this.bacnetClient.readPropertyMultiple({
+                address: deviceAddress,
+                net: this.networkNumber,
+                adr: [this.settings['macAddress'].value],
+            }, requestArray, requestArray, callback);
+        }
+        else
+            this.bacnetClient.readPropertyMultiple(deviceAddress, requestArray, callback);
     }
     readObjectFull(deviceAddress, type) {
         return this.readObject(deviceAddress, type, [
@@ -168,12 +192,26 @@ class BACnetDevice extends container_node_1.ContainerNode {
             ];
             if (!this.bacnetClient)
                 return;
-            this.bacnetClient.readPropertyMultiple(deviceAddress, requestArray, (error, value) => {
-                resolve({
-                    error: error,
-                    value: value,
+            if (this.settings['deviceTypeMstp'].value) {
+                this.bacnetClient.readPropertyMultiple({
+                    address: deviceAddress,
+                    net: this.networkNumber,
+                    adr: [this.settings['macAddress'].value],
+                }, requestArray, (error, value) => {
+                    resolve({
+                        error: error,
+                        value: value,
+                    });
                 });
-            });
+            }
+            else {
+                this.bacnetClient.readPropertyMultiple(deviceAddress, requestArray, (error, value) => {
+                    resolve({
+                        error: error,
+                        value: value,
+                    });
+                });
+            }
         });
     }
     readProperty(deviceAddress, obj, properties) {
@@ -181,7 +219,7 @@ class BACnetDevice extends container_node_1.ContainerNode {
             if (this.settings['deviceTypeMstp'].value) {
                 this.bacnetClient.readProperty({
                     address: deviceAddress,
-                    net: this.settings['networkNumber'].value,
+                    net: this.networkNumber,
                     adr: [this.settings['macAddress'].value],
                 }, { type: obj.type, instance: obj.instance }, Bacnet.enum.PropertyIdentifier.PRESENT_VALUE, (error, value) => {
                     resolve({
@@ -236,11 +274,14 @@ class BACnetDevice extends container_node_1.ContainerNode {
                 deviceId: this.settings['deviceId'].value,
                 address: this.settings['ip'].value,
             };
-            this.setOutputData(this.outputMsg, `INFO: Scan device ID: ${device}`);
+            this.setOutputData(1, `INFO: Scan device ID: ${device}`);
+            this.setOutputData(2, ``);
             return new Promise((resolve, reject) => {
                 this.readObjectList(device.address, device.deviceId, (err, result) => __awaiter(this, void 0, void 0, function* () {
                     if (!err) {
                         const objectArray = result.values[0].values[0].value;
+                        this.setOutputData(1, `INFO: Scan device ID: ${device}`);
+                        this.setOutputData(2, ``);
                         const outputs = [];
                         for (const object of objectArray) {
                             try {
@@ -251,7 +292,8 @@ class BACnetDevice extends container_node_1.ContainerNode {
                                 outputs.push(output);
                             }
                             catch (error) {
-                                this.setOutputData(this.outputMsg, `ERROR: while fetching objects: ${error}`);
+                                this.setOutputData(1, ``);
+                                this.setOutputData(2, `ERROR: while fetching objects: ${JSON.stringify(error)}`);
                                 reject(error);
                             }
                             yield utils_1.default.sleep(this.delayBetweenDevice);
@@ -263,7 +305,8 @@ class BACnetDevice extends container_node_1.ContainerNode {
                         resolve(deviceObjects);
                     }
                     else {
-                        this.setOutputData(this.outputMsg, `ERROR: Error while fetching objects: ${err}`);
+                        this.setOutputData(1, ``);
+                        this.setOutputData(2, `ERROR: while fetching objects: ${JSON.stringify(err)}`);
                         reject(err);
                     }
                 }));
@@ -287,9 +330,7 @@ class BACnetDevice extends container_node_1.ContainerNode {
             case bacnet_constant_1.SEND_PAYLOAD_TO_CHILD:
                 this.bacnetClient = payload.bacnetClient;
                 this.networkSettings = payload.networkSettings;
-                this.networkNumber = payload.networkSettings.networkNumber.value;
-                this.settings['networkNumber'].value = payload.networkSettings.networkNumber.value;
-                this.broadcastSettingsToClients();
+                this.updateNetworkSettings();
                 if (!this.isFirst) {
                     this.setPayloadsToPointNodes();
                 }
@@ -305,6 +346,17 @@ class BACnetDevice extends container_node_1.ContainerNode {
     }
     emitResult(id, out) {
         this.setOutputData(id, out);
+    }
+    persistSettings() {
+        if (!this.container.db)
+            return;
+        console.log(JSON.stringify(this.settings));
+        this.container.db.updateNode(this.id, this.container.id, {
+            $set: {
+                settings: this.settings,
+                properties: this.properties,
+            },
+        });
     }
     polling() {
         return __awaiter(this, void 0, void 0, function* () {

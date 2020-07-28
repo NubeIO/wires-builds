@@ -14,7 +14,6 @@ class CronWeeklyNode extends node_1.Node {
         this.description =
             "This node allows the user to set a String output 'message' which is delivered at a configured time on each selected day. Days and Times are set in settings. 'info' will show information about the status of the node. 'cronExpression' represents the configured scheduled timings in Cron notation. 'cronDescription' represents the configured scheduled timings in plain english. 'nextExecution' is a String output representing the datetime that the next 'message' will be sent from 'output'. For more information on Cron Expressions see: (https://www.freeformatter.com/cron-expression-generator-quartz.html)";
         this.addInputWithSettings('enable', node_1.Type.BOOLEAN, false, 'Enable', false);
-        this.addInputWithSettings('message', node_1.Type.STRING, 'my message', 'Enter the message to send', false);
         this.addOutput('output', node_1.Type.STRING);
         this.addOutput('info', node_1.Type.STRING);
         this.addOutput('cronExpression', node_1.Type.STRING);
@@ -71,6 +70,11 @@ class CronWeeklyNode extends node_1.Node {
             type: node_1.SettingType.BOOLEAN,
         };
     }
+    onAdded() {
+        clearInterval(this.timeoutFunc);
+        this.setOutputData(0, false);
+        this.onAfterSettingsChange();
+    }
     onAfterSettingsChange() {
         this.onInputUpdated();
     }
@@ -122,14 +126,13 @@ class CronWeeklyNode extends node_1.Node {
             }
             this.job = null;
             this.jobCronExp = '';
-            this.setOutputData(0, null, true);
+            this.setOutputData(0, false, true);
             this.setOutputData(2, null, true);
             this.setOutputData(3, null, true);
             this.setOutputData(4, null, true);
             return;
         }
         const timezone = this.settings['timezone'].value;
-        const message = this.getInputData(1);
         if (this.job && cronExp !== this.jobCronExp) {
             this.setOutputData(1, 'CRON job stopped');
             this.job.stop();
@@ -141,7 +144,10 @@ class CronWeeklyNode extends node_1.Node {
             this.setOutputData(2, cronExp);
             this.setOutputData(3, construe.toString(cronExp));
             this.job = new CronJob(cronExp, () => {
-                this.setOutputData(0, message);
+                this.setOutputData(0, true);
+                this.timeoutFunc = setTimeout(() => {
+                    this.setOutputData(0, false);
+                }, 500);
                 let nextJobs = this.job.nextDates(1);
                 this.setOutputData(4, this.jsonataQuery(nextJobs));
             }, null, null, timezone);

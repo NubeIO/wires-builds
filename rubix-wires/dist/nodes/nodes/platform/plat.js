@@ -10,12 +10,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
-const container_node_1 = require("../../container-node");
 const container_1 = require("../../container");
 const os_utils_1 = require("../../utils/os-utils");
-class PlatNode extends container_node_1.ContainerNode {
-    constructor(container) {
-        super(container);
+class PlatNode extends node_1.Node {
+    constructor() {
+        super();
+        this.unitsFunc = ['metric', 'imperial'].map(e => {
+            return { value: e, text: e };
+        });
         this.haystackSite = {
             id: { description: 'enter site id', value: 'My ID', type: node_1.SettingType.STRING },
         };
@@ -28,6 +30,14 @@ class PlatNode extends container_node_1.ContainerNode {
             vendorName: 'Nube IO',
         };
         this.title = 'Platform Instance';
+        this.settings['units'] = {
+            description: 'Select Units of measurement',
+            value: this.unitsFunc[0].value,
+            type: node_1.SettingType.DROPDOWN,
+            config: {
+                items: this.unitsFunc,
+            },
+        };
         this.description = "A node for return the build versions of wires and nodejs'";
         this.settings['id'] = this.haystackSite.id;
         this.settings['serverName'] = {
@@ -55,6 +65,7 @@ class PlatNode extends container_node_1.ContainerNode {
     }
     onAfterSettingsChange() {
         this.persistSettings();
+        console.log(this.settings['units'].value);
     }
     persistSettings() {
         if (!this.container.db)

@@ -4,6 +4,7 @@ const node_1 = require("../../node");
 const container_1 = require("../../container");
 const time_utils_1 = require("../../utils/time-utils");
 const node_utils_1 = require("../../utils/node-utils");
+const moment = require('moment');
 class ClockNode extends node_1.Node {
     constructor() {
         super();
@@ -67,16 +68,18 @@ class ClockNode extends node_1.Node {
         }
     }
     recalculate() {
+        if (this.side !== container_1.Side.server)
+            return;
         const advanced = this.settings['advanced'].value;
-        let now = new Date();
-        this.setOutputData(0, now.toLocaleTimeString(), true);
-        this.setOutputData(1, now.getHours(), true);
-        this.setOutputData(2, now.getMinutes(), true);
-        this.setOutputData(3, now.getSeconds(), true);
+        const now = moment();
+        this.setOutputData(0, now.format('HH:mm:ss'), true);
+        this.setOutputData(1, now.hours(), true);
+        this.setOutputData(2, now.minutes(), true);
+        this.setOutputData(3, now.seconds(), true);
         if (advanced) {
-            this.setOutputData(4, now.getMilliseconds(), true);
-            this.setOutputData(5, now.toTimeString(), true);
-            this.setOutputData(6, now.getTimezoneOffset() / -60, true);
+            this.setOutputData(4, now.milliseconds(), true);
+            this.setOutputData(5, now.toString(), true);
+            this.setOutputData(6, now.utcOffset() / 60, true);
             this.setOutputData(7, now.valueOf(), true);
         }
     }

@@ -25,9 +25,7 @@ class PointFunc {
                 return value ? 1 : 0;
             }
         }
-        catch (err) {
-            console.log(err);
-        }
+        catch (err) { }
     }
     static oneToTrue(value) {
         try {
@@ -37,9 +35,7 @@ class PointFunc {
                 return value ? true : false;
             }
         }
-        catch (err) {
-            console.log(err);
-        }
+        catch (err) { }
     }
     static invert(value) {
         try {
@@ -49,9 +45,7 @@ class PointFunc {
                 return !value;
             }
         }
-        catch (err) {
-            console.log(err);
-        }
+        catch (err) { }
     }
     static mathSwitch(caseIn, val, mathValue) {
         let out;

@@ -5,14 +5,18 @@ class PointValueCreator {
     }
 }
 exports.PointValueCreator = PointValueCreator;
-PointValueCreator.create = (presentValue, priority, priorityArray) => {
-    let pv = {};
-    pv.presentValue = presentValue;
-    pv.priority = priority || 16;
-    pv.priorityArray = PointValueCreator.normalizePriorityArray(priorityArray);
-    if (pv.priority < 1 || pv.priority > 16) {
+PointValueCreator.init = (presentValue, priority, priorityArray) => {
+    if (priority < 1 || priority > 16) {
         throw new Error('Priority must be in range [1, 16]');
     }
+    let pv = new DefaultPointValue();
+    pv.presentValue = (presentValue !== null && presentValue !== void 0 ? presentValue : null);
+    pv.priority = (priority !== null && priority !== void 0 ? priority : 16);
+    pv.priorityArray = PointValueCreator.normalizePriorityArray(priorityArray);
+    return pv;
+};
+PointValueCreator.create = (presentValue, priority, priorityArray) => {
+    let pv = PointValueCreator.init(presentValue, priority, priorityArray);
     let highestValue = Object.entries(pv.priorityArray).find(pa => pa[1]);
     pv.priorityArray[pv.priority] = pv.presentValue;
     if (highestValue && parseInt(highestValue[0]) === pv.priority && pv.presentValue === null) {
@@ -52,4 +56,26 @@ PointValueCreator.normalizePriorityArray = (priorityArray) => {
     }
     return pa;
 };
+var HistoryMode;
+(function (HistoryMode) {
+    HistoryMode[HistoryMode["COV"] = 0] = "COV";
+    HistoryMode[HistoryMode["TRIGGERED"] = 1] = "TRIGGERED";
+})(HistoryMode = exports.HistoryMode || (exports.HistoryMode = {}));
+class DefaultPointValue {
+    changedOfValue(prev) {
+        if (this.presentValue !== prev.presentValue || this.priority !== prev.priority) {
+            return this;
+        }
+        let pv = {};
+        for (const priority in this.priorityArray) {
+            if (this.priorityArray[priority] !== prev.priorityArray[priority]) {
+                pv.priority = parseInt(priority);
+                pv.presentValue = this.priorityArray[priority];
+                pv.priorityArray = this.priorityArray;
+                return pv;
+            }
+        }
+        return null;
+    }
+}
 //# sourceMappingURL=point-model.js.map

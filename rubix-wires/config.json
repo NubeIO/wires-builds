@@ -48,13 +48,5 @@
       "allowRegistrationOfNewUsers": false
     },
     "debug": true
-  },
-  "remoteApi": {
-    "baseUrl": "http://45.63.30.129:8380/api/"
-  },
-  "backendSync": {
-    "nodeRefreshIntervalSeconds": 180,
-    "pointRefreshIntervalSeconds": 60,
-    "nodeDistance": 60
   }
 }

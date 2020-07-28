@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const constants_1 = require("../../../constants");
+const container_1 = require("../../../container");
 const container_node_1 = require("../../../container-node");
 const node_1 = require("../../../node");
-const container_1 = require("../../../container");
-const constants_1 = require("../../../constants");
 const mqtt_types_1 = require("./mqtt-types");
 const mqtt_utils_1 = require("./mqtt-utils");
 class MqttNetworkNode extends container_node_1.ContainerNode {
@@ -12,8 +12,9 @@ class MqttNetworkNode extends container_node_1.ContainerNode {
         this.writerNodes = [];
         this.readerNodes = [];
         this.title = 'MQTT Network';
-        this.description =
-            'This node acts as a container for MQTT nodes.  All MQTT nodes should be added within the MQTT-Network container.  The MQTT broker details can be configured in settings.';
+        this.description = 'This node acts as a container for MQTT nodes. ' +
+            'All MQTT nodes should be added within the MQTT-Network container. ' +
+            'The MQTT broker details can be configured in settings.';
         this.settings['server'] = {
             description: 'Broker URL',
             value: 'localhost',
@@ -68,7 +69,7 @@ class MqttNetworkNode extends container_node_1.ContainerNode {
                 this.readerNodes = this.readerNodes.filter(node => node.id !== payload.id);
                 break;
             default:
-                this.debugWarn("Request action doesn't match");
+                this.debugWarn('Request action doesn\'t match');
         }
     }
 }

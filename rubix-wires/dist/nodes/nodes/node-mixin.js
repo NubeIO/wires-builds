@@ -25,10 +25,10 @@ function AbleEnableNode(Base) {
         ;
         reEvaluateSettingByInput() {
             var _a;
-            this.settings[this.enableSettingKey()].value = (_a = this.inputs[this.enableInputIdx()].data, (_a !== null && _a !== void 0 ? _a : this.settings[this.enableSettingKey()].value));
             if (super['reEvaluateSettingByInput'] && mixins_1.isFunction(super['reEvaluateSettingByInput'])) {
                 super['reEvaluateSettingByInput']();
             }
+            this.settings[this.enableSettingKey()].value = (_a = this.inputs[this.enableInputIdx()].data, (_a !== null && _a !== void 0 ? _a : this.settings[this.enableSettingKey()].value));
         }
         enableInputIdx() {
             return 0;
@@ -37,7 +37,11 @@ function AbleEnableNode(Base) {
             return 'enable';
         }
         isEnabled() {
-            return this.settings[this.enableSettingKey()].value;
+            let parentIsEnabled = true;
+            if (super['isEnabled'] && mixins_1.isFunction(super['isEnabled'])) {
+                parentIsEnabled = super['isEnabled']();
+            }
+            return parentIsEnabled && this.settings[this.enableSettingKey()].value;
         }
     }
     return AbleEnableNodeBase;

@@ -5,6 +5,7 @@ const container_node_1 = require("../../nodes/container-node");
 const container_1 = require("../../nodes/container");
 const utils_1 = require("../../nodes/utils");
 const renderer_themes_1 = require("./renderer-themes");
+const lodash_1 = require("lodash");
 const events_1 = require("events");
 const Storage_1 = require("../helpers/Storage");
 const CopyPasteExtension_1 = require("./extensions/CopyPasteExtension");
@@ -158,6 +159,16 @@ class Renderer extends events_1.EventEmitter {
         }
         this.emit('editorChangeContainer', container);
         this.reDrawSearchPanel();
+    }
+    focusNode(id) {
+        let nodeToFocus = this.container._nodes[id];
+        if (nodeToFocus) {
+            nodeToFocus.selected = true;
+            if (nodeToFocus['onSelected'])
+                nodeToFocus['onSelected']();
+            this.selected_nodes = { [id]: nodeToFocus };
+            this.centerOnNode(nodeToFocus);
+        }
     }
     closeContainer(joinRoom = true) {
         if (!this._containers_stack || this._containers_stack.length == 0)
@@ -332,14 +343,12 @@ class Renderer extends events_1.EventEmitter {
         const isCategoryPanelClicked = e.localX <= this.NODE_PANEL_WIDTH;
         const toggleCategoryPanel = () => {
             const nodeCategory = this.nodeCategoriesPanel.find(nodeCategory => {
-                return (nodeCategory.startY - this.nodePanelOffset < e.localY &&
-                    nodeCategory.endY - this.nodePanelOffset >= e.localY);
+                return (nodeCategory.startY - this.nodePanelOffset < e.localY && nodeCategory.endY - this.nodePanelOffset >= e.localY);
             });
             if (nodeCategory) {
                 if (nodeCategory.startY + nodeCategory.height - this.nodePanelOffset <= e.localY) {
                     const nodeClicked = nodeCategory.children.find(node => {
-                        return (node.startY - this.nodePanelOffset < e.localY &&
-                            node.endY - this.nodePanelOffset >= e.localY);
+                        return node.startY - this.nodePanelOffset < e.localY && node.endY - this.nodePanelOffset >= e.localY;
                     });
                     if (nodeClicked) {
                         let pos = this.convertEventToCanvas(e);
@@ -551,9 +560,7 @@ class Renderer extends events_1.EventEmitter {
                 this._highlight_input_pos = null;
                 this._highlight_input = null;
             }
-            if (this.node_capturing_input &&
-                this.node_capturing_input != n &&
-                this.node_capturing_input['onMouseMove']) {
+            if (this.node_capturing_input && this.node_capturing_input != n && this.node_capturing_input['onMouseMove']) {
                 this.node_capturing_input['onMouseMove'](e);
             }
             if (this.node_dragged && !this.live_mode) {
@@ -955,6 +962,12 @@ class Renderer extends events_1.EventEmitter {
     convertOffsetToCanvas(pos) {
         return [pos[0] / this.scale - this.offset[0], pos[1] / this.scale - this.offset[1]];
     }
+    centerOnNode(node) {
+        this.offset[0] = -node.pos[0] - node.size[0] * 0.5 + (this.canvas.width * 0.5) / this.scale;
+        this.offset[1] = -node.pos[1] - node.size[1] * 0.5 + (this.canvas.height * 0.5) / this.scale;
+        this.setOffsetValue();
+        this.setDirty(true, true);
+    }
     convertCanvasToOffset(pos) {
         return [(pos[0] + this.offset[0]) * this.scale, (pos[1] + this.offset[1]) * this.scale];
     }
@@ -990,10 +1003,7 @@ class Renderer extends events_1.EventEmitter {
         this.last_draw_time = now;
         if (this.container) {
             let start = [-this.offset[0], -this.offset[1]];
-            let end = [
-                start[0] + this.canvas.width / this.scale,
-                start[1] + this.canvas.height / this.scale,
-            ];
+            let end = [start[0] + this.canvas.width / this.scale, start[1] + this.canvas.height / this.scale];
             this.visible_area = [start[0], start[1], end[0], end[1]];
         }
         if (this.dirty_bgcanvas || force_background)
@@ -1356,9 +1366,7 @@ class Renderer extends events_1.EventEmitter {
                     let slot = node.inputs[i];
                     ctx.globalAlpha = editor_alpha;
                     ctx.fillStyle =
-                        slot.link != null
-                            ? this.theme.NODE_SLOT_COLOR
-                            : this.theme.DATATYPE_COLOR[Renderer.mapToColor(slot.type)];
+                        slot.link != null ? this.theme.NODE_SLOT_COLOR : this.theme.DATATYPE_COLOR[Renderer.mapToColor(slot.type)];
                     let pos = this.getConnectionPos(node, true, +i);
                     pos[0] -= node.pos[0];
                     pos[1] -= node.pos[1];
@@ -1371,9 +1379,7 @@ class Renderer extends events_1.EventEmitter {
                         let nameWidth = 0;
                         if (name != null) {
                             ctx.textAlign = 'left';
-                            ctx.fillStyle = slot.isOptional
-                                ? this.theme.NODE_OPTIONAL_IO_COLOR
-                                : this.theme.NODE_DEFAULT_IO_COLOR;
+                            ctx.fillStyle = slot.isOptional ? this.theme.NODE_OPTIONAL_IO_COLOR : this.theme.NODE_DEFAULT_IO_COLOR;
                             const truncated = Renderer.truncateToSize(ctx, name, size[0] / 2);
                             nameWidth = ctx.measureText(truncated).width;
                             ctx.fillText(truncated, 8, pos[1] + 5);
@@ -1931,11 +1937,13 @@ class Renderer extends events_1.EventEmitter {
             options.push({ content: 'Clone', callback: this.onMenuNodeClone.bind(this) });
         }
         options.push({ content: 'Collapse', callback: this.onMenuNodeCollapse.bind(this) });
-        options.push({
-            content: 'Move to Container',
-            callback: this.onMenuNodeMoveToContainer.bind(this),
-        });
-        options.push({ content: 'Remove', callback: this.onMenuNodeRemove.bind(this) });
+        if (node.removable !== false && node.movable !== false)
+            options.push({
+                content: 'Move to Container',
+                callback: this.onMenuNodeMoveToContainer.bind(this),
+            });
+        if (node.removable !== false)
+            options.push({ content: 'Remove', callback: this.onMenuNodeRemove.bind(this) });
         if (node['onGetInputs']) {
             let inputs = node['onGetInputs']();
             if (inputs && inputs.length)
@@ -2041,7 +2049,7 @@ class Renderer extends events_1.EventEmitter {
         let menu = canvas.createContextualMenu(entries, { event: e, callback: inner_clicked.bind(this), from: prev_menu }, window);
         function inner_clicked(v, e) {
             let category = v.value;
-            const nodeTypes = this.filterRequiredNodesOnCategory(category);
+            const nodeTypes = this.getDisplayableCategoryNodeTypes(category);
             if (nodeTypes.length) {
                 const values = [];
                 nodeTypes.forEach(nodeType => {
@@ -2062,6 +2070,16 @@ class Renderer extends events_1.EventEmitter {
             this.editor.socket.sendCreateNode(type, pos);
         }
         return false;
+    }
+    getDisplayableCategoryNodeTypes(category) {
+        return container_1.Container.getNodeTypes()
+            .filter(n => n.show_in_menu)
+            .concat(lodash_1.get(this, 'container.container_node.extra_node_types', [])
+            .map(v => v.toString())
+            .filter(v => v)
+            .map(v => container_1.Container.nodes_types[v])
+            .filter(v => v))
+            .filter(container_1.Container.nodeIsInCategory(category));
     }
     onMenuNodeCollapse(node) {
         node.flags.collapsed = !node.flags.collapsed;
@@ -2218,34 +2236,19 @@ class Renderer extends events_1.EventEmitter {
             if (is_input)
                 return [node.pos[0], node.pos[1] - this.theme.NODE_TITLE_HEIGHT * 0.5];
             else
-                return [
-                    node.pos[0] + this.theme.NODE_COLLAPSED_WIDTH,
-                    node.pos[1] - this.theme.NODE_TITLE_HEIGHT * 0.5,
-                ];
+                return [node.pos[0] + this.theme.NODE_COLLAPSED_WIDTH, node.pos[1] - this.theme.NODE_TITLE_HEIGHT * 0.5];
         }
         if (is_input && slot_number == -1) {
             return [node.pos[0] + 10, node.pos[1] + 10];
         }
         if (is_input && node.inputs[slot_number] && node.inputs[slot_number].pos)
-            return [
-                node.pos[0] + node.inputs[slot_number].pos[0],
-                node.pos[1] + node.inputs[slot_number].pos[1],
-            ];
+            return [node.pos[0] + node.inputs[slot_number].pos[0], node.pos[1] + node.inputs[slot_number].pos[1]];
         else if (!is_input && node.outputs[slot_number] && node.outputs[slot_number].pos)
-            return [
-                node.pos[0] + node.outputs[slot_number].pos[0],
-                node.pos[1] + node.outputs[slot_number].pos[1],
-            ];
+            return [node.pos[0] + node.outputs[slot_number].pos[0], node.pos[1] + node.outputs[slot_number].pos[1]];
         if (!is_input)
-            return [
-                node.pos[0] + node.size[0] + 1,
-                node.pos[1] + 10 + slot_number * this.theme.NODE_SLOT_HEIGHT,
-            ];
+            return [node.pos[0] + node.size[0] + 1, node.pos[1] + 10 + slot_number * this.theme.NODE_SLOT_HEIGHT];
         const offsetForInputs = is_input ? (node.outputs ? Object.keys(node.outputs).length : 0) : 0;
-        return [
-            node.pos[0],
-            node.pos[1] + 10 + (slot_number + offsetForInputs) * this.theme.NODE_SLOT_HEIGHT,
-        ];
+        return [node.pos[0], node.pos[1] + 10 + (slot_number + offsetForInputs) * this.theme.NODE_SLOT_HEIGHT];
     }
     loadImage(url, onReadyCallback = () => { }) {
         let img = new Image();
@@ -2316,10 +2319,7 @@ class Renderer extends events_1.EventEmitter {
         return null;
     }
     localToScreen(node, x, y, canvas) {
-        return [
-            (x + node.pos[0]) * canvas.scale + canvas.offset[0],
-            (y + node.pos[1]) * canvas.scale + canvas.offset[1],
-        ];
+        return [(x + node.pos[0]) * canvas.scale + canvas.offset[0], (y + node.pos[1]) * canvas.scale + canvas.offset[1]];
     }
     showNodeActivity(node) {
         node.boxcolor = this.theme.NODE_ACTIVE_BOXCOLOR;
@@ -2354,6 +2354,7 @@ class Renderer extends events_1.EventEmitter {
             endOffset += categoryHeight;
             const isOpen = this.openNodeCategories.indexOf(category) !== -1 || !!this.searchText;
             const nodeTypesInCategory = this.filterRequiredNodesOnCategory(category)
+                .filter(child => child.show_in_menu)
                 .filter(child => {
                 return (child.title.toLowerCase().includes(this.searchText.toLowerCase()) ||
                     category.toLowerCase().includes(this.searchText.toLowerCase()));
@@ -2395,6 +2396,7 @@ class Renderer extends events_1.EventEmitter {
     }
     reDrawSearchPanel() {
         this.nodeCategoriesPanel = this.evaluateNodeCategories();
+        this.closeAllContextualMenus();
         this.draw(true, false);
     }
     onSearch(searchText) {

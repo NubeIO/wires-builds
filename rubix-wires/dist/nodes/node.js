@@ -4,6 +4,8 @@ const moment = require("moment");
 const container_1 = require("./container");
 const utils_1 = require("./utils");
 const registry_1 = require("./registry");
+const events_1 = require("../events");
+const lodash_1 = require("lodash");
 const log = require('logplease').create('node', { color: 5 });
 const doNothing = () => { };
 class NodeOutput {
@@ -23,6 +25,7 @@ var BROADCAST;
     BROADCAST[BROADCAST["UPDATE_VALUE"] = 3] = "UPDATE_VALUE";
     BROADCAST[BROADCAST["UPDATE_STATE"] = 4] = "UPDATE_STATE";
     BROADCAST[BROADCAST["UPDATE_NAME"] = 5] = "UPDATE_NAME";
+    BROADCAST[BROADCAST["UPDATE_PROPERTIES"] = 6] = "UPDATE_PROPERTIES";
 })(BROADCAST = exports.BROADCAST || (exports.BROADCAST = {}));
 var Type;
 (function (Type) {
@@ -94,9 +97,9 @@ class Node {
         this.settings = {};
         this.settingConfigs = {};
         this.contextMenu = {};
+        this.clonable = true;
         this.flags = {};
         this.showIcon = true;
-        this.clonable = true;
     }
     onAfterSettingsChange(oldSettings, oldName) { }
     configure(ser_node) {
@@ -295,6 +298,36 @@ class Node {
             type: exports.convertType(type),
         };
     }
+    addInputAtPosition(position, name, type, setting = { exist: false, nullable: false }, extra_info = {}) {
+        if (!this.inputs)
+            this.inputs = {};
+        const inputsCount = this.getInputsCount();
+        if (position >= inputsCount)
+            return this.addInput(name, type, setting, extra_info);
+        else {
+            const myID = this.id;
+            for (let i = inputsCount; i > position; i--) {
+                this.inputs[i] = this.inputs[i - 1];
+                if (this.inputs[i].hasOwnProperty('link')) {
+                    const outputNode = this.container._nodes[`${this.inputs[i].link.target_node_id}`];
+                    let linksArray = outputNode.outputs[`${this.inputs[i].link.target_slot}`].links;
+                    const replaceLinkIndex = linksArray.findIndex(link => {
+                        return link.target_node_id == myID && link.target_slot == i - 1;
+                    });
+                    if (replaceLinkIndex != -1)
+                        linksArray.splice(replaceLinkIndex, 1, { target_node_id: myID, target_slot: i });
+                    outputNode.updateNodeOutput();
+                }
+            }
+            let input = Object.assign({ name, type, setting }, extra_info);
+            this.inputs[position] = input;
+            this.size = this.computeSize();
+            if (this['onInputAdded'])
+                this['onInputAdded'](input);
+            return position;
+        }
+        this.updateNodeInput();
+    }
     getFreeInputId() {
         if (!this.inputs)
             return 0;
@@ -309,6 +342,28 @@ class Node {
         this.size = this.computeSize();
         if (this['onInputRemoved'])
             this['onInputRemoved'](id);
+    }
+    removeInputAtPosition(position) {
+        this.disconnectInputLink(position);
+        const inputsCount = this.getInputsCount();
+        const myID = this.id;
+        for (let i = position; i < inputsCount - 1; i++) {
+            this.inputs[i] = this.inputs[i + 1];
+            if (this.inputs[i].hasOwnProperty('link')) {
+                const outputNode = this.container._nodes[`${this.inputs[i].link.target_node_id}`];
+                let linksArray = outputNode.outputs[`${this.inputs[i].link.target_slot}`].links;
+                const replaceLinkIndex = linksArray.findIndex(link => {
+                    return link.target_node_id == myID && link.target_slot == i + 1;
+                });
+                if (replaceLinkIndex != -1)
+                    linksArray.splice(replaceLinkIndex, 1, { target_node_id: myID, target_slot: i });
+                outputNode.updateNodeOutput();
+            }
+        }
+        delete this.inputs[inputsCount - 1];
+        this.size = this.computeSize();
+        if (this['onInputRemoved'])
+            this['onInputRemoved'](position);
     }
     getInputsCount() {
         return this.inputs ? Object.keys(this.inputs).length : 0;
@@ -620,9 +675,7 @@ class Node {
             },
         };
         if (this.side == container_1.Side.editor) {
-            log.warn('Node ' +
-                this.getReadableId() +
-                ' is trying to send message from editor side to editor side');
+            log.warn('Node ' + this.getReadableId() + ' is trying to send message from editor side to editor side');
         }
         else if (this.side == container_1.Side.server) {
             let socket = this.container.server_editor_socket;
@@ -643,9 +696,7 @@ class Node {
             },
         };
         if (this.side == container_1.Side.editor) {
-            log.warn('Node ' +
-                this.getReadableId() +
-                ' is trying to send message from editor side to editor side');
+            log.warn('Node ' + this.getReadableId() + ' is trying to send message from editor side to editor side');
         }
         else if (this.side == container_1.Side.server) {
             let socket = this.container.server_editor_socket;
@@ -662,9 +713,7 @@ class Node {
             input: id,
         };
         if (this.side == container_1.Side.editor) {
-            log.warn('Node ' +
-                this.getReadableId() +
-                ' is trying to send message from editor side to editor side');
+            log.warn('Node ' + this.getReadableId() + ' is trying to send message from editor side to editor side');
         }
         else if (this.side == container_1.Side.server) {
             let socket = this.container.server_editor_socket;
@@ -681,9 +730,7 @@ class Node {
             output: id,
         };
         if (this.side == container_1.Side.editor) {
-            log.warn('Node ' +
-                this.getReadableId() +
-                ' is trying to send message from editor side to editor side');
+            log.warn('Node ' + this.getReadableId() + ' is trying to send message from editor side to editor side');
         }
         else if (this.side == container_1.Side.server) {
             let socket = this.container.server_editor_socket;
@@ -721,9 +768,7 @@ class Node {
             inputs: inputs_values,
             outputs: outputs_values,
         };
-        this.container.server_editor_socket
-            .in('' + this.container.id)
-            .emit('nodes-io-values', slots_values);
+        this.container.server_editor_socket.in('' + this.container.id).emit('nodes-io-values', slots_values);
     }
     updateInputsLabels() {
         if (this.inputs) {
@@ -747,6 +792,12 @@ class Node {
         this.sendMessageToEditorSide({
             action: BROADCAST.UPDATE_SETTINGS,
             payload: this.settings,
+        });
+    }
+    broadcastPropertiesToClients() {
+        this.sendMessageToEditorSide({
+            action: BROADCAST.UPDATE_PROPERTIES,
+            payload: this.properties,
         });
     }
     broadcastOutputsToClients() {
@@ -787,6 +838,9 @@ class Node {
                 return;
             case BROADCAST.UPDATE_SETTINGS:
                 this.settings = payload;
+                return;
+            case BROADCAST.UPDATE_PROPERTIES:
+                this.properties = payload;
                 return;
             case BROADCAST.UPDATE_OUTPUTS:
                 this.outputs = payload;
@@ -830,6 +884,15 @@ class Node {
             outputSettings[key].validation = settings[key] ? settings[key].validation : null;
         });
         return outputSettings;
+    }
+    displayError(e, message = '') {
+        this.container.server_editor_socket.emit(events_1.ERROR, `${message} ${this.extractErrorMessage(e)}`);
+    }
+    displayMessage(message) {
+        this.container.server_editor_socket.emit(events_1.NOTIFICATION, message);
+    }
+    extractErrorMessage(e) {
+        return lodash_1.get(e, 'response.data.message', lodash_1.get(e, 'message', e));
     }
 }
 exports.Node = Node;

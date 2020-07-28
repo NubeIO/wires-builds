@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const mqtt = require("mqtt");
+const container_1 = require("../../../container");
 const node_1 = require("../../../node");
 const utils_1 = require("../../../utils");
-const container_1 = require("../../../container");
-const mqtt = require("mqtt");
 const crypto_utils_1 = require("../../../utils/crypto-utils");
 const matchMQTT = require('mqtt-match');
 class MqttClientNode extends node_1.Node {
@@ -72,8 +72,10 @@ class MqttClientNode extends node_1.Node {
             },
         });
     }
+    init() {
+        this.changeTopicsCount(this.settings['topics_count'].value);
+    }
     onCreated() {
-        this.changeTopicsCount(1);
         this.renameInputsOutputs();
     }
     onAdded() {
@@ -81,8 +83,7 @@ class MqttClientNode extends node_1.Node {
         this.topicsCount = this.settings['topics_count'].value;
         if (this.side == container_1.Side.server) {
             this.setOutputData(0, false);
-            if (this.settings['enable'].value &&
-                (this.inputs[0].link == null || this.inputs[0].data == true)) {
+            if (this.settings['enable'].value && (this.inputs[0].link == null || this.inputs[0].data == true)) {
                 this.connectToBroker();
             }
         }
@@ -124,8 +125,7 @@ class MqttClientNode extends node_1.Node {
         if (this.inputs[0].updated) {
             if (this.inputs[0].data == false)
                 this.disconnectFromBroker();
-            else if (this.settings['enable'].value &&
-                (this.inputs[0].link == null || this.inputs[0].data == true))
+            else if (this.settings['enable'].value && (this.inputs[0].link == null || this.inputs[0].data == true))
                 this.connectToBroker();
         }
         if (this.settings['enable'].value && this.client && this.client.connected) {
@@ -202,10 +202,12 @@ class MqttClientNode extends node_1.Node {
                     value: '',
                     type: node_1.SettingType.STRING,
                 };
-                this.settingConfigs.groups.push({
-                    [`outputType${i}`]: { weight: 2 },
-                    [`topic${i}`]: { weight: 5 },
-                });
+                for (let i = this.topicsCount + 1; i <= target_count; i++) {
+                    this.settingConfigs.groups.push({
+                        [`outputType${i}`]: { weight: 2 },
+                        [`topic${i}`]: { weight: 5 },
+                    });
+                }
             }
         }
         else if (diff < 0) {

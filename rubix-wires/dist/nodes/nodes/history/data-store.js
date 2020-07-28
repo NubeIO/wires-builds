@@ -3,11 +3,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
 const utils_1 = require("../../utils");
+const node_utils_1 = require("../../utils/node-utils");
 let moment = require('moment-timezone');
 class AnyDataStoreNode extends node_1.Node {
     constructor() {
         super();
-        this.obj = [];
         this.title = 'Data Store';
         this.description =
             'The data-store node is used to store history log data locally.  The data-store node has limited memory so the capacity is limited to 50 log entries; beware of using too many data-store nodes as it could affect the operation of Wires.  The history logs can be configured to log in UTC or local timezone, and the output format can be set to ‘Array’, ‘CSV’, or ‘JSON’.  If ‘Round up in increments of’ setting is used (not zero), then the timestamp will be rounded up to the nearest increment value step.';
@@ -70,10 +70,14 @@ class AnyDataStoreNode extends node_1.Node {
                 },
             },
         });
+        this.properties['historyLog'];
+    }
+    onCreated() {
+        this.properties['historyLog'] = [];
     }
     onAdded() {
-        this.setOutputData(0, this.obj);
-        this.setOutputData(1, this.obj.length);
+        this.setOutputData(0, this.properties['historyLog']);
+        this.setOutputData(1, this.properties['historyLog'] ? this.properties['historyLog'].length : 0);
     }
     nearestFutureMinutes(interval, someMoment) {
         const roundedMinutes = Math.ceil(someMoment.minute() / interval) * interval;
@@ -88,7 +92,7 @@ class AnyDataStoreNode extends node_1.Node {
             : 'Etc/UTC';
         let dateTz = null;
         const pointName = this.settings['pointName'].value;
-        let timeFormatedArray = this.obj.map(entry => {
+        let timeFormatedArray = this.properties['historyLog'].map(entry => {
             return entry;
         });
         timeFormatedArray = timeFormatedArray.reverse().map(entry => {
@@ -155,9 +159,9 @@ class AnyDataStoreNode extends node_1.Node {
         if (this.side !== container_1.Side.server)
             return;
         if (this.getInputData(1) && this.inputs[1].updated) {
-            this.obj = [];
-            this.setOutputData(0, this.obj.reverse());
-            this.setOutputData(1, this.obj.length);
+            this.properties['historyLog'] = [];
+            this.setOutputData(0, this.properties['historyLog'].reverse());
+            this.setOutputData(1, this.properties['historyLog'].length);
         }
         if (this.getInputData(0) == null || !this.inputs[0].updated)
             return;
@@ -168,20 +172,21 @@ class AnyDataStoreNode extends node_1.Node {
             payload: this.getInputData(0),
             timestamp: now._d,
         };
-        this.obj.push(msg);
-        while (this.obj.length > storageLimit) {
-            this.obj.shift();
+        this.properties['historyLog'].push(msg);
+        while (this.properties['historyLog'].length > storageLimit) {
+            this.properties['historyLog'].shift();
         }
+        node_utils_1.default.persistProperties(this, true, true);
         const newObj = this.formatOutputs() || [];
         this.setOutputData(0, newObj);
-        this.setOutputData(1, this.obj.length);
+        this.setOutputData(1, this.properties['historyLog'].length);
     }
     onAfterSettingsChange() {
         this.outputs[0].name = `output (${this.settings['outputFormat'].value})`;
         this.broadcastOutputsToClients();
         const newObj = this.formatOutputs() || [];
         this.setOutputData(0, newObj);
-        this.setOutputData(1, this.obj.length);
+        this.setOutputData(1, this.properties['historyLog'].length);
     }
 }
 container_1.Container.registerNodeType('history/data-store', AnyDataStoreNode);

@@ -326,9 +326,7 @@ router.post('/c/:cid/n-type', function (req, res) {
 });
 function sendNotFoundError(res, error) {
     res.status(404).send(error);
-    app_1.default.server.editorSocket.io.emit(events_1.ERROR, {
-        error,
-    });
+    app_1.default.server.editorSocket.io.emit(events_1.ERROR, error);
 }
 function pushNewWrapperContainer(nodes, paramsCid, convertedParamsCid) {
     const containersIds = container_utils_1.default.getSortedAvailableContainers(nodes);
@@ -454,28 +452,13 @@ function exportNodes(container, ids, paramsCid) {
     });
 }
 function removeNodes(container, ids, cid) {
-    const dashboardNodes = [];
-    return new Promise((resolve, reject) => {
-        for (let id of ids) {
-            const node = container.getNodeById(id);
-            if (!node)
-                reject(`Can't delete node. Node id [${cid}/${id}] not found.`);
-            if (node.isDashboardNode)
-                dashboardNodes.push(id);
-            container.remove(node);
-        }
-        app_1.default.server.editorSocket.io.emit('nodes-delete', {
-            nodes: ids,
-            cid,
-        });
-        if (dashboardNodes.length > 0) {
-            app_1.default.server.dashboardSocket.io.in('' + cid).emit('nodes-delete', {
-                nodes: dashboardNodes,
-                cid,
-            });
-        }
-        resolve();
-    });
+    for (let id of ids) {
+        const node = container.getNodeById(id);
+        if (!node)
+            return Promise.reject(`Can't delete node. Node id [${cid}/${id}] not found.`);
+        container.removeBroadcasted(node);
+    }
+    return Promise.resolve();
 }
 module.exports = router;
 //# sourceMappingURL=api-editor.js.map

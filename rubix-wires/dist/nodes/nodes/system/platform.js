@@ -95,6 +95,8 @@ class PlatNode extends container_node_1.ContainerNode {
         });
     }
     onAfterSettingsChange() {
+        if (this.side !== container_1.Side.server)
+            return;
         this.doUUIDSteps();
         this.settings['deviceIdType'].value
             ? (this.properties['deviceID'] = this.settings['deviceIDcustom'].value)
@@ -114,17 +116,31 @@ class PlatNode extends container_node_1.ContainerNode {
     doUUIDSteps() {
         return __awaiter(this, void 0, void 0, function* () {
             const fileName = 'deviceUUID.txt';
-            const dbPath = '/data/rubix-wires/db';
-            const filePath = `${dbPath}/${fileName}`;
-            let result = yield this.checkUUIDFile(filePath);
-            if (!result)
-                this.makeUUIDFile(filePath);
-            this.getDeviceUUID(filePath);
+            const dirPath = '/data/rubix-wires/ids';
+            const filePath = `${dirPath}/${fileName}`;
+            const oldIdFile = yield this.checkForOldDirectory('/data/rubix-wires/db/deviceUUID.txt');
+            if (oldIdFile) {
+                yield this.copyOldIdFileToNewDir(dirPath, fileName, oldIdFile);
+            }
+            else {
+                let result = yield this.checkUUIDFile(filePath);
+                if (!result)
+                    yield this.makeUUIDFile(dirPath, fileName);
+            }
+            yield this.getDeviceUUID(filePath);
         });
     }
     checkUUIDFile(filePath) {
         return __awaiter(this, void 0, void 0, function* () {
-            const fileContent = yield file_utils_1.default.readFile(filePath);
+            let fileContent;
+            yield file_utils_1.default.readFile(filePath)
+                .then(data => {
+                fileContent = data;
+            })
+                .catch(err => {
+                fileContent = false;
+                this.debugWarn(err);
+            });
             if (!fileContent)
                 return false;
             const fileDataArray = fileContent
@@ -152,9 +168,56 @@ class PlatNode extends container_node_1.ContainerNode {
             });
         });
     }
-    makeUUIDFile(filePath) {
+    makeUUIDFile(dirPath, fileName) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield file_utils_1.default.writeFile(filePath, uuid_utils_1.default.createUUID());
+            let dirExists = false;
+            yield file_utils_1.default.createDirectory(dirPath)
+                .then(data => {
+                dirExists = true;
+            })
+                .catch(err => {
+                this.debugWarn(err);
+            });
+            yield file_utils_1.default.writeFile(`${dirPath}/${fileName}`, uuid_utils_1.default.createUUID())
+                .then(data => {
+                dirExists = true;
+            })
+                .catch(err => {
+                this.debugWarn(err);
+            });
+        });
+    }
+    checkForOldDirectory(filePath) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let fileContent;
+            yield file_utils_1.default.readFile(filePath)
+                .then(data => {
+                fileContent = data;
+            })
+                .catch(err => {
+                fileContent = false;
+                this.debugWarn(err);
+            });
+            if (!fileContent)
+                return false;
+            return fileContent.toString();
+        });
+    }
+    copyOldIdFileToNewDir(dirPath, fileName, oldIdFile) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let dirExists = false;
+            yield file_utils_1.default.createDirectory(dirPath)
+                .then(data => {
+                dirExists = true;
+            })
+                .catch(err => {
+                this.debugWarn(err);
+            });
+            yield file_utils_1.default.writeFile(`${dirPath}/${fileName}`, oldIdFile)
+                .then(data => { })
+                .catch(err => {
+                this.debugWarn(err);
+            });
         });
     }
 }

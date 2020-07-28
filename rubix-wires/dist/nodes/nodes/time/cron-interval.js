@@ -14,7 +14,6 @@ class CronIntervalNode extends node_1.Node {
         this.description =
             "This node allows the user to set a String output 'message' which is delivered at a selected times/intervals, configured in settings.  'info' will show information about the status of the node. 'cronExpression' represents the configured scheduled timings in Cron notation. 'cronDescription' represents the configured scheduled timings in plain english. 'nextExecution' is a String output representing the datetime that the next 'message' will be sent from 'output'. For more information on Cron Expressions see: (https://www.freeformatter.com/cron-expression-generator-quartz.html)";
         this.addInputWithSettings('enable', node_1.Type.BOOLEAN, false, 'Enable', false);
-        this.addInputWithSettings('message', node_1.Type.STRING, 'my message', 'Enter the message to send', false);
         this.addOutput('output', node_1.Type.STRING);
         this.addOutput('info', node_1.Type.STRING);
         this.addOutput('cronExpression', node_1.Type.STRING);
@@ -114,6 +113,11 @@ class CronIntervalNode extends node_1.Node {
             },
         });
     }
+    onAdded() {
+        clearInterval(this.timeoutFunc);
+        this.setOutputData(0, false);
+        this.onAfterSettingsChange();
+    }
     onAfterSettingsChange() {
         this.onInputUpdated();
     }
@@ -126,8 +130,7 @@ class CronIntervalNode extends node_1.Node {
         return expression.evaluate(nextJobs);
     }
     onInputUpdated() {
-        const message = this.getInputData(0);
-        const enable = this.getInputData(1);
+        const enable = this.getInputData(0);
         const minute = parseInt(this.settings['min'].value);
         const hour = parseInt(this.settings['hour'].value);
         const day = parseInt(this.settings['day'].value);
@@ -145,25 +148,13 @@ class CronIntervalNode extends node_1.Node {
             else if (cronType == 1 && minute >= 0 && minute < 60 && hour >= 0 && hour < 24) {
                 cronExp = minute + ' */' + hour + ' * * *';
             }
-            else if (cronType == 2 &&
-                minute >= 0 &&
-                minute < 60 &&
-                hour >= 0 &&
-                hour < 24 &&
-                day > 0 &&
-                day <= 31) {
+            else if (cronType == 2 && minute >= 0 && minute < 60 && hour >= 0 && hour < 24 && day > 0 && day <= 31) {
                 cronExp = minute + ' ' + hour + ' */' + day + ' * *';
             }
             else if (cronType == 3) {
                 cronExp = '0 0 1 * *';
             }
-            else if (cronType == 4 &&
-                minute >= 0 &&
-                minute < 60 &&
-                hour >= 0 &&
-                hour < 24 &&
-                day > 0 &&
-                day <= 31) {
+            else if (cronType == 4 && minute >= 0 && minute < 60 && hour >= 0 && hour < 24 && day > 0 && day <= 31) {
                 cronExp = minute + ' ' + hour + ' ' + day + ' * *';
             }
             else if (cronType == 5) {
@@ -209,7 +200,7 @@ class CronIntervalNode extends node_1.Node {
             }
             this.job = null;
             this.jobCronExp = '';
-            this.setOutputData(0, null, true);
+            this.setOutputData(0, false, true);
             this.setOutputData(2, null, true);
             this.setOutputData(3, null, true);
             this.setOutputData(4, null, true);
@@ -226,7 +217,10 @@ class CronIntervalNode extends node_1.Node {
             this.setOutputData(2, cronExp);
             this.setOutputData(3, construe.toString(cronExp));
             this.job = new CronJob(cronExp, () => {
-                this.setOutputData(0, message);
+                this.setOutputData(0, true);
+                this.timeoutFunc = setTimeout(() => {
+                    this.setOutputData(0, false);
+                }, 500);
                 let nextJobs = this.job.nextDates(1);
                 this.setOutputData(4, this.jsonataQuery(nextJobs));
             }, null, null, timezone);

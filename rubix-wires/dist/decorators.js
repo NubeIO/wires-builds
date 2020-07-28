@@ -8,9 +8,9 @@ exports.ErrorHandler = (target, propertyKey, descriptor) => {
             return fn.apply(this, args);
         }
         catch (error) {
-            logger.error(error.toString());
+            logger.error(error);
             if (typeof alert !== "undefined") {
-                alert(error);
+                alert(error.toString());
             }
         }
     };
