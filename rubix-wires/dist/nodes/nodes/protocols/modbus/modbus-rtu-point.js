@@ -181,7 +181,7 @@ class ModbusPointNode extends container_node_1.ContainerNode {
         };
         this.settings['offset'] = {
             description: 'Register offset',
-            value: 2,
+            value: 1,
             type: node_1.SettingType.NUMBER,
         };
         this.settings['dataType'] = {

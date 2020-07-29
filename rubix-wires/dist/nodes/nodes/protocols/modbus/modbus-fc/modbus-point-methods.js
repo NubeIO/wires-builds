@@ -105,8 +105,8 @@ class ModbusMethods {
     }
 }
 exports.default = ModbusMethods;
-ModbusMethods.modbusMethods = (thisInstance, id, type, regAddr, regLength, nodeInputValue, pntDataType, pntDataEndian) => __awaiter(void 0, void 0, void 0, function* () {
-    let ft = yield ModbusMethods.pntSwitch(type, regAddr, regLength, nodeInputValue, pntDataType, pntDataEndian);
+ModbusMethods.modbusMethods = (thisInstance, id, type, regAddr, regLength, nodeInputValue, pntDataType, pntDataEndian, deviceAddressOffset) => __awaiter(void 0, void 0, void 0, function* () {
+    let ft = yield ModbusMethods.pntSwitch(type, regAddr - deviceAddressOffset, regLength, nodeInputValue, pntDataType, pntDataEndian);
     yield thisInstance.setID(id);
     yield utils_1.default.sleep(5);
     return yield new Promise((resolve, reject) => {

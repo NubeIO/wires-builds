@@ -222,6 +222,7 @@ class ModbusSerialNetworkNode extends container_node_1.ContainerNode {
         });
         return __awaiter(this, void 0, void 0, function* () {
             _super.onAfterSettingsChange.call(this, oldSettings);
+            this.persistSettings();
             yield this.setupForPolling();
         });
     }
@@ -263,14 +264,8 @@ class ModbusSerialNetworkNode extends container_node_1.ContainerNode {
                 return;
             }
             if (this.transport === 'rtu') {
-                yield this.checkRS485Device();
-                if (this.isPortOk === false) {
-                    this.setOutputData(this.outPortStatus, false);
-                    this.setOutputData(this.outPortMsg, `ERROR! unable to connect to port :( @ ${this.port.substring(5)}`);
-                    return;
-                }
-                this.setOutputData(this.outPortStatus, this.isPortOk);
-                this.setOutputData(this.outPortMsg, `INFO: polling :) @ ${this.port.substring(5)}`);
+                if (this.client)
+                    this.client.close(() => { });
                 try {
                     this.client = new ModbusRTU();
                     this.client.setTimeout(500);
@@ -281,10 +276,10 @@ class ModbusSerialNetworkNode extends container_node_1.ContainerNode {
                             dataBits: this.dataBits,
                             stopBits: this.stopBits,
                         });
+                        this.setOutputData(this.outPortMsg, `INFO: will start RS485 polling`);
                     }, 500);
                 }
                 catch (error) {
-                    console.log(error);
                 }
             }
             else {
@@ -303,7 +298,7 @@ class ModbusSerialNetworkNode extends container_node_1.ContainerNode {
             const devices = yield ModbusSerialNetworkNode.getDevicesPoints(this.sub_container.id, this.container.db);
             let errorOnModbusDevicesExec = false;
             for (let device of devices) {
-                let { deviceCID, deviceID, deviceAddress, ipAddress, ipPort } = device.deviceObj;
+                let { deviceCID, deviceID, deviceAddress, ipAddress, ipPort, deviceAddressOffset } = device.deviceObj;
                 const deviceNode = registry_1.default._nodes[registry_1.default.getId(deviceCID, deviceID)];
                 if (!deviceNode)
                     return;
@@ -327,7 +322,7 @@ class ModbusSerialNetworkNode extends container_node_1.ContainerNode {
                     if (!pointNode)
                         return;
                     try {
-                        const response = yield modbus_point_methods_1.default.modbusMethods(this.client, deviceAddress, pntType, pntAddr, pntOffset, pntVal, pntDataType, pntDataEndian);
+                        const response = yield modbus_point_methods_1.default.modbusMethods(this.client, deviceAddress, pntType, pntAddr, pntOffset, pntVal, pntDataType, pntDataEndian, deviceAddressOffset);
                         modbus_functions_1.default.sendPointMessage(pointNode, response);
                         modbus_functions_1.default.sendPointError(pointNode, null);
                     }
@@ -374,6 +369,16 @@ class ModbusSerialNetworkNode extends container_node_1.ContainerNode {
                 this.pollEnableSetting = false;
                 yield this.polling(Poll.STOP);
             }
+        });
+    }
+    persistSettings() {
+        if (!this.container.db)
+            return;
+        this.container.db.updateNode(this.id, this.container.id, {
+            $set: {
+                settings: this.settings,
+                properties: this.properties,
+            },
         });
     }
 }

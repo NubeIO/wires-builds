@@ -350,7 +350,6 @@ class BACnetDevice extends container_node_1.ContainerNode {
     persistSettings() {
         if (!this.container.db)
             return;
-        console.log(JSON.stringify(this.settings));
         this.container.db.updateNode(this.id, this.container.id, {
             $set: {
                 settings: this.settings,

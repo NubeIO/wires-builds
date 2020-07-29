@@ -39,6 +39,12 @@ class ModbusSerialDeviceNode extends container_node_1.ContainerNode {
                 `If type is TCP set select type TCP and set the target device IP and port \n ` +
                 `If type is RTU set the device address as per setting **Modbus Address** \n ` +
                 `   \n ` +
+                `### Point address starting offset\n ` +
+                `   \n ` +
+                `Modbus point address offset(Base 1 subtracts 1 to the address) \n ` +
+                `If set to Base 1 this will make for example point address 1 (from the manufacture data sheet) equal to 0\n ` +
+                `The default setting is Base 1\n ` +
+                `   \n ` +
                 `## Node outputs\n ` +
                 `   \n ` +
                 ` If device is TCP when the node is added or after the setting a change a device ping will be sent to see if the device is online\n ` +
@@ -82,6 +88,17 @@ class ModbusSerialDeviceNode extends container_node_1.ContainerNode {
             description: 'Network Port Number',
             value: 502,
             type: node_1.SettingType.NUMBER,
+        };
+        this.settings['deviceAddressOffset'] = {
+            description: 'Point address starting offset',
+            type: node_1.SettingType.DROPDOWN,
+            config: {
+                items: [
+                    { value: 1, text: 'Base 1' },
+                    { value: 0, text: 'Base 0' },
+                ],
+            },
+            value: 1,
         };
         this.setSettingsConfig({
             conditions: {

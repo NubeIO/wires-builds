@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../../node");
 const container_1 = require("../../../container");
+const serial_utils_1 = require("../../../utils/serial-utils");
 const SerialPort = require('serialport');
 class SerialConnectorNode extends node_1.Node {
     constructor() {
@@ -14,9 +15,11 @@ class SerialConnectorNode extends node_1.Node {
             'This node reads/writes serial data from/to the onboard serial ports.  These ports can be RS485 ports, or Rubix Compute wireless interface ports.  Once the Port and Baud Rate settings are configured, when enabled, the ‘output’ will be raw messages received over the configured serial port.  Any values written to the ‘writeValue’ input will be sent on the configured serial port.';
         this.addInput('writeValue', node_1.Type.STRING);
         this.addInput('enable', node_1.Type.BOOLEAN);
+        this.addInput('list-ports', node_1.Type.BOOLEAN);
         this.addOutput('output', node_1.Type.STRING);
         this.addOutput('error', node_1.Type.STRING);
         this.addOutput('status', node_1.Type.BOOLEAN);
+        this.addOutput('active-ports', node_1.Type.BOOLEAN);
         this.settings['port'] = {
             description: 'Serial Port',
             value: '/dev/ttyUSB2',
@@ -58,6 +61,9 @@ class SerialConnectorNode extends node_1.Node {
             return;
         }
         this.writePortData(this.getInputData(0));
+        if (this.getInputData(2) === true) {
+            this.listPorts();
+        }
     }
     onAfterSettingsChange() {
         this.connectToSerialPort();
@@ -112,6 +118,15 @@ class SerialConnectorNode extends node_1.Node {
         this.setOutputData(0, null);
         this.setOutputData(1, null);
         this.setOutputData(2, false);
+    }
+    listPorts() {
+        serial_utils_1.default.listPorts()
+            .then(e => {
+            this.setOutputData(3, e);
+        })
+            .catch(err => {
+            this.setOutputData(3, err);
+        });
     }
     closePort() {
         if (this.port) {

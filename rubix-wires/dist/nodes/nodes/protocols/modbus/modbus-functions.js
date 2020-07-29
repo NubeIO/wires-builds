@@ -71,6 +71,7 @@ class ModbusUtils {
                                 ipAddress: settings.ipAddress.value,
                                 ipPort: settings.ipPort.value,
                                 deviceTimeout: settings.deviceTimeout.value,
+                                deviceAddressOffset: settings.deviceAddressOffset.value,
                             });
                         });
                     }
