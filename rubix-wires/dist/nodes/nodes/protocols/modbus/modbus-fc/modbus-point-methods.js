@@ -111,9 +111,14 @@ ModbusMethods.modbusMethods = (thisInstance, id, type, regAddr, regLength, nodeI
     yield utils_1.default.sleep(5);
     return yield new Promise((resolve, reject) => {
         thisInstance[ft.funcType](...ft.methodType).then((res) => {
-            if (pntDataType !== 0 && (type === 3 || type === 4)) {
-                const payload = modbus_point_byte_order_1.default.readByteOrder(res.buffer, 0, pntDataType, pntDataEndian);
-                resolve({ res: res, payload: payload });
+            if (type === 3 || type === 4) {
+                if (pntDataType === 3 || pntDataType === 4) {
+                    const payload = modbus_point_byte_order_1.default.readByteOrder(res.buffer, 0, pntDataType, pntDataEndian);
+                    resolve({ res: res, payload: payload });
+                }
+                else {
+                    resolve({ res: res, payload: res.data[0] });
+                }
             }
             else if (type === 1 || type === 2 || type === 21 || type === 22) {
                 const payload = ModbusMethods.readBool(res);
