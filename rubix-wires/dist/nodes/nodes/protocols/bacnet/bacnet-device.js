@@ -82,7 +82,8 @@ class BACnetDevice extends container_node_1.ContainerNode {
             yield this.requestPoll();
         });
     }
-    onAfterSettingsChange() {
+    onAfterSettingsChange(oldSettings) {
+        super.onAfterSettingsChange(oldSettings);
         this.setPayloadsToPointNodes();
         this.requestPoll().then();
     }

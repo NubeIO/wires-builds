@@ -19,6 +19,7 @@ const edge_gpio_utils_1 = require("./edge-gpio-utils");
 const BACnet_enums_units_1 = require("../../../utils/points/BACnet-enums-units");
 const edge_constant_1 = require("./edge-constant");
 const history_config_1 = require("../../../utils/points/history-config");
+const constants_1 = require("../../../constants");
 class Edge28OutputPointNode extends container_node_1.ContainerNode {
     constructor(container) {
         super(container);
@@ -188,6 +189,7 @@ class Edge28OutputPointNode extends container_node_1.ContainerNode {
         history_config_1.default.historyOnCreated(this);
     }
     onAdded() {
+        super.onAdded();
         if (this.side !== container_1.Side.server)
             return;
         this.EXECUTE_INTERVAL = 60000;
@@ -304,7 +306,8 @@ class Edge28OutputPointNode extends container_node_1.ContainerNode {
         super.onRemoved();
         edge_utils_1.default.removePoint(this.getParentNode(), this);
     }
-    onAfterSettingsChange() {
+    onAfterSettingsChange(oldSettings) {
+        super.onAfterSettingsChange(oldSettings);
         history_config_1.default.historyFunctionsForAfterSettingsChange(this, this.settings['pointName'].value || this.settings['pointNumber'].value);
         const unitsType = this.settings['unitsType'].value;
         this.settings['units'].config = {
@@ -316,5 +319,5 @@ class Edge28OutputPointNode extends container_node_1.ContainerNode {
             return;
     }
 }
-container_1.Container.registerNodeType('protocols/nube/edge-28-output', Edge28OutputPointNode);
+container_1.Container.registerNodeType(constants_1.EDGE_28_OUTPUT, Edge28OutputPointNode, constants_1.EDGE_28_NETWORK);
 //# sourceMappingURL=edge-28-output.js.map

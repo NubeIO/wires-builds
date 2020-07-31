@@ -11,6 +11,7 @@ const pointFunc_1 = require("../../../utils/points/pointFunc");
 const BACnet_enums_units_1 = require("../../../utils/points/BACnet-enums-units");
 const history_config_1 = require("../../../utils/points/history-config");
 const utils_1 = require("../../../utils");
+const constants_1 = require("../../../constants");
 class Edge28InputPointNode extends container_node_1.ContainerNode {
     constructor(container) {
         super(container);
@@ -289,6 +290,7 @@ class Edge28InputPointNode extends container_node_1.ContainerNode {
         history_config_1.default.historyOnCreated(this);
     }
     onAdded() {
+        super.onAdded();
         if (this.side !== container_1.Side.server)
             return;
         try {
@@ -297,7 +299,8 @@ class Edge28InputPointNode extends container_node_1.ContainerNode {
         catch (error) { }
         history_config_1.default.historyFunctionsForAfterSettingsChange(this, this.settings['pointName'].value || this.settings['pointNumber'].value);
     }
-    onAfterSettingsChange() {
+    onAfterSettingsChange(oldSettings) {
+        super.onAfterSettingsChange(oldSettings);
         history_config_1.default.historyFunctionsForAfterSettingsChange(this, this.settings['pointName'].value || this.settings['pointNumber'].value);
         if (this.side !== container_1.Side.server)
             return;
@@ -442,5 +445,5 @@ class Edge28InputPointNode extends container_node_1.ContainerNode {
         }
     }
 }
-container_1.Container.registerNodeType('protocols/nube/edge-28-input', Edge28InputPointNode);
+container_1.Container.registerNodeType(constants_1.EDGE_28_INPUT, Edge28InputPointNode, constants_1.EDGE_28_NETWORK);
 //# sourceMappingURL=edge-28-input.js.map

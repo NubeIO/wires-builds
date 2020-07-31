@@ -56,6 +56,7 @@ class Edge28LORAResetNode extends container_node_1.ContainerNode {
         super.onCreated();
     }
     onAdded() {
+        super.onAdded();
         this.inputs[1]['name'] = `[interval] (${this.settings['time'].value})`;
         if (this.side !== container_1.Side.server)
             return;
@@ -102,7 +103,8 @@ class Edge28LORAResetNode extends container_node_1.ContainerNode {
     onRemoved() {
         super.onRemoved();
     }
-    onAfterSettingsChange() {
+    onAfterSettingsChange(oldSettings) {
+        super.onAfterSettingsChange(oldSettings);
         this.inputs[1]['name'] = `[interval] (${this.settings['time'].value})`;
         if (this.side !== container_1.Side.server)
             return;

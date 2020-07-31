@@ -11,7 +11,6 @@ class ModbusSerialDeviceNode extends container_node_1.ContainerNode {
         this.tcpServer = null;
         this.db = null;
         this.uuid = null;
-        this.subscriber = null;
         this.outStatus = 0;
         this.outError = 1;
         this.outMessageJson = 2;
@@ -154,15 +153,25 @@ class ModbusSerialDeviceNode extends container_node_1.ContainerNode {
             this.ping();
         }
     }
-    onAfterSettingsChange() {
+    onAfterSettingsChange(oldSettings) {
+        super.onAfterSettingsChange(oldSettings);
         if (this.side !== container_1.Side.server)
             return;
         if (this.settings['transport'].value === 'tcp') {
             this.ping();
         }
     }
+    subscribeMessage(e) {
+        this.setOutputData(0, true, true);
+        this.setOutputData(1, false, true);
+        this.setOutputData(2, null, true);
+    }
     subscribeError(e) {
-        this.setOutputData(this.outError, e, true);
+        if (e === null)
+            return;
+        this.setOutputData(0, false, true);
+        this.setOutputData(1, true, true);
+        this.setOutputData(2, e, true);
     }
 }
 container_1.Container.registerNodeType(constants_1.MODBUS_RTU_DEVICE, ModbusSerialDeviceNode, constants_1.MODBUS_RTU_NETWORK);

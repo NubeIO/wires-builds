@@ -19,6 +19,7 @@ class SerialConnectorNode extends node_1.Node {
         this.addOutput('output', node_1.Type.STRING);
         this.addOutput('error', node_1.Type.STRING);
         this.addOutput('status', node_1.Type.BOOLEAN);
+        this.addOutput('last-message', node_1.Type.STRING);
         this.addOutput('active-ports', node_1.Type.BOOLEAN);
         this.settings['port'] = {
             description: 'Serial Port',
@@ -122,10 +123,10 @@ class SerialConnectorNode extends node_1.Node {
     listPorts() {
         serial_utils_1.default.listPorts()
             .then(e => {
-            this.setOutputData(3, e);
+            this.setOutputData(4, e);
         })
             .catch(err => {
-            this.setOutputData(3, err);
+            this.setOutputData(4, err);
         });
     }
     closePort() {
@@ -136,6 +137,7 @@ class SerialConnectorNode extends node_1.Node {
     }
     readPortData(data) {
         this.setOutputData(0, data);
+        this.setOutputData(3, this.formattedExecutionTime());
     }
     writePortData(message) {
         if (message) {

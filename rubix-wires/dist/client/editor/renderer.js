@@ -765,6 +765,10 @@ class Renderer extends events_1.EventEmitter {
                 this.selectAllNodes();
                 block_default = true;
             }
+            if (e.keyCode == 77 && (e.ctrlKey || e.metaKey)) {
+                this.editor.toggleMiniMap();
+                block_default = true;
+            }
             if (e.keyCode == 46 || e.keyCode == 8) {
                 this.deleteSelectedNodes();
                 block_default = true;

@@ -1,6 +1,6 @@
 {
   "name": "rubix-wires",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "author": "zero, binod, marc, ap, hilly, ritesh, ig, dan <dev@nube-io.com>",
   "private": false,
   "scripts": {
@@ -20,6 +20,7 @@
     "save:prod": "pm2 save",
     "startup:prod": "pm2 startup",
     "unstartup:prod": "pm2 unstartup",
+    "pm2": "pm2",
     "updateEnv": "node buildSrc/updateEnv.js"
   },
   "dependencies": {

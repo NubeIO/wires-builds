@@ -285,7 +285,7 @@ class HistoryConfig {
                         val: log.payload,
                     },
                     tags: tagList,
-                    timestamp: log.timestamp,
+                    time: log.timestamp,
                 });
             });
             var errorFlag = false;

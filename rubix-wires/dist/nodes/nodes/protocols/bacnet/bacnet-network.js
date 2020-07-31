@@ -76,7 +76,8 @@ class BACnetNetwork extends container_node_1.ContainerNode {
         this.name = `BACnet Network:  cid_${this.container.id.toString()}_sid_${this.sub_container.id.toString()}_id${this.id.toString()}`;
         this.initializeBacnetClient();
     }
-    onAfterSettingsChange() {
+    onAfterSettingsChange(oldSettings) {
+        super.onAfterSettingsChange(oldSettings);
         if (this.side !== container_1.Side.server)
             return;
         this.initializeBacnetClient();

@@ -12,6 +12,15 @@ const config = {
         pointRefreshIntervalSeconds: 60,
         nodeDistance: 60,
     },
+    rubix: {
+        branch: 'master',
+        build: '',
+        hash: 'da6f62a',
+        version: '1.2.4',
+    },
 };
+const footerPrefix = `-${config.rubix.hash}${config.rubix.build && `-${config.rubix.build}`}
+`;
+exports.footerInfo = `v${config.rubix.version}${footerPrefix}`;
 exports.default = config;
 //# sourceMappingURL=config.js.map

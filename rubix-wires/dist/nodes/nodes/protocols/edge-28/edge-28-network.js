@@ -17,6 +17,7 @@ const axios_1 = require("axios");
 const edge_utils_1 = require("./edge-utils");
 const time_utils_1 = require("../../../utils/time-utils");
 const edge_constant_1 = require("./edge-constant");
+const constants_1 = require("../../../constants");
 class Edge28ApiNode extends container_node_1.ContainerNode {
     constructor(container) {
         super(container);
@@ -85,7 +86,11 @@ class Edge28ApiNode extends container_node_1.ContainerNode {
         this.name = `id_${this.container.id.toString()}_${this.id.toString()}`;
     }
     onAdded() {
+        const _super = Object.create(null, {
+            onAdded: { get: () => super.onAdded }
+        });
         return __awaiter(this, void 0, void 0, function* () {
+            _super.onAdded.call(this);
             this.inputs[1]['name'] = `[interval] (${this.settings['time'].value})`;
             clearInterval(this.UI_timeoutFunc);
             clearInterval(this.DI_timeoutFunc);
@@ -98,42 +103,57 @@ class Edge28ApiNode extends container_node_1.ContainerNode {
             let interval = this.getInputData(1);
             interval = time_utils_1.default.timeConvert(interval, this.settings['time'].value);
             this.startInputPolling(interval);
-            this.onInputUpdated();
+            yield this.onInputUpdated();
+        });
+    }
+    onRemoved() {
+        const _super = Object.create(null, {
+            onRemoved: { get: () => super.onRemoved }
+        });
+        return __awaiter(this, void 0, void 0, function* () {
+            _super.onRemoved.call(this);
+            clearInterval(this.UI_timeoutFunc);
+            clearInterval(this.DI_timeoutFunc);
         });
     }
     startInputPolling(interval) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (this.side !== container_1.Side.server)
-                return;
-            this.UI_timeoutFunc = setInterval(() => {
-                this.pollUIs();
-            }, interval);
-            this.DI_timeoutFunc = setInterval(() => {
-                this.pollDIs();
-                this.sendPayloadToPointNodesFunc();
-            }, interval + 5);
-        });
+        if (this.side !== container_1.Side.server)
+            return;
+        this.UI_timeoutFunc = setInterval(() => __awaiter(this, void 0, void 0, function* () {
+            yield this.pollUIs();
+            this.sendPayloadToPointNodesFunc();
+        }), interval);
+        this.DI_timeoutFunc = setInterval(() => __awaiter(this, void 0, void 0, function* () {
+            yield this.pollDIs();
+            this.sendPayloadToPointNodesFunc();
+        }), interval + 5);
     }
     pollUIs() {
-        if (this.side !== container_1.Side.server)
-            return;
-        this.fetchPointValue(edge_constant_1.edgeIp, edge_constant_1.edgePort, edge_constant_1.edgeApiVer, this._ui)
-            .then(e => (this.edgeReadUI_Store = e))
-            .catch(err => this.debugInfo(`ERROR: getting edge point type: ${this._ui} ${err}`));
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                this.edgeReadUI_Store = yield this.fetchPointValue(edge_constant_1.edgeIp, edge_constant_1.edgePort, edge_constant_1.edgeApiVer, this._ui);
+            }
+            catch (err) {
+                this.debugInfo(`ERROR: getting edge point type: ${this._ui} ${err}`);
+            }
+        });
     }
     pollDIs() {
-        if (this.side !== container_1.Side.server)
-            return;
-        this.fetchPointValue(edge_constant_1.edgeIp, edge_constant_1.edgePort, edge_constant_1.edgeApiVer, this._di)
-            .then(e => (this.edgeReadDI_Store = e))
-            .catch(err => this.debugInfo(`ERROR: getting edge point type: ${this._di} ${err}`));
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                this.edgeReadDI_Store = this.fetchPointValue(edge_constant_1.edgeIp, edge_constant_1.edgePort, edge_constant_1.edgeApiVer, this._di);
+            }
+            catch (err) {
+                this.debugInfo(`ERROR: getting edge point type: ${this._di} ${err}`);
+            }
+        });
     }
     pollInputsAndSend() {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.side !== container_1.Side.server)
                 return;
-            this.pollUIs;
-            this.pollDIs;
+            yield this.pollUIs();
+            yield this.pollDIs();
             this.sendPayloadToPointNodesFunc();
         });
     }
@@ -196,18 +216,24 @@ class Edge28ApiNode extends container_node_1.ContainerNode {
                 }
                 else if (!this.runState) {
                     this.runState = true;
-                    this.setOutputData(0, this.doPing(edge_constant_1.edgeIp, edge_constant_1.edgePort));
+                    this.setOutputData(0, yield this.doPing(edge_constant_1.edgeIp, edge_constant_1.edgePort));
                     this.startInputPolling(interval);
                     return;
                 }
-                this.pollInputsAndSend();
+                yield this.pollInputsAndSend();
             }
         });
     }
-    onAfterSettingsChange() {
-        if (this.side !== container_1.Side.server)
-            return;
-        this.onInputUpdated();
+    onAfterSettingsChange(oldSettings) {
+        const _super = Object.create(null, {
+            onAfterSettingsChange: { get: () => super.onAfterSettingsChange }
+        });
+        return __awaiter(this, void 0, void 0, function* () {
+            _super.onAfterSettingsChange.call(this, oldSettings);
+            if (this.side !== container_1.Side.server)
+                return;
+            yield this.onInputUpdated();
+        });
     }
     doPing(host, port) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -219,5 +245,5 @@ class Edge28ApiNode extends container_node_1.ContainerNode {
         });
     }
 }
-container_1.Container.registerNodeType('protocols/nube/edge-28-network', Edge28ApiNode);
+container_1.Container.registerNodeType(constants_1.EDGE_28_NETWORK, Edge28ApiNode);
 //# sourceMappingURL=edge-28-network.js.map

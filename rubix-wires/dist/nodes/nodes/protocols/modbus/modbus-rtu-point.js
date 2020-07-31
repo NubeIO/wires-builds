@@ -277,7 +277,8 @@ class ModbusPointNode extends container_node_1.ContainerNode {
         this.title = `MB Pnt (FC: ${this.settings['pointType'].value}, AD: ${this.settings['address'].value}, ID: ${this.container.id}_${this.id})`;
         this.broadcastSettingsToClients();
     }
-    onAfterSettingsChange() {
+    onAfterSettingsChange(oldSettings) {
+        super.onAfterSettingsChange(oldSettings);
         this.updateNodeInputs(true);
         this.onInputUpdated();
     }
@@ -304,6 +305,7 @@ class ModbusPointNode extends container_node_1.ContainerNode {
     subscribe(payload) {
         let pointType = this.settings['pointType'].value;
         this.setOutputData(this.outMessageJson, payload.res.data);
+        this.setOutputData(this.outError, false, true);
         if ([5, 6, 15, 16, 25, 26].includes(pointType)) {
             if (payload.payload === 'writeOk') {
                 this.setOutputData(this.outVal, this.properties['pointVal']);
@@ -333,7 +335,8 @@ class ModbusPointNode extends container_node_1.ContainerNode {
         }
     }
     subscribeError(e) {
-        this.setOutputData(this.outError, e, true);
+        this.setOutputData(this.outError, true, true);
+        this.setOutputData(this.outMessageJson, e, true);
     }
 }
 container_1.Container.registerNodeType(constants_1.MODBUS_RTU_POINT, ModbusPointNode, constants_1.MODBUS_RTU_DEVICE);

@@ -10,6 +10,17 @@ const config = {
     pointRefreshIntervalSeconds: '$POINT_REFRESH_INTERVAL_SEC',
     nodeDistance: '$NODE_DISTANCE',
   },
+  rubix: {
+    branch: '$RUBIX_BRANCH',
+    build: '$RUBIX_BUILD',
+    hash: '$RUBIX_HASH',
+    version: '$RUBIX_VERSION',
+  },
 };
+
+const footerPrefix = `-${config.rubix.hash}${config.rubix.build && `-${config.rubix.build}`}
+`;
+
+export const footerInfo = `v${config.rubix.version}${footerPrefix}`;
 
 export default config;
