@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-let moment = require('moment');
+const moment = require("moment-timezone");
 class TimeUtils {
     static timeConvert(timeOut, timeType) {
         switch (timeType) {
@@ -18,6 +18,13 @@ class TimeUtils {
                 return -1;
         }
     }
+    static nearestFutureMinutes(interval, momentValue) {
+        const roundedMinutes = Math.ceil(momentValue.minute() / interval) * interval;
+        return momentValue
+            .clone()
+            .minute(roundedMinutes)
+            .second(0);
+    }
     static getTimezone() {
         let timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         return timezone;
@@ -29,15 +36,7 @@ class TimeUtils {
         const mm = moment.duration(duration);
         switch (format) {
             case 0:
-                return (mm.days().toString() +
-                    ':' +
-                    mm.hours() +
-                    ':' +
-                    mm.minutes() +
-                    ':' +
-                    mm.seconds() +
-                    ':' +
-                    mm.milliseconds());
+                return (mm.days().toString() + ':' + mm.hours() + ':' + mm.minutes() + ':' + mm.seconds() + ':' + mm.milliseconds());
             case 1:
                 return ('DD:HH:MM:SS:MS ' +
                     mm.days() +
@@ -140,15 +139,7 @@ class TimeUtils {
                         .toString()
                         .padStart(3, '0'));
             default:
-                return (mm.days().toString() +
-                    ':' +
-                    mm.hours() +
-                    ':' +
-                    mm.minutes() +
-                    ':' +
-                    mm.seconds() +
-                    ':' +
-                    mm.milliseconds());
+                return (mm.days().toString() + ':' + mm.hours() + ':' + mm.minutes() + ':' + mm.seconds() + ':' + mm.milliseconds());
         }
     }
 }

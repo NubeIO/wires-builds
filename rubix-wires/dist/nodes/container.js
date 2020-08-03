@@ -329,7 +329,7 @@ class Container {
         node.id = id;
         if (isNew || force) {
             if (node['init'])
-                node['init']();
+                node['init'](properties);
             Container.setSettings(properties, node);
             this.createNewNode(node).then(() => {
                 callNodeMethodOnAdded();
