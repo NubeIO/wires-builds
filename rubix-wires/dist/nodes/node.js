@@ -201,17 +201,27 @@ class Node {
         if (this.container.db)
             this.container.db.updateNode(this.id, this.container.id, { $set: { outputs: this.outputs } });
     }
+    persistProperties(saveSettings = false, saveProperties = false, saveInputs = false, saveOutputs = false) {
+        if (!this.container.db)
+            return;
+        const props = {};
+        if (saveSettings)
+            props['props'] = this.settings;
+        if (saveProperties)
+            props['properties'] = this.properties;
+        if (saveInputs)
+            props['inputs'] = this.inputs;
+        if (saveOutputs)
+            props['outputs'] = this.outputs;
+        this.container.db.updateNode(this.id, this.container.id, {
+            $set: props,
+        });
+    }
     persistConfiguration(callback = doNothing) {
         if (this.container.db)
             this.container.db.updateNode(this.id, this.container.id, {
                 $set: { settings: this.settings, properties: this.properties },
             }, callback);
-    }
-    updateNodeInputOutput() {
-        if (this.container.db)
-            this.container.db.updateNode(this.id, this.container.id, {
-                $set: { inputs: this.inputs, outputs: this.outputs },
-            });
     }
     setOutputData(output_id, data, only_if_new = false) {
         if (!this.outputs[output_id])

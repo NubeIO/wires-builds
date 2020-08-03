@@ -6,11 +6,11 @@ class SettingUtils {
             Object.assign(object, insert);
             return object;
         }
-        var newObj = {};
-        var insertAfter = false;
+        const newObj = {};
+        let insertAfter = false;
         const matchBoth = before !== '' && after !== '';
-        var foundFlag = false;
-        for (var prop in object) {
+        let foundFlag = false;
+        for (let prop in object) {
             if (object.hasOwnProperty(prop)) {
                 if (!foundFlag && matchBoth && insertAfter && before === prop) {
                     Object.assign(newObj, insert);
