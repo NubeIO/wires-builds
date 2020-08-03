@@ -7,20 +7,18 @@ class ClientReceiver extends node_1.Node {
         super();
         this.listOfClients = [];
         this.title = 'ClientReceiver';
-        this.description = "";
+        this.description = '';
         this.settings['clientUUID'] = {
             description: 'enable enable',
             value: '',
             type: node_1.SettingType.READONLY,
         };
     }
-    onAdded() {
-    }
-    onAfterSettingsChange() {
-    }
+    onAdded() { }
+    onAfterSettingsChange() { }
     subscribe({ action, payload }) {
         switch (action) {
-            case "ADD_CLIENT":
+            case 'ADD_CLIENT':
                 console.log(111);
                 console.log(action, payload);
                 this.settings['clientUUID'].value = payload.uuid;
@@ -28,7 +26,7 @@ class ClientReceiver extends node_1.Node {
                 this.listOfClients.push(payload);
                 console.log(this.listOfClients);
                 break;
-            case "DELETE_CLIENT":
+            case 'DELETE_CLIENT':
                 this.listOfClients = this.listOfClients.filter(e => e.uuid !== payload.uuid);
                 console.log(this.listOfClients);
                 break;

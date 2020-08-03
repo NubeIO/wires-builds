@@ -66,16 +66,12 @@ class ScheduleAfterhoursOffWidgetNode extends node_1.Node {
             if (this.inputs[1].updated) {
                 if (this.getInputData(1)) {
                     this.setOutputData(1, true);
-                    const nextStop = this.getInputData(2);
-                    if (nextStop)
-                        this.setOutputData(2, nextStop - Date.now());
-                    else
-                        this.setOutputData(2, null);
+                    this.startSchedule();
                 }
                 else {
                     this.setOutputData(1, false, true);
                     clearInterval(this.timeoutFunc);
-                    this.setOutputData(2, null);
+                    this.setOutputData(2, 0);
                 }
             }
             if (this.getInputData(2) == null)

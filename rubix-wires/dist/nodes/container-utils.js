@@ -49,10 +49,7 @@ class ContainerUtils {
                 Object.keys(node.outputs).forEach(key => {
                     let isChanged = false;
                     let nodeWithLink = nodesWithLinks.find(n => n.id === node.id && n.cid === node.cid);
-                    if (nodeWithLink &&
-                        nodeWithLink.outputs &&
-                        nodeWithLink.outputs[key] &&
-                        nodeWithLink.outputs[key].links) {
+                    if (nodeWithLink && nodeWithLink.outputs && nodeWithLink.outputs[key] && nodeWithLink.outputs[key].links) {
                         const links = nodeWithLink.outputs[key].links;
                         links.forEach(link => {
                             const connectedNode = createdNodes.find(n => n.id === link.target_node_id && n.cid === nodeWithLink.cid);
@@ -181,6 +178,11 @@ class ContainerUtils {
                     }
                 });
             return node;
+        });
+    }
+    static updateSubContainerLastNodeId(container, lastNodeId) {
+        container.db.updateNode(container.container_node.id, container.container_node.container.id, {
+            $set: { 'sub_container.last_node_id': lastNodeId },
         });
     }
     static remapContainersId(container, nodes, paramsCid, firstCid, allNew = false) {

@@ -143,16 +143,16 @@ class WeeklyScheduleNode extends node_1.Node {
             endMinsUTC = endMinsUTC + 60;
         else if (endMinsUTC >= 60)
             endMinsUTC = endMinsUTC - 60;
-        const sundayIndex = this.settings['sunday'].value && rolloverFlag == -1 ? 6 : 0;
-        const saturdayIndex = this.settings['saturday'].value && rolloverFlag == 1 ? 0 : 6;
+        const sundayIndex = this.settings['sunday'].value && rolloverFlag == -1 ? 7 : 0;
+        const saturdayIndex = this.settings['saturday'].value && rolloverFlag == 1 ? -1 : 6;
         var daysOutput = [];
-        this.settings['sunday'].value ? daysOutput.push(this.daysArray[sundayIndex]) : null;
+        this.settings['sunday'].value ? daysOutput.push(this.daysArray[sundayIndex + rolloverFlag]) : null;
         this.settings['monday'].value ? daysOutput.push(this.daysArray[1 + rolloverFlag]) : null;
         this.settings['tuesday'].value ? daysOutput.push(this.daysArray[2 + rolloverFlag]) : null;
         this.settings['wednesday'].value ? daysOutput.push(this.daysArray[3 + rolloverFlag]) : null;
         this.settings['thursday'].value ? daysOutput.push(this.daysArray[4 + rolloverFlag]) : null;
         this.settings['friday'].value ? daysOutput.push(this.daysArray[5 + rolloverFlag]) : null;
-        this.settings['saturday'].value ? daysOutput.push(this.daysArray[saturdayIndex]) : null;
+        this.settings['saturday'].value ? daysOutput.push(this.daysArray[saturdayIndex + rolloverFlag]) : null;
         scheduleOutput.weekly = {
             [schedID]: {
                 colour: '#FFFFFF',

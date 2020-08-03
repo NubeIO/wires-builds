@@ -7,7 +7,7 @@ class JsonConstantNode extends node_1.Node {
         super();
         this.title = 'Json Constant';
         this.description = `Outputs a JSON value set from settings. Can also output null by leaving the settings field blank. Example {"name":"John Hill", "age":31} or [1,2,3,4]`;
-        this.settings['value'] = { description: 'Value', value: '[1,2,3,4]', type: node_1.SettingType.STRING };
+        this.settings['value'] = { description: 'Value', value: '', type: node_1.SettingType.STRING };
         this.addOutput('output', node_1.Type.JSON);
         this.addOutput('error', node_1.Type.STRING);
     }

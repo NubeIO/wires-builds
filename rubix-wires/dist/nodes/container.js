@@ -293,11 +293,7 @@ class Container {
             this.debugErr("Can't create node. Node class of type [" + type + '] not registered.');
             return null;
         }
-        const { id, isNew } = this.getNodeId(properties, serializedNode);
-        if (this._nodes[id]) {
-            this.debugErr("Can't create node. Node id [" + id + '] already exist.');
-            return null;
-        }
+        let { id, isNew } = this.getNodeId(properties, serializedNode, type);
         let node = new node_class(this, id, properties);
         node.id = id;
         node.cid = this.id;
@@ -363,7 +359,7 @@ class Container {
                 node['onAdded']();
         }
     }
-    getNodeId(properties, serializedNode) {
+    getNodeId(properties, serializedNode, type) {
         let id;
         let isNew = false;
         if (properties && properties.id != null)
@@ -373,6 +369,19 @@ class Container {
         else {
             id = ++this.last_node_id;
             isNew = true;
+        }
+        if (this._nodes[id]) {
+            this.debugErr(` Node id [ ${id} ] already exist.`);
+            const lastNodeId = Math.max(...Object.keys(this._nodes).map(x => Number(x)));
+            this.last_node_id = lastNodeId + 1;
+            id = this.last_node_id;
+            this.debugErr(`Forcefully creating node of type [ ${type} ] with id [ ${id} ].`);
+            if (this.container_node.cid === 0) {
+                this.db.updateLastRootNodeId(this.last_node_id);
+            }
+            else {
+                container_utils_1.default.updateSubContainerLastNodeId(this, this.last_node_id);
+            }
         }
         return { id, isNew };
     }

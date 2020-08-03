@@ -39,9 +39,7 @@ router.get('/c/:cid', function (req, res) {
 router.get('/c/:cid/file', function (req, res) {
     let container = container_1.Container.containers[req.params.cid];
     if (!container)
-        return res
-            .status(404)
-            .send(`Can't export container. Container id [${req.params.cid}] not found.`);
+        return res.status(404).send(`Can't export container. Container id [${req.params.cid}] not found.`);
     let s = container.container_node.serialize();
     if (s.inputs)
         for (let i in s.inputs)
@@ -92,14 +90,10 @@ router.delete('/c/:cid/n/', function (req, res) {
 router.put('/c/:cid/n/:id/position', function (req, res) {
     let container = container_1.Container.containers[req.params.cid];
     if (!container)
-        return res
-            .status(404)
-            .send(`Can't update node position. Container id [${req.params.cid}] not found.`);
+        return res.status(404).send(`Can't update node position. Container id [${req.params.cid}] not found.`);
     let node = container.getNodeById(req.params.id);
     if (!node)
-        return res
-            .status(404)
-            .send(`Can't update node position. Node id [${req.params.cid}/${req.params.id}] not found.`);
+        return res.status(404).send(`Can't update node position. Node id [${req.params.cid}/${req.params.id}] not found.`);
     node.pos = req.body.position;
     if (app_1.default.db)
         app_1.default.db.updateNode(node.id, node.container.id, { $set: { pos: node.pos } });
@@ -113,14 +107,10 @@ router.put('/c/:cid/n/:id/position', function (req, res) {
 router.put('/c/:cid/n/:id/size', function (req, res) {
     let container = container_1.Container.containers[req.params.cid];
     if (!container)
-        return res
-            .status(404)
-            .send(`Can't update node size. Container id [${req.params.cid}] not found.`);
+        return res.status(404).send(`Can't update node size. Container id [${req.params.cid}] not found.`);
     let node = container.getNodeById(req.params.id);
     if (!node)
-        return res
-            .status(404)
-            .send(`Can't update node size. Node id [${req.params.cid}/${req.params.id}] not found.`);
+        return res.status(404).send(`Can't update node size. Node id [${req.params.cid}/${req.params.id}] not found.`);
     node.size = req.body.size;
     if (app_1.default.db)
         app_1.default.db.updateNode(node.id, node.container.id, { $set: { size: node.size } });
@@ -197,13 +187,9 @@ router.post('/c/:cid/l', function (req, res) {
     let node = container.getNodeById(link.origin_id);
     let targetNode = container.getNodeById(link.target_id);
     if (!node)
-        return res
-            .status(404)
-            .send(`Can't create link. Node id [${req.params.cid}/${link.origin_id}] not found.`);
+        return res.status(404).send(`Can't create link. Node id [${req.params.cid}/${link.origin_id}] not found.`);
     if (!targetNode)
-        return res
-            .status(404)
-            .send(`Can't create link. Node id [${req.params.cid}/${link.target_id}] not found.`);
+        return res.status(404).send(`Can't create link. Node id [${req.params.cid}/${link.target_id}] not found.`);
     if (link.target_slot == -1) {
         let input = targetNode.getInputInfo(0);
         if (!input)
@@ -227,13 +213,9 @@ router.delete('/c/:cid/l', function (req, res) {
     let node = container.getNodeById(link.origin_id);
     let targetNode = container.getNodeById(link.target_id);
     if (!node)
-        return res
-            .status(404)
-            .send(`Can't create link. Node id [${req.params.cid}/${link.origin_id}] not found.`);
+        return res.status(404).send(`Can't create link. Node id [${req.params.cid}/${link.origin_id}] not found.`);
     if (!targetNode)
-        return res
-            .status(404)
-            .send(`Can't create link. Node id [${req.params.cid}/${link.target_id}] not found.`);
+        return res.status(404).send(`Can't create link. Node id [${req.params.cid}/${link.target_id}] not found.`);
     targetNode.disconnectInputLink(link.target_slot);
     app_1.default.server.editorSocket.io.emit('link-delete', {
         cid: req.params.cid,
@@ -265,14 +247,10 @@ router.post('/step', function (req, res) {
 router.get('/c/:cid/n/:id*', function (req, res) {
     let cont = container_1.Container.containers[req.params.cid];
     if (!cont)
-        return res
-            .status(404)
-            .send(`Can't send request to node. Container id [${req.params.cid}] not found.`);
+        return res.status(404).send(`Can't send request to node. Container id [${req.params.cid}] not found.`);
     let node = cont.getNodeById(req.params.id);
     if (!node)
-        return res
-            .status(404)
-            .send(`Can't send request to node. Node id [${req.params.cid}/${req.params.id}] not found.`);
+        return res.status(404).send(`Can't send request to node. Node id [${req.params.cid}/${req.params.id}] not found.`);
     if (node['onEditorApiGetRequest'])
         node['onEditorApiGetRequest'](req, res);
     else
@@ -283,14 +261,10 @@ router.get('/c/:cid/n/:id*', function (req, res) {
 router.post('/c/:cid/n/:id*', function (req, res) {
     let cont = container_1.Container.containers[req.params.cid];
     if (!cont)
-        return res
-            .status(404)
-            .send(`Can't send request to node. Container id [${req.params.cid}] not found.`);
+        return res.status(404).send(`Can't send request to node. Container id [${req.params.cid}] not found.`);
     let node = cont.getNodeById(req.params.id);
     if (!node)
-        return res
-            .status(404)
-            .send(`Can't send request to node. Node id [${req.params.cid}/${req.params.id}] not found.`);
+        return res.status(404).send(`Can't send request to node. Node id [${req.params.cid}/${req.params.id}] not found.`);
     if (node['onEditorApiPostRequest'])
         node['onEditorApiPostRequest'](req, res);
     else
@@ -301,9 +275,7 @@ router.post('/c/:cid/n/:id*', function (req, res) {
 router.post('/c/:cid/n-type', function (req, res) {
     let cont = container_1.Container.containers[req.params.cid];
     if (!cont)
-        return res
-            .status(404)
-            .send(`Can't receive request to node. Container id [${req.params.cid}] not found.`);
+        return res.status(404).send(`Can't receive request to node. Container id [${req.params.cid}] not found.`);
     let type = req.body.type;
     if (!type)
         return res.status(404).send(`Can't receive request to node. Node type is not defined.`);
@@ -317,9 +289,7 @@ router.post('/c/:cid/n-type', function (req, res) {
         if (node['onEditorApiPostRequest'])
             node['onEditorApiPostRequest'](req, res);
         else
-            return res
-                .status(404)
-                .send(`Can't receive request to node. Node type [${type}] does not accept requests.`);
+            return res.status(404).send(`Can't receive request to node. Node type [${type}] does not accept requests.`);
     });
     if (!res.headersSent)
         res.status(400).send(`No node has processed the request.`);
@@ -357,6 +327,7 @@ function moveNodesToNewContainer(container, nodes, paramsCid) {
             importedNodes.push(n);
             container.last_node_id = n.id;
         });
+        container_utils_1.default.updateSubContainerLastNodeId(container, container.last_node_id);
     });
     container_utils_1.default.removeBrokenLinks(container_1.Container.containers[paramsCid]);
     container_utils_1.default.removeBrokenLinks(container_1.Container.containers[convertedParamsCid]);
@@ -394,6 +365,7 @@ function importNodes(container, nodes, paramsCid, pos, isCloned = false) {
                 importedNodes.push(n);
                 container.last_node_id = n.id;
             });
+            container_utils_1.default.updateSubContainerLastNodeId(container, container.last_node_id);
         }
     });
     container_utils_1.default.addInputsLinkNodes(importedNodes, nodes, updateInputs);

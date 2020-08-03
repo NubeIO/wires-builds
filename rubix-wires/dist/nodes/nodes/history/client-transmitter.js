@@ -12,7 +12,7 @@ class ClientTransmitter extends node_1.Node {
         this.description = '';
         this.settings['clientName'] = {
             description: 'clientName enable',
-            value: "my new client",
+            value: 'my new client',
             type: node_1.SettingType.STRING,
         };
         this.settings['enable'] = {
@@ -30,7 +30,7 @@ class ClientTransmitter extends node_1.Node {
         receivers.forEach(receiver => {
             client_utils_1.default.deleteClient(receiver, {
                 uuid: this.properties['uuid'],
-                details: "delete client",
+                details: 'delete client',
             });
         });
     }
@@ -39,7 +39,7 @@ class ClientTransmitter extends node_1.Node {
         receivers.forEach(receiver => {
             client_utils_1.default.addClient(receiver, {
                 uuid: this.properties['uuid'],
-                details: "add client",
+                details: 'add client',
             });
         });
     }
