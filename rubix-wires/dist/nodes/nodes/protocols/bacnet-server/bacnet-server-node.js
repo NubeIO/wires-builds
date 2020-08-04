@@ -49,7 +49,9 @@ class BACnetServerNode extends ProtocolDeviceNode_1.ProtocolDeviceNode {
     applyTitle() {
         super.applyTitle();
         this.title = `BACnet Server (ID: ${this.settings['id'].value}, Name: ${this.settings['name'].value})`;
+        this.name = `BACnet Server ${this.settings['name'].value}`;
         this.broadcastSettingsToClients();
+        this.broadcastNameToClients();
     }
     createThenStart() {
         this.device = new bacnet_device_1.default({
