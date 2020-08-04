@@ -295,8 +295,9 @@ class HistoryBase extends node_1.Node {
                     if (log.payload === true) {
                         log.payload = 1;
                     }
-                    else
+                    else if (log.payload === false) {
                         log.payload = 0;
+                    }
                 }
                 else if (typeof log.payload === 'string') {
                 }

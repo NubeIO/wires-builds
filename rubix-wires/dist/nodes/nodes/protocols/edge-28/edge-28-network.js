@@ -141,7 +141,7 @@ class Edge28ApiNode extends container_node_1.ContainerNode {
     pollDIs() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                this.edgeReadDI_Store = this.fetchPointValue(edge_constant_1.edgeIp, edge_constant_1.edgePort, edge_constant_1.edgeApiVer, this._di);
+                this.edgeReadDI_Store = yield this.fetchPointValue(edge_constant_1.edgeIp, edge_constant_1.edgePort, edge_constant_1.edgeApiVer, this._di);
             }
             catch (err) {
                 this.debugInfo(`ERROR: getting edge point type: ${this._di} ${err}`);

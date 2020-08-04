@@ -40,9 +40,7 @@ class HistoryNode extends HistoryBase_1.default {
             if (clear === true) {
                 this.properties['obj'] = [];
             }
-            if (this.inputs[0].data) {
-                yield this.doNonPeriodicHistoryFunctions();
-            }
+            yield this.doNonPeriodicHistoryFunctions();
         });
     }
     onAfterSettingsChange() {
