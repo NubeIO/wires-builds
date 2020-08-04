@@ -64,8 +64,8 @@ class HistoryBase extends node_1.Node {
             value: false,
             type: node_1.SettingType.BOOLEAN,
         };
-        this.settings['host'] = { description: 'Host', value: '', type: node_1.SettingType.STRING };
-        this.settings['port'] = { description: 'Port', value: '', type: node_1.SettingType.STRING };
+        this.settings['host'] = { description: 'Host', value: '0.0.0.0', type: node_1.SettingType.STRING };
+        this.settings['port'] = { description: 'Port', value: '8086', type: node_1.SettingType.STRING };
         this.settings['authentication'] = {
             description: 'Use Authentication',
             value: false,
@@ -288,12 +288,20 @@ class HistoryBase extends node_1.Node {
             decimals = utils_1.default.clamp(decimals, 0, 5);
             const points = [];
             this.properties['obj'].forEach(log => {
-                if (!isNaN(log.payload)) {
-                    log.payload = Number(log.payload).toFixed(decimals);
+                if (typeof log.payload === 'number') {
+                    log.payload = +log.payload.toFixed(decimals);
                 }
-                else {
-                    log.payload = '0.00';
+                else if (typeof log.payload === 'boolean') {
+                    if (log.payload === true) {
+                        log.payload = 1;
+                    }
+                    else
+                        log.payload = 0;
                 }
+                else if (typeof log.payload === 'string') {
+                }
+                else
+                    return;
                 const tagList = {};
                 tagList['point'] = this.settings['pointName'].value || 'undefined';
                 Object.keys(log).map(key => {

@@ -15,8 +15,8 @@ const config = {
     rubix: {
         branch: 'master',
         build: '',
-        hash: '7b9305b',
-        version: '1.2.6',
+        hash: '5dc1496',
+        version: '1.2.7',
     },
 };
 const footerPrefix = `-${config.rubix.hash}${config.rubix.build && `-${config.rubix.build}`}
