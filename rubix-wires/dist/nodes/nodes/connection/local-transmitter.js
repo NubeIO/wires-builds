@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const container_1 = require("../../container");
 const node_1 = require("../../node");
 const utils_1 = require("../../utils");
-const node_utils_1 = require("../../utils/node-utils");
 class ConnectionLocalTransmitterNode extends node_1.Node {
     constructor() {
         super();
@@ -52,7 +51,7 @@ class ConnectionLocalTransmitterNode extends node_1.Node {
         if (inputCount !== this.properties['inputsCount'])
             this.changeTopicsCount(inputCount);
         this.renameInputs();
-        node_utils_1.default.persistProperties(this, true, true, true);
+        this.persistProperties(true, true, true);
         this.onInputUpdated();
     }
     changeTopicsCount(target_count) {

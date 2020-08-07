@@ -1,6 +1,6 @@
 {
   "name": "rubix-wires",
-  "version": "1.2.9",
+  "version": "1.3.0",
   "author": "zero, binod, marc, ap, hilly, ritesh, ig, dan <dev@nube-io.com>",
   "private": false,
   "scripts": {
@@ -13,9 +13,13 @@
     "postbuild": "cross-env NODE_ENV=$NODE_ENV node buildSrc/distribute.js",
     "test": "jest",
     "prestart:prod": "npm run delete:prod && npm run updateEnv --prod && tsc",
+    "prestart:prod:nolog": "npm run delete:prod && npm run updateEnv --prod && tsc",
     "start:prod": "cross-env NODE_ENV=production pm2 start dist/app.js",
+    "start:prod:nolog": "cross-env NODE_ENV=production pm2 start dist/app.js -o /dev/null -e /dev/null",
     "stop:prod": "pm2 stop --silent app &",
     "delete:prod": "pm2 delete --silent app &",
+    "install:pm2-logrotate": "pm2 install pm2-logrotate &",
+    "uninstall:pm2-logrotate": "pm2 uninstall pm2-logrotate &",
     "status:prod": "pm2 status",
     "save:prod": "pm2 save",
     "startup:prod": "pm2 startup",

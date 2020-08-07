@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
 const time_utils_1 = require("../../utils/time-utils");
-const node_utils_1 = require("../../utils/node-utils");
 const moment = require('moment');
 class ClockNode extends node_1.Node {
     constructor() {
@@ -89,7 +88,7 @@ class ClockNode extends node_1.Node {
         if (advanced && !this.properties['advancedOutputs']) {
             this.addOutputs();
             this.properties['advancedOutputs'] = true;
-            node_utils_1.default.persistProperties(this, false, true);
+            this.persistProperties(false, true);
         }
         else if (!advanced && this.properties['advancedOutputs']) {
             this.removeOutput(4);
@@ -97,7 +96,7 @@ class ClockNode extends node_1.Node {
             this.removeOutput(6);
             this.removeOutput(7);
             this.properties['advancedOutputs'] = false;
-            node_utils_1.default.persistProperties(this, false, true);
+            this.persistProperties(false, true);
         }
         this.updateNodeOutput();
         this.onInputUpdated();

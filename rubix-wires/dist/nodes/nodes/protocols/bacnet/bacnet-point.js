@@ -15,8 +15,8 @@ const bacnet_utils_1 = require("./bacnet-utils");
 const constants_1 = require("../../../constants");
 const bacnet_constant_1 = require("./bacnet-constant");
 const utils_1 = require("../../../utils");
-const history_config_1 = require("../../../utils/points/history-config");
-class BACnetPoint extends node_1.Node {
+const HistoryBase_1 = require("../../history/HistoryBase");
+class BACnetPoint extends HistoryBase_1.default {
     constructor() {
         super();
         this.dynamicInputsExist = false;
@@ -83,13 +83,7 @@ class BACnetPoint extends node_1.Node {
             value: 16,
             type: node_1.SettingType.NUMBER,
         };
-        history_config_1.default.addHistorySettings(this);
         this.setSettingsConfig({
-            groups: [
-                { host: { weight: 3 }, port: { weight: 1 } },
-                { user: {}, password: {} },
-                { period: { weight: 2 }, periodUnits: {} },
-            ],
             conditions: {
                 pointsList: setting => {
                     return !setting['manualPoint'].value;
@@ -97,68 +91,73 @@ class BACnetPoint extends node_1.Node {
                 objectType: setting => {
                     return setting['manualPoint'].value;
                 },
-                user: setting => {
-                    return !!setting['authentication'].value;
-                },
-                password: setting => {
-                    return !!setting['authentication'].value;
-                },
             },
         });
-        history_config_1.default.addHistorySettingsConfig(this);
         this.useInterval = false;
         this.properties['lastHistoryValue'] = null;
-    }
-    onCreated() {
-        history_config_1.default.historyOnCreated(this);
+        this.addHistorySettingsConfig(0, false);
     }
     onAdded() {
+        const _super = Object.create(null, {
+            onAdded: { get: () => super.onAdded }
+        });
         return __awaiter(this, void 0, void 0, function* () {
-            this.name = `BACnet Point: cid_${this.container.id.toString()}_id${this.id.toString()}`;
+            _super.onAdded.call(this);
             if (this.side !== container_1.Side.server)
                 return;
+            yield utils_1.default.sleep(2000);
             this.points = bacnet_utils_1.default.getPoints(this.getParentNode());
             this.setPointsListItems();
-            yield utils_1.default.sleep(1000);
             this.getPresentValue();
             bacnet_utils_1.default.addPoint(this.getParentNode(), this);
         });
     }
-    onRemoved() {
-        bacnet_utils_1.default.removePoint(this.getParentNode(), this);
-    }
     onInputUpdated() {
-        if (this.side !== container_1.Side.server)
-            return;
-        history_config_1.default.doHistoryFunctions(this).then();
-        let objectType;
-        let objectInstance;
-        const value = this.getInputData(0);
-        const priority = this.settings['priority'].value;
-        const manualPoint = this.settings['manualPoint'].value;
-        const selectPoint = this.settings['pointsList'].value;
-        if (manualPoint) {
-            objectType = this.settings['objectType'].value;
-            objectInstance = this.settings['objectInstance'].value;
-        }
-        if (selectPoint) {
-            objectType = selectPoint.type;
-            objectInstance = selectPoint.instance;
-        }
-        if (value === undefined)
-            return;
-        bacnet_utils_1.default.writePresentValue(this.getParentNode(), [objectType, objectInstance, value, priority]);
+        const _super = Object.create(null, {
+            onInputUpdated: { get: () => super.onInputUpdated }
+        });
+        return __awaiter(this, void 0, void 0, function* () {
+            this.setOutputData(0, 1);
+            yield _super.onInputUpdated.call(this);
+            if (this.side !== container_1.Side.server)
+                return;
+            let objectType;
+            let objectInstance;
+            const value = this.getInputData(0);
+            const priority = this.settings['priority'].value;
+            const manualPoint = this.settings['manualPoint'].value;
+            const selectPoint = this.settings['pointsList'].value;
+            if (manualPoint) {
+                objectType = this.settings['objectType'].value;
+                objectInstance = this.settings['objectInstance'].value;
+            }
+            if (selectPoint) {
+                objectType = selectPoint.type;
+                objectInstance = selectPoint.instance;
+            }
+            if (value === undefined)
+                return;
+            bacnet_utils_1.default.writePresentValue(this.getParentNode(), [objectType, objectInstance, value, priority]);
+        });
     }
     onAfterSettingsChange() {
-        history_config_1.default.historyFunctionsForAfterSettingsChange(this, this.settings['pointName'].value);
-        this.getPresentValue();
-        const getNetworkNumber = bacnet_utils_1.default.getNetworkSettings(this.getParentNode());
-        if (getNetworkNumber) {
-            if (!isNaN(getNetworkNumber.networkNumber.value)) {
-                this.networkNumber = getNetworkNumber.networkNumber.value;
+        const _super = Object.create(null, {
+            onAfterSettingsChange: { get: () => super.onAfterSettingsChange }
+        });
+        return __awaiter(this, void 0, void 0, function* () {
+            yield _super.onAfterSettingsChange.call(this);
+            this.getPresentValue();
+            const getNetworkNumber = bacnet_utils_1.default.getNetworkSettings(this.getParentNode());
+            if (getNetworkNumber) {
+                if (!isNaN(getNetworkNumber.networkNumber.value)) {
+                    this.networkNumber = getNetworkNumber.networkNumber.value;
+                }
             }
-        }
-        this.onInputUpdated();
+        });
+    }
+    onRemoved() {
+        super.onRemoved();
+        bacnet_utils_1.default.removePoint(this.getParentNode(), this);
     }
     getPresentValue() {
         if (this.side !== container_1.Side.server)

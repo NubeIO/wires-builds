@@ -11,10 +11,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
-const history_config_1 = require("../../utils/points/history-config");
 const time_utils_1 = require("../../utils/time-utils");
-const node_utils_1 = require("../../utils/node-utils");
 const axios_1 = require("axios");
+const system_utils_1 = require("../system/system-utils");
 class GetSchedulesNode extends node_1.Node {
     constructor() {
         super();
@@ -50,15 +49,19 @@ class GetSchedulesNode extends node_1.Node {
         this.enable = true;
     }
     onAdded() {
-        if (this.properties['scheduleData'])
-            this.setOutputData(0, this.properties['scheduleData']);
-        this.onAfterSettingsChange();
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.properties['scheduleData'])
+                this.setOutputData(0, this.properties['scheduleData']);
+            yield this.onAfterSettingsChange();
+        });
     }
     onAfterSettingsChange() {
-        if (this.side == container_1.Side.server) {
-            this.setExecuteInterval();
-            this.onInputUpdated();
-        }
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.side == container_1.Side.server) {
+                this.setExecuteInterval();
+                yield this.onInputUpdated();
+            }
+        });
     }
     onInputUpdated() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -68,7 +71,7 @@ class GetSchedulesNode extends node_1.Node {
                 this.enable = false;
             else {
                 this.enable = true;
-                yield this.getDittoSchedules(this);
+                yield this.getDittoSchedules();
             }
         });
     }
@@ -76,69 +79,40 @@ class GetSchedulesNode extends node_1.Node {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.side !== container_1.Side.server || !this.enable)
                 return;
-            yield this.getDittoSchedules(this);
+            yield this.getDittoSchedules();
         });
     }
-    getDittoSchedules(self) {
+    getDittoSchedules() {
         return __awaiter(this, void 0, void 0, function* () {
-            var errorFlag = false;
-            const deviceIDfromPlat = yield self.getDeviceID();
-            let foundDeviceID = false;
-            typeof deviceIDfromPlat == 'string' ? (foundDeviceID = true) : null;
-            axios_1.default({
-                method: 'get',
-                url: 'https://ditto1.nube-iot.com/api/2/things/com.nubeio:' + deviceIDfromPlat + '/features/schedules/properties',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Basic bnViZS1kaXR0bzpVeVJadjh6UG9P',
-                },
-            })
-                .then(function (response) {
-                self.setOutputData(0, response.data);
-                self.setOutputData(1, false);
-                self.properties['scheduleData'] = response.data;
-                node_utils_1.default.persistProperties(this, true, true);
-            })
-                .catch(function (error) {
-                self.setOutputData(1, String(error));
-                errorFlag = true;
-            });
-            if (!errorFlag) {
-            }
-        });
-    }
-    getDeviceID() {
-        return new Promise((resolve, reject) => {
+            let errorFlag = false;
             try {
-                history_config_1.default.findMainContainer(this).db.getNodeType('system/platform', (err, docs) => {
-                    if (!err) {
-                        let output = [];
-                        output.push(docs);
-                        if (output[0] && output[0][0] && output[0][0].properties) {
-                            resolve(output[0][0].properties['deviceID'].trim());
-                            return output[0][0].properties['deviceID'].trim();
-                        }
-                        else {
-                        }
-                        resolve(output);
-                        return output;
-                    }
-                    else {
-                        console.log(err);
-                        reject(err);
-                    }
+                const deviceIdFromPlat = yield system_utils_1.default.getDeviceID(this);
+                const self = this;
+                axios_1.default({
+                    method: 'get',
+                    url: 'https://ditto1.nube-iot.com/api/2/things/com.nubeio:' + deviceIdFromPlat + '/features/schedules/properties',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Basic bnViZS1kaXR0bzpVeVJadjh6UG9P',
+                    },
+                })
+                    .then(function (response) {
+                    self.setOutputData(0, response.data);
+                    self.setOutputData(1, false);
+                    self.properties['scheduleData'] = response.data;
+                    self.persistProperties(false, true);
+                })
+                    .catch(function (error) {
+                    self.debugErr(error);
+                    self.setOutputData(1, String(error));
+                    errorFlag = true;
                 });
             }
-            catch (error) {
-                console.log(error);
+            catch (e) {
+                this.debugErr(e);
+                return;
             }
         });
-    }
-    findMainContainer() {
-        if (this.hasOwnProperty('container'))
-            return history_config_1.default.findMainContainer(this.container);
-        else
-            return this;
     }
     setExecuteInterval() {
         let interval = this.settings['interval'].value;

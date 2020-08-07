@@ -6,9 +6,8 @@ const container_1 = require("../../../container");
 const check_types_1 = require("../../../utils/check-types");
 const constants_1 = require("../../../constants");
 const unitsJson_1 = require("../../../utils/data-types/src/valueFormats/unitsJson");
-const pointFunc_1 = require("../../../utils/points/pointFunc");
 const utils_1 = require("../../../utils");
-const node_utils_1 = require("../../../utils/node-utils");
+const MathUtils_1 = require("../../../utils/MathUtils");
 class ModbusPointNode extends container_node_1.ContainerNode {
     constructor(container) {
         super(container);
@@ -131,17 +130,17 @@ class ModbusPointNode extends container_node_1.ContainerNode {
             type: node_1.SettingType.DROPDOWN,
             config: {
                 items: [
-                    { value: 0, text: 'na' },
-                    { value: 1, text: 'add' },
-                    { value: 2, text: 'subtract' },
-                    { value: 3, text: 'multiply' },
-                    { value: 4, text: 'divide' },
-                    { value: 7, text: 'bool invert' },
-                    { value: 8, text: 'convert 1/0 to true/false' },
-                    { value: 9, text: 'convert true/false to 1/0' },
+                    { value: MathUtils_1.MATH_FUNC_TYPE.NA, text: 'na' },
+                    { value: MathUtils_1.MATH_FUNC_TYPE.ADD, text: 'add' },
+                    { value: MathUtils_1.MATH_FUNC_TYPE.SUBTRACT, text: 'subtract' },
+                    { value: MathUtils_1.MATH_FUNC_TYPE.MULTIPLY, text: 'multiply' },
+                    { value: MathUtils_1.MATH_FUNC_TYPE.DIVIDE, text: 'divide' },
+                    { value: MathUtils_1.MATH_FUNC_TYPE.BOOL_INVERT, text: 'bool invert' },
+                    { value: MathUtils_1.MATH_FUNC_TYPE.ONE_TO_TRUE, text: 'convert 1/0 to true/false' },
+                    { value: MathUtils_1.MATH_FUNC_TYPE.TRUE_TO_ONE, text: 'convert true/false to 1/0' },
                 ],
             },
-            value: 0,
+            value: MathUtils_1.MATH_FUNC_TYPE.NA,
         };
         this.settings['mathValue'] = {
             description: 'Enter a value',
@@ -265,7 +264,7 @@ class ModbusPointNode extends container_node_1.ContainerNode {
             this.setOutputData(this.outMessageJson, `write val ${inputValue} @ priority ${priority - 1}`, true);
             if (input !== this.lastInputState) {
                 this.properties['pointVal'] = input;
-                node_utils_1.default.persistProperties(this, false, true);
+                this.persistProperties(false, true);
                 this.lastInputState = input;
             }
             else if (typeof this.lastInputState === 'undefined') {
@@ -319,8 +318,8 @@ class ModbusPointNode extends container_node_1.ContainerNode {
             const mathValue = this.settings['mathValue'].value;
             let out;
             if (mathFunc !== 0) {
-                if (pointFunc_1.default.validateNumbers(payload.payload, mathValue)) {
-                    out = pointFunc_1.default.mathSwitch(mathFunc, payload.payload, mathValue);
+                if (MathUtils_1.default.validateNumbers(payload.payload, mathValue)) {
+                    out = MathUtils_1.default.mathSwitch(mathFunc, payload.payload, mathValue);
                     this.setOutputData(this.outVal, out);
                 }
             }

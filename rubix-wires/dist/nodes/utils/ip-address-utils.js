@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const ip = require('ip');
 const network = require('network');
 const child_process_1 = require("child_process");
+const cp = require('child_process');
 class IpAddressUtils {
     static getActiveNetworks() {
         return new Promise(resolve => {
@@ -38,6 +39,47 @@ class IpAddressUtils {
         }
         else
             return false;
+    }
+    static bbbGetInterfaceDetails() {
+        return new Promise((resolve, reject) => {
+            cp.execSync('connmanctl services', (err, stdout, stderr) => {
+                if (err) {
+                    reject({ err, stderr });
+                }
+                else {
+                    resolve(stdout
+                        .toString()
+                        .replace(/\s/g, '')
+                        .substring(8));
+                }
+            });
+        });
+    }
+    static bbbSetIPDHCP(iface) {
+        return new Promise((resolve, reject) => {
+            const setIpDHCP = `sudo connmanctl config ${iface} --ipv4 dhcp`;
+            cp.execSync(setIpDHCP, (err, stdout, stderr) => {
+                if (err) {
+                    reject({ err, stderr });
+                }
+                else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+    static bbbSetIPFixed(iface, ipAddress, subnetMask, gateway) {
+        return new Promise((resolve, reject) => {
+            const setIP = `sudo connmanctl config ${iface} --ipv4 manual ${ipAddress} ${subnetMask} ${gateway} --nameservers 8.8.8.8 8.8.4.4`;
+            cp.execSync(setIP, (err, stdout, stderr) => {
+                if (err) {
+                    reject({ err, stderr });
+                }
+                else {
+                    resolve(true);
+                }
+            });
+        });
     }
 }
 exports.default = IpAddressUtils;

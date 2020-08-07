@@ -23,6 +23,7 @@ const copyProductionFiles = () => {
   shell.cp('-Rf', './package.json', workingFolder);
   shell.cp('-Rf', './tsconfig.json', workingFolder);
   shell.cp('-Rf', './webpack.config.js', workingFolder);
+  shell.cp('-Rf', './script.bash', workingFolder);
 };
 
 const x86BuildDependencyUpdate = () => {

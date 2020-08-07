@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
-const node_utils_1 = require("../../utils/node-utils");
 class CounterNode extends node_1.Node {
     constructor() {
         super();
@@ -31,7 +30,7 @@ class CounterNode extends node_1.Node {
         if (this.properties['pointVal'] !== old) {
             this.setOutputData(0, this.properties['pointVal']);
             this.properties['pointVal'] = this.properties['pointVal'];
-            node_utils_1.default.persistProperties(this, false, true);
+            this.persistProperties(false, true);
         }
     }
 }

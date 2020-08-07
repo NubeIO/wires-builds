@@ -24,20 +24,32 @@ class AddressHelperString extends node_1.Node {
             groups: [{ topics_count: {} }],
         });
     }
+    init() {
+        this.changeOutputsAndSettings();
+    }
+    onCreated() {
+        this.renameInputsOutputs();
+    }
+    onAdded() {
+        this.topicsCount = this.settings['topics_count'].value;
+    }
     onAfterSettingsChange() {
-        let topics = this.settings['topics_count'].value;
-        topics = utils_1.default.clamp(topics, 1, 100);
-        this.settings['topics_count'].value = topics;
-        if (this.topicsCount != topics)
-            this.changeTopicsCount(topics);
+        this.changeOutputsAndSettings();
         this.renameInputsOutputs();
         if (this.container.db)
             this.container.db.updateNode(this.id, this.container.id, {
                 $set: { outputs: this.outputs, settings: this.settings },
             });
     }
+    changeOutputsAndSettings() {
+        let topics = this.settings['topics_count'].value;
+        topics = utils_1.default.clamp(topics, 1, 100);
+        this.settings['topics_count'].value = topics;
+        if (this.topicsCount != topics)
+            this.changeTopicsCount(topics);
+    }
     changeTopicsCount(target_count) {
-        let diff = target_count - this.topicsCount;
+        const diff = target_count - this.topicsCount;
         if (diff == 0)
             return;
         this.changeOutputsCount(target_count + 1, node_1.Type.STRING);
@@ -64,9 +76,9 @@ class AddressHelperString extends node_1.Node {
         this.topicsCount = target_count;
     }
     renameInputsOutputs() {
-        let input = this.settings['attribute_1'].value;
+        const input = this.settings['attribute_1'].value;
         for (let i = 1; i <= this.topicsCount; i++) {
-            let topic = this.settings['topic' + i].value;
+            const topic = this.settings['topic' + i].value;
             this.outputs[i].name = '' + i + ' | ' + topic;
             this.setOutputData(i, input + topic);
         }

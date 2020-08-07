@@ -3,8 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
 const utils_1 = require("../../utils");
-const node_utils_1 = require("../../utils/node-utils");
-let moment = require('moment-timezone');
+const time_utils_1 = require("../../utils/time-utils");
+const moment = require('moment-timezone');
 class AnyDataStoreNode extends node_1.Node {
     constructor() {
         super();
@@ -70,7 +70,6 @@ class AnyDataStoreNode extends node_1.Node {
                 },
             },
         });
-        this.properties['historyLog'];
     }
     onCreated() {
         this.properties['historyLog'] = [];
@@ -167,7 +166,7 @@ class AnyDataStoreNode extends node_1.Node {
             return;
         const storageLimit = utils_1.default.clamp(this.settings['storage-limit'].value, 0, 50);
         const minuteRound = utils_1.default.clamp(this.settings['minuteRoundValue'].value, 0, 60);
-        const now = minuteRound ? this.nearestFutureMinutes(minuteRound, moment()) : moment();
+        const now = minuteRound ? time_utils_1.default.nearestFutureMinutes(minuteRound, moment()) : moment();
         let msg = {
             payload: this.getInputData(0),
             timestamp: now._d,
@@ -176,7 +175,7 @@ class AnyDataStoreNode extends node_1.Node {
         while (this.properties['historyLog'].length > storageLimit) {
             this.properties['historyLog'].shift();
         }
-        node_utils_1.default.persistProperties(this, true, true);
+        this.persistProperties(true, true);
         const newObj = this.formatOutputs() || [];
         this.setOutputData(0, newObj);
         this.setOutputData(1, this.properties['historyLog'].length);

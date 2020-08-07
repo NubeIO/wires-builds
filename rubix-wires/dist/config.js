@@ -15,12 +15,30 @@ const config = {
     rubix: {
         branch: 'master',
         build: '',
-        hash: '43c3d1f',
-        version: '1.2.9',
+        hash: 'a8a6b81',
+        version: '1.3.0',
+    },
+    bsa: {
+        baseURL: '',
+        username: '',
+        password: '',
+        paths: {
+            measurement: {
+                path: '',
+                accept: '',
+            },
+            alarm: {
+                path: '',
+                accept: '',
+                contentType: '',
+            },
+            device: {
+                path: '',
+            },
+        },
     },
 };
-const footerPrefix = `-${config.rubix.hash}${config.rubix.build && `-${config.rubix.build}`}
-`;
+const footerPrefix = `-${config.rubix.hash}${config.rubix.build && `-${config.rubix.build}`}`;
 exports.footerInfo = `v${config.rubix.version}${footerPrefix}`;
 exports.default = config;
 //# sourceMappingURL=config.js.map

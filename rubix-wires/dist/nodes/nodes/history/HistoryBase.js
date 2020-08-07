@@ -40,6 +40,7 @@ class HistoryBase extends node_1.Node {
     }
     addHistoryConfiguration() {
         this.addInput('histTrigger', node_1.Type.BOOLEAN);
+        this.addInput('clearStoredHis', node_1.Type.BOOLEAN);
         this.addOutput('histError', node_1.Type.ANY);
         this.addOutput('storedHistCount', node_1.Type.NUMBER);
         this.addOutput('lastHistExport', node_1.Type.STRING);
@@ -100,6 +101,18 @@ class HistoryBase extends node_1.Node {
             },
             value: HistoryMode.COV,
         };
+        this.settings['dataType'] = {
+            description: 'Data type for storing',
+            type: node_1.SettingType.DROPDOWN,
+            config: {
+                items: [
+                    { value: node_1.Type.NUMBER, text: 'Number' },
+                    { value: node_1.Type.BOOLEAN, text: 'Boolean' },
+                    { value: node_1.Type.STRING, text: 'String' },
+                ],
+            },
+            value: node_1.Type.NUMBER,
+        };
         this.settings['threshold'] = {
             description: 'COV Threshold',
             value: 0,
@@ -115,13 +128,13 @@ class HistoryBase extends node_1.Node {
             type: node_1.SettingType.DROPDOWN,
             config: {
                 items: [
-                    { value: 'milliseconds', text: 'Milliseconds' },
-                    { value: 'seconds', text: 'Seconds' },
-                    { value: 'minutes', text: 'Minutes' },
-                    { value: 'hours', text: 'Hours' },
+                    { value: time_utils_1.TIME_TYPE.MILLISECONDS, text: 'Milliseconds' },
+                    { value: time_utils_1.TIME_TYPE.SECONDS, text: 'Seconds' },
+                    { value: time_utils_1.TIME_TYPE.MINUTES, text: 'Minutes' },
+                    { value: time_utils_1.TIME_TYPE.HOURS, text: 'Hours' },
                 ],
             },
-            value: 'minutes',
+            value: time_utils_1.TIME_TYPE.MINUTES,
         };
         this.settings['storage-limit'] = {
             description: 'Local Storage Limit (Max 50)',
@@ -171,6 +184,34 @@ class HistoryBase extends node_1.Node {
         };
         this.properties['obj'] = [];
     }
+    setup() {
+        this.addHistoryConfiguration();
+    }
+    init(properties) {
+        this.assignInputsOutputs();
+        this.historyFunctionsForAfterSettingsChange(properties['settings'], false);
+    }
+    onAdded() {
+        this.assignInputsOutputs();
+        this.resetOutputs();
+        this.doPeriodicHistoryFunctions();
+    }
+    onInputUpdated() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.getInputData(this.clearStoredHisInput)) {
+                this.properties['obj'] = [];
+                this.updateHistoryCountOutput();
+            }
+            yield this.doNonPeriodicHistoryFunctions();
+        });
+    }
+    onAfterSettingsChange() {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.historyFunctionsForAfterSettingsChange();
+            yield this.doNonPeriodicHistoryFunctions();
+            this.doPeriodicHistoryFunctions();
+        });
+    }
     onRemoved() {
         clearInterval(this.timeoutFunc);
     }
@@ -179,6 +220,8 @@ class HistoryBase extends node_1.Node {
             if (this.inputs.hasOwnProperty(input)) {
                 if (this.inputs[input].name == 'histTrigger')
                     this.histTriggerInput = Number(input);
+                if (this.inputs[input].name == 'clearStoredHis')
+                    this.clearStoredHisInput = Number(input);
             }
         }
         for (let output in this.outputs) {
@@ -193,8 +236,11 @@ class HistoryBase extends node_1.Node {
         }
     }
     addHistorySettingsConfig(valueInput = 0, takeValueFromInput = true) {
-        if (!this.settingConfigs.hasOwnProperty('groups') && !this.settingConfigs.hasOwnProperty('conditions')) {
-            this.setSettingsConfig({ groups: [], conditions: {} });
+        if (!this.settingConfigs.hasOwnProperty('groups') || !this.settingConfigs.hasOwnProperty('conditions')) {
+            this.setSettingsConfig({
+                groups: this.settingConfigs['groups'] || [],
+                conditions: this.settingConfigs['conditions'] || {},
+            });
         }
         this.settingConfigs.groups.push({ history_group: {} });
         this.settingConfigs.groups.push({ databaseType: {} });
@@ -288,6 +334,20 @@ class HistoryBase extends node_1.Node {
             decimals = utils_1.default.clamp(decimals, 0, 5);
             const points = [];
             this.properties['obj'].forEach(log => {
+                const dataType = this.settings['dataType'].value;
+                const loggedDataType = typeof log.payload;
+                if (dataType === node_1.Type.NUMBER) {
+                    log.payload = (isNaN(log.payload) ? 0 : Number(log.payload)).toFixed(decimals);
+                }
+                else if (dataType === node_1.Type.BOOLEAN) {
+                    if (loggedDataType === 'boolean')
+                        log.payload = Number(log.payload);
+                    else
+                        log.payload = log.payload === 1 || log.payload === 'true' ? 1 : 0;
+                }
+                else if (dataType === node_1.Type.STRING && loggedDataType !== 'string') {
+                    log.payload = JSON.stringify(log.payload);
+                }
                 if (typeof log.payload === 'number') {
                     log.payload = +log.payload.toFixed(decimals);
                 }
@@ -322,23 +382,23 @@ class HistoryBase extends node_1.Node {
             });
             let errorFlag = false;
             if (this.settings['databaseType'].value === DataBaseType.POSTGRES) {
-                let clientIDFromPlat;
-                let deviceIDFromPlat;
+                let clientIdFromPlat;
+                let deviceIdFromPlat;
                 try {
-                    clientIDFromPlat = yield system_utils_1.default.getClientID(this);
+                    clientIdFromPlat = yield system_utils_1.default.getClientID(this);
                 }
                 catch (e) {
-                    clientIDFromPlat = 'unknownDeviceID';
+                    clientIdFromPlat = 'unknownDeviceID';
                 }
                 try {
-                    deviceIDFromPlat = yield system_utils_1.default.getDeviceID(this);
+                    deviceIdFromPlat = yield system_utils_1.default.getDeviceID(this);
                 }
                 catch (e) {
-                    deviceIDFromPlat = 'unknownClientID';
+                    deviceIdFromPlat = 'unknownClientID';
                 }
                 const multiPointPost = points.map(point => ({
-                    deviceid: deviceIDFromPlat,
-                    clientid: clientIDFromPlat,
+                    deviceid: deviceIdFromPlat,
+                    clientid: clientIdFromPlat,
                     val: point.fields.val,
                     point: point.tags.point,
                     ts: moment(Number(point.timestamp) / 1000000).toISOString(),

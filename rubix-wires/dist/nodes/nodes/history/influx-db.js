@@ -13,7 +13,6 @@ const node_1 = require("../../node");
 const container_1 = require("../../container");
 const utils_1 = require("../../utils");
 const time_utils_1 = require("../../utils/time-utils");
-const node_utils_1 = require("../../utils/node-utils");
 let moment = require('moment-timezone');
 var Influx = require('influx');
 class InfluxDBNode extends node_1.Node {
@@ -209,7 +208,7 @@ class InfluxDBNode extends node_1.Node {
                 this.obj.shift();
             }
             this.properties['lastHistoryValue'] = input;
-            node_utils_1.default.persistProperties(this, false, true);
+            this.persistProperties(false, true);
             return this.obj.length;
         });
     }

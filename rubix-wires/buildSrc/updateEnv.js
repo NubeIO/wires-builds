@@ -16,20 +16,37 @@ const replaceRubixInfo = () => {
   shell.sed('-i', /\$RUBIX_BUILD/g, process.env.RUBIX_BUILD || '', 'src/config.ts');
 };
 
-const updateEnv = () => {
-  dotenv.config();
-  let dataDir = process.env.DATA_DIR || (process.env.NODE_ENV === 'production' ? '/data/rubix-wires' : './db');
+function replaceBSA() {
+  shell.sed('-i', /\$BSA_BASEURL/g, process.env.BSA_BASEURL || '', 'src/config.ts');
+  shell.sed('-i', /\$BSA_USERNAME/g, process.env.BSA_USERNAME || '', 'src/config.ts');
+  shell.sed('-i', /\$BSA_PASSWORD/g, process.env.BSA_PASSWORD || '', 'src/config.ts');
+  shell.sed('-i', /\$BSA_PATHS_MEASUREMENT_PATH/g, process.env.BSA_PATHS_MEASUREMENT_PATH || '', 'src/config.ts');
+  shell.sed('-i', /\$BSA_PATHS_MEASUREMENT_ACCEPT/g, process.env.BSA_PATHS_MEASUREMENT_ACCEPT || '', 'src/config.ts');
+  shell.sed('-i', /\$BSA_PATHS_ALARM_PATH/g, process.env.BSA_PATHS_ALARM_PATH || '', 'src/config.ts');
+  shell.sed('-i', /\$BSA_PATHS_ALARM_ACCEPT/g, process.env.BSA_PATHS_ALARM_ACCEPT || '', 'src/config.ts');
+  shell.sed('-i', /\$BSA_PATHS_ALARM_CONTENTTYPE/g, process.env.BSA_PATHS_ALARM_CONTENTTYPE || '', 'src/config.ts');
+  shell.sed('-i', /\$BSA_PATHS_DEVICE_PATH/g, process.env.BSA_PATHS_DEVICE_PATH || '', 'src/config.ts');
+}
+
+function replaceBackend() {
   let backendEnabled = /true|1/i.test(process.env.BACKEND_ENABLED || 'false');
-  shell.sed('-i', /\$SECRET_KEY/g, process.env.SECRET_KEY || '__SECRET_KEY__', 'src/config.ts');
-  shell.sed('-i', /'\$PORT'/g, process.env.PORT || 1313, 'src/config.ts');
-  shell.sed('-i', /\$DATA_DIR/g, dataDir, 'src/config.ts');
-  shell.sed('-i', /'\$LOOP_INTERVAL'/g, process.env.LOOP_INTERVAL || 100, 'src/config.ts');
   shell.sed('-i', /'\$BACKEND_ENABLED'/g, backendEnabled.toString(), 'src/config.ts');
   shell.sed('-i', /\$BACKEND_API/g, process.env.BACKEND_API || 'http://localhost:8080/api/', 'src/config.ts');
   shell.sed('-i', /'\$NODE_DISTANCE'/g, process.env.NODE_DISTANCE || 60, 'src/config.ts');
   shell.sed('-i', /'\$NODE_REFRESH_INTERVAL_SEC'/g, process.env.NODE_REFRESH_INTERVAL_SEC || 60, 'src/config.ts');
   shell.sed('-i', /'\$POINT_REFRESH_INTERVAL_SEC'/g, process.env.POINT_REFRESH_INTERVAL_SEC || 60, 'src/config.ts');
+}
+
+const updateEnv = () => {
+  dotenv.config();
+  let dataDir = process.env.DATA_DIR || (process.env.NODE_ENV === 'production' ? '/data/rubix-wires' : './db');
+  shell.sed('-i', /\$SECRET_KEY/g, process.env.SECRET_KEY || '__SECRET_KEY__', 'src/config.ts');
+  shell.sed('-i', /'\$PORT'/g, process.env.PORT || 1313, 'src/config.ts');
+  shell.sed('-i', /\$DATA_DIR/g, dataDir, 'src/config.ts');
+  shell.sed('-i', /'\$LOOP_INTERVAL'/g, process.env.LOOP_INTERVAL || 100, 'src/config.ts');
+  replaceBackend();
   replaceRubixInfo();
+  replaceBSA();
 };
 
 updateEnv();

@@ -17,66 +17,6 @@ class NodeUtils {
             $set: setProps,
         });
     }
-    static getDeviceID(self) {
-        return new Promise((resolve, reject) => {
-            try {
-                NodeUtils.findMainContainer(self).db.getNodeType('system/platform', (err, docs) => {
-                    if (!err) {
-                        let output = [];
-                        output.push(docs);
-                        if (output[0] && output[0][0] && output[0][0].properties) {
-                            resolve(output[0][0].properties['deviceID'].trim());
-                            return output[0][0].properties['deviceID'].trim();
-                        }
-                        else {
-                        }
-                        resolve(output);
-                        return output;
-                    }
-                    else {
-                        console.log(err);
-                        reject(err);
-                    }
-                });
-            }
-            catch (error) {
-                console.log(error);
-            }
-        });
-    }
-    static getClientID(self) {
-        return new Promise((resolve, reject) => {
-            try {
-                NodeUtils.findMainContainer(self).db.getNodeType('system/platform', (err, docs) => {
-                    if (!err) {
-                        let output = [];
-                        output.push(docs);
-                        if (output[0] && output[0][0] && output[0][0].settings) {
-                            resolve(output[0][0].settings['clientID'].value.trim());
-                            return output[0][0].settings['clientID'].value.trim();
-                        }
-                        else {
-                        }
-                        resolve(output);
-                        return output;
-                    }
-                    else {
-                        console.log(err);
-                        reject(err);
-                    }
-                });
-            }
-            catch (error) {
-                console.log(error);
-            }
-        });
-    }
-    static findMainContainer(self) {
-        if (self.hasOwnProperty('container'))
-            return NodeUtils.findMainContainer(self.container);
-        else
-            return self;
-    }
 }
 exports.default = NodeUtils;
 //# sourceMappingURL=node-utils.js.map

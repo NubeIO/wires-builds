@@ -5,7 +5,6 @@ const container_1 = require("../../../container");
 const utils_1 = require("../../../utils");
 const ip_address_utils_1 = require("../../../utils/ip-address-utils");
 const child_process_1 = require("child_process");
-const ip = require('ip');
 class UpdateIPEdge28 extends node_1.Node {
     constructor() {
         super();
@@ -31,7 +30,7 @@ class UpdateIPEdge28 extends node_1.Node {
             value: false,
         };
         this.settings['reboot'] = {
-            description: 'Reboot. Warning this will reboot the device',
+            description: 'Optional Reboot. Warning this will reboot the device',
             type: node_1.SettingType.BOOLEAN,
             value: false,
         };
@@ -140,26 +139,39 @@ class UpdateIPEdge28 extends node_1.Node {
             }, 10000);
         }
         if (checkIpSettingsEth0 && writeChanges) {
-            let interfacesArray = [];
             if (interfaceTypeEth0 == 0) {
                 this.title = 'Adapter' + +' ' + '(DHCP)';
-                let eth0 = {
-                    interface: this.interfaceEth0,
-                    dhcp: true,
-                };
-                interfacesArray.push(eth0);
+                ip_address_utils_1.default.bbbGetInterfaceDetails()
+                    .then(e => {
+                    this.msgOut(this.messageOutput, `'MSG: get interface ID' ${e}`);
+                    ip_address_utils_1.default.bbbSetIPDHCP(e)
+                        .then(e => {
+                        this.msgOut(this.messageOutput, `'MSG: set ip to DHCP' ${e}`);
+                    })
+                        .catch(err => {
+                        this.msgOut(this.messageOutput, `'ERROR: setting to DHCP' ${err}`);
+                    });
+                })
+                    .catch(err => {
+                    this.msgOut(this.messageOutput, `'ERROR: setting to DHCP' ${err}`);
+                });
             }
-            if (interfaceTypeEth0 == 1) {
+            else if (interfaceTypeEth0 == 1) {
                 this.title = 'Adapter' + ' ' + '(Static)';
-                let subnetMaskLength = ip.subnet(newIpEth0, netNetmaskEth0);
-                let eth0 = {
-                    interface: this.interfaceEth0,
-                    ip_address: newIpEth0,
-                    prefix: subnetMaskLength.subnetMaskLength,
-                    gateway: newGatewayEth0,
-                    nameserver: [newNameServerEth0],
-                };
-                interfacesArray.push(eth0);
+                ip_address_utils_1.default.bbbGetInterfaceDetails()
+                    .then(iface => {
+                    console.log(iface);
+                    ip_address_utils_1.default.bbbSetIPFixed(iface, newIpEth0, netNetmaskEth0, newGatewayEth0)
+                        .then(e => {
+                        this.msgOut(this.messageOutput, `'MSG: set ip to fixed IP' ${e}`);
+                    })
+                        .catch(err => {
+                        this.msgOut(this.messageOutput, `'ERROR: setting to fixed IP' ${err}`);
+                    });
+                })
+                    .catch(err => {
+                    this.msgOut(this.messageOutput, `'ERROR: setting to fixed IP' ${err}`);
+                });
             }
         }
         else

@@ -7,7 +7,7 @@ class PointValueCreator {
 }
 exports.PointValueCreator = PointValueCreator;
 PointValueCreator.init = (presentValue, priority, priorityArray) => {
-    if (priority < 1 || priority > 16) {
+    if (priority && (priority < 1 || priority > 16)) {
         throw new Error('Priority must be in range [1, 16]');
     }
     let pv = new DefaultPointValue();
@@ -16,9 +16,16 @@ PointValueCreator.init = (presentValue, priority, priorityArray) => {
     pv.priorityArray = PointValueCreator.normalizePriorityArray(priorityArray);
     return pv;
 };
+PointValueCreator.by = (priorityArray) => {
+    var _a;
+    let pa = PointValueCreator.normalizePriorityArray(priorityArray);
+    let highestValue = (_a = Object.entries(pa).find(pa => pa[1]), (_a !== null && _a !== void 0 ? _a : [16, null]));
+    return PointValueCreator.init(helper_1.convertToNumber(highestValue[1]), helper_1.convertToNumber(highestValue[0]), pa);
+};
 PointValueCreator.create = (presentValue, priority, priorityArray) => {
+    var _a;
     let pv = PointValueCreator.init(presentValue, priority, priorityArray);
-    let highestValue = Object.entries(pv.priorityArray).find(pa => pa[1]);
+    let highestValue = (_a = Object.entries(pv.priorityArray).find(pa => pa[1]), (_a !== null && _a !== void 0 ? _a : [16, null]));
     pv.priorityArray[pv.priority] = pv.presentValue;
     if (highestValue && helper_1.convertToNumber(highestValue[0]) === pv.priority && pv.presentValue === null) {
         highestValue = Object.entries(pv.priorityArray).find(pa => pa[1]);
@@ -30,7 +37,7 @@ PointValueCreator.create = (presentValue, priority, priorityArray) => {
     return pv;
 };
 PointValueCreator.createPriorityArray = () => {
-    return Array.from({ length: 16 }, (v, k) => k + 1).reduce((o, k) => ((o[k] = null), o), {});
+    return Array.from(helper_1.range(1, 16)).reduce((o, k) => ((o[k] = null), o), {});
 };
 PointValueCreator.normalizePriorityArray = (priorityArray) => {
     if (!priorityArray) {
@@ -64,10 +71,13 @@ var HistoryMode;
 })(HistoryMode = exports.HistoryMode || (exports.HistoryMode = {}));
 class DefaultPointValue {
     changedOfValue(prev) {
+        if (!prev) {
+            return this;
+        }
         if (this.presentValue !== prev.presentValue || this.priority !== prev.priority) {
             return this;
         }
-        let pv = {};
+        let pv = new DefaultPointValue();
         for (const priority in this.priorityArray) {
             if (this.priorityArray[priority] !== prev.priorityArray[priority]) {
                 pv.priority = helper_1.convertToNumber(priority);
@@ -77,6 +87,17 @@ class DefaultPointValue {
             }
         }
         return null;
+    }
+    merge(prev) {
+        if (!prev || !prev.priorityArray) {
+            return PointValueCreator.create(this.presentValue, this.priority, this.priorityArray);
+        }
+        let arr = {};
+        for (const priority in this.priorityArray) {
+            arr[priority] = helper_1.isNull(this.priorityArray[priority]) && helper_1.isNotNull(prev.priorityArray[priority])
+                ? prev.priorityArray[priority] : this.priorityArray[priority];
+        }
+        return PointValueCreator.create(this.presentValue, this.priority, arr);
     }
 }
 //# sourceMappingURL=point-model.js.map

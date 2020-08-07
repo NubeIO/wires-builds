@@ -72,7 +72,7 @@ class BACnetDevice extends container_node_1.ContainerNode {
         return __awaiter(this, void 0, void 0, function* () {
             _super.onAdded.call(this);
             this.name = `BACnet Device: cid_${this.container.id.toString()}_sid_${this.sub_container.id.toString()}_id${this.id.toString()}`;
-            yield utils_1.default.sleep(500);
+            yield utils_1.default.sleep(1000);
             this.setBacnetClient();
             this.setPayloadsToPointNodes();
             if (this.side !== container_1.Side.server)
@@ -95,8 +95,7 @@ class BACnetDevice extends container_node_1.ContainerNode {
     updateNetworkSettings() {
         if (this.side !== container_1.Side.server)
             return;
-        const getNetworkSettings = bacnet_utils_1.default.getNetworkSettings(this.getParentNode());
-        this.networkSettings = getNetworkSettings;
+        this.networkSettings = bacnet_utils_1.default.getNetworkSettings(this.getParentNode());
         this.networkNumber = this.networkSettings.networkNumber.value;
         this.settings['networkNumber'].value = this.networkNumber;
         this.broadcastSettingsToClients();
@@ -215,7 +214,7 @@ class BACnetDevice extends container_node_1.ContainerNode {
             }
         });
     }
-    readProperty(deviceAddress, obj, properties) {
+    readProperty(deviceAddress, obj) {
         return new Promise(resolve => {
             if (this.settings['deviceTypeMstp'].value) {
                 this.bacnetClient.readProperty({
@@ -240,7 +239,7 @@ class BACnetDevice extends container_node_1.ContainerNode {
         });
     }
     readPresentValue(obj) {
-        return this.readProperty(this.settings['ip'].value, obj, [{ id: Bacnet.enum.PropertyIdentifier.PRESENT_VALUE }]);
+        return this.readProperty(this.settings['ip'].value, obj);
     }
     findValueById(properties, id) {
         const property = properties.find(function (element) {

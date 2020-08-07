@@ -9,6 +9,15 @@ class UuidUtils {
             return (c == 'x' ? r : (r & 0x3) | 0x8).toString(16);
         });
     }
+    static create8DigId() {
+        return (Math.random()
+            .toString(36)
+            .substr(2, 4) +
+            '_' +
+            Math.random()
+                .toString(36)
+                .substr(2, 4));
+    }
 }
 exports.default = UuidUtils;
 //# sourceMappingURL=uuid-utils.js.map

@@ -7,11 +7,11 @@ const edge_constant_1 = require("./edge-constant");
 const edge_utils_1 = require("./edge-utils");
 const edge_gpio_utils_1 = require("./edge-gpio-utils");
 const edge_10k_sensor_calc_1 = require("./edge-10k-sensor-calc");
-const pointFunc_1 = require("../../../utils/points/pointFunc");
 const BACnet_enums_units_1 = require("../../../utils/points/BACnet-enums-units");
 const history_config_1 = require("../../../utils/points/history-config");
 const utils_1 = require("../../../utils");
 const constants_1 = require("../../../constants");
+const MathUtils_1 = require("../../../utils/MathUtils");
 class Edge28InputPointNode extends container_node_1.ContainerNode {
     constructor(container) {
         super(container);
@@ -219,12 +219,12 @@ class Edge28InputPointNode extends container_node_1.ContainerNode {
             type: node_1.SettingType.DROPDOWN,
             config: {
                 items: [
-                    { value: 0, text: 'na' },
-                    { value: 1, text: 'add' },
-                    { value: 2, text: 'subtract' },
-                    { value: 3, text: 'multiply' },
-                    { value: 4, text: 'divide' },
-                    { value: 10, text: 'invert' },
+                    { value: MathUtils_1.MATH_FUNC_TYPE.NA, text: 'na' },
+                    { value: MathUtils_1.MATH_FUNC_TYPE.ADD, text: 'add' },
+                    { value: MathUtils_1.MATH_FUNC_TYPE.SUBTRACT, text: 'subtract' },
+                    { value: MathUtils_1.MATH_FUNC_TYPE.MULTIPLY, text: 'multiply' },
+                    { value: MathUtils_1.MATH_FUNC_TYPE.DIVIDE, text: 'divide' },
+                    { value: MathUtils_1.MATH_FUNC_TYPE.NUMBER_INVERT, text: 'invert' },
                 ],
             },
             value: 0,
@@ -348,23 +348,23 @@ class Edge28InputPointNode extends container_node_1.ContainerNode {
         const decimals = this.settings['decimals'].value;
         const pointType = this.settings['pointType'].value;
         let out;
-        if (pointFunc_1.default.validateNumbers(val, mathValue)) {
+        if (MathUtils_1.default.validateNumbers(val, mathValue)) {
             if (mathFunc !== 0) {
                 if (![1, 2].includes(pointType)) {
-                    out = pointFunc_1.default.mathSwitch(mathFunc, val, mathValue);
-                    out = pointFunc_1.default.decimals(out, decimals);
+                    out = MathUtils_1.default.mathSwitch(mathFunc, val, mathValue);
+                    out = MathUtils_1.default.decimals(out, decimals);
                     out = this.pointOffset(out);
                     this.sendPointValue(out);
                 }
                 else {
-                    out = pointFunc_1.default.mathSwitch(mathFunc, val, mathValue);
+                    out = MathUtils_1.default.mathSwitch(mathFunc, val, mathValue);
                     out = this.pointOffset(out);
                     this.sendPointValue(out);
                 }
             }
             else {
                 if (![1, 2].includes(pointType)) {
-                    out = pointFunc_1.default.decimals(val, decimals);
+                    out = MathUtils_1.default.decimals(val, decimals);
                     out = this.pointOffset(out);
                 }
                 else {

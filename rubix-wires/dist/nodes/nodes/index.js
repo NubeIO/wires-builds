@@ -1,5 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+require("./bsa/bsa-cumulocity-device");
+require("./bsa/bsa-cumulocity-point");
+require("./bsa/bsa-cumulocity-alarm");
 require("./boolean/and");
 require("./boolean/or");
 require("./boolean/xor");
@@ -117,6 +120,7 @@ require("./point/string-constant");
 require("./point/json-constant");
 require("./point/bool-writable");
 require("./point/num-writable");
+require("./point/point-persistence");
 require("./protocols/email/email");
 require("./protocols/edge-28/edge-28-network");
 require("./protocols/edge-28/edge-28-input");

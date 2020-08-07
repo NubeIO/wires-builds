@@ -1,18 +1,26 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const moment = require("moment-timezone");
+var TIME_TYPE;
+(function (TIME_TYPE) {
+    TIME_TYPE["DAYS"] = "days";
+    TIME_TYPE["HOURS"] = "hours";
+    TIME_TYPE["MINUTES"] = "minutes";
+    TIME_TYPE["SECONDS"] = "seconds";
+    TIME_TYPE["MILLISECONDS"] = "milliseconds";
+})(TIME_TYPE = exports.TIME_TYPE || (exports.TIME_TYPE = {}));
 class TimeUtils {
     static timeConvert(timeOut, timeType) {
         switch (timeType) {
-            case 'days':
+            case TIME_TYPE.DAYS:
                 return timeOut * 24 * 60 * 60 * 1000;
-            case 'hours':
+            case TIME_TYPE.HOURS:
                 return timeOut * 60 * 60 * 1000;
-            case 'minutes':
+            case TIME_TYPE.MINUTES:
                 return timeOut * 60 * 1000;
-            case 'seconds':
+            case TIME_TYPE.SECONDS:
                 return timeOut * 1000;
-            case 'milliseconds':
+            case TIME_TYPE.MILLISECONDS:
                 return timeOut;
             default:
                 return -1;
@@ -24,10 +32,6 @@ class TimeUtils {
             .clone()
             .minute(roundedMinutes)
             .second(0);
-    }
-    static getTimezone() {
-        let timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        return timezone;
     }
     static timeDisplay(timeInMs, format = 5, timeType) {
         let duration = timeInMs;
