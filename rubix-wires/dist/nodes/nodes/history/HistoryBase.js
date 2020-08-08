@@ -337,7 +337,7 @@ class HistoryBase extends node_1.Node {
                 const dataType = this.settings['dataType'].value;
                 const loggedDataType = typeof log.payload;
                 if (dataType === node_1.Type.NUMBER) {
-                    log.payload = (isNaN(log.payload) ? 0 : Number(log.payload)).toFixed(decimals);
+                    log.payload = +log.payload.toFixed(decimals);
                 }
                 else if (dataType === node_1.Type.BOOLEAN) {
                     if (loggedDataType === 'boolean')
