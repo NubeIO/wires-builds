@@ -1,20 +1,37 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../../node");
-const container_node_1 = require("../../../container-node");
 const container_1 = require("../../../container");
 const edge_constant_1 = require("./edge-constant");
 const edge_utils_1 = require("./edge-utils");
 const edge_gpio_utils_1 = require("./edge-gpio-utils");
 const edge_10k_sensor_calc_1 = require("./edge-10k-sensor-calc");
 const BACnet_enums_units_1 = require("../../../utils/points/BACnet-enums-units");
-const history_config_1 = require("../../../utils/points/history-config");
 const utils_1 = require("../../../utils");
 const constants_1 = require("../../../constants");
 const MathUtils_1 = require("../../../utils/MathUtils");
-class Edge28InputPointNode extends container_node_1.ContainerNode {
-    constructor(container) {
-        super(container);
+const HistoryBase_1 = require("../../history/HistoryBase");
+var POINT_TYPE;
+(function (POINT_TYPE) {
+    POINT_TYPE[POINT_TYPE["DIGITAL"] = 1] = "DIGITAL";
+    POINT_TYPE[POINT_TYPE["UI_DIGITAL"] = 2] = "UI_DIGITAL";
+    POINT_TYPE[POINT_TYPE["_0_10DC"] = 3] = "_0_10DC";
+    POINT_TYPE[POINT_TYPE["_0_20MA"] = 4] = "_0_20MA";
+    POINT_TYPE[POINT_TYPE["_4_20MA"] = 5] = "_4_20MA";
+    POINT_TYPE[POINT_TYPE["_10K_THERMISTOR"] = 6] = "_10K_THERMISTOR";
+})(POINT_TYPE || (POINT_TYPE = {}));
+class Edge28InputPointNode extends HistoryBase_1.default {
+    constructor() {
+        super();
         this.title = 'Edge IO 28 Input';
         this.description =
             `## Description\n ` +
@@ -179,14 +196,14 @@ class Edge28InputPointNode extends container_node_1.ContainerNode {
             type: node_1.SettingType.DROPDOWN,
             config: {
                 items: [
-                    { value: 1, text: `Digital` },
-                    { value: 2, text: `UI-Digital` },
-                    { value: 3, text: `0-10dc` },
-                    { value: 4, text: `0-20ma` },
-                    { value: 5, text: `4-20ma` },
-                    { value: 6, text: `10k-thermistor` },
+                    { value: POINT_TYPE.DIGITAL, text: `Digital` },
+                    { value: POINT_TYPE.UI_DIGITAL, text: `UI-Digital` },
+                    { value: POINT_TYPE._0_10DC, text: `0-10dc` },
+                    { value: POINT_TYPE._0_20MA, text: `0-20ma` },
+                    { value: POINT_TYPE._4_20MA, text: `4-20ma` },
+                    { value: POINT_TYPE._10K_THERMISTOR, text: `10k-thermistor` },
                 ],
-                value: 1,
+                value: POINT_TYPE.DIGITAL,
             },
         };
         this.settings['value_group'] = {
@@ -227,7 +244,7 @@ class Edge28InputPointNode extends container_node_1.ContainerNode {
                     { value: MathUtils_1.MATH_FUNC_TYPE.NUMBER_INVERT, text: 'invert' },
                 ],
             },
-            value: 0,
+            value: MathUtils_1.MATH_FUNC_TYPE.NA,
         };
         this.settings['mathValue'] = {
             description: 'Enter a value',
@@ -250,7 +267,7 @@ class Edge28InputPointNode extends container_node_1.ContainerNode {
             value: BACnet_enums_units_1.default.COMMON_METRIC.NO_UNITS,
             type: node_1.SettingType.DROPDOWN,
         };
-        history_config_1.default.addHistorySettings(this);
+        const isDigitalType = [POINT_TYPE.DIGITAL, POINT_TYPE.UI_DIGITAL];
         this.setSettingsConfig({
             groups: [
                 { pointEnable: {}, pointDebug: {} },
@@ -263,61 +280,52 @@ class Edge28InputPointNode extends container_node_1.ContainerNode {
             conditions: {
                 decimals: setting => {
                     const val = setting['pointType'].value;
-                    return ![1, 2].includes(val);
+                    return !isDigitalType.includes(val);
                 },
                 offset: setting => {
                     const val = setting['pointType'].value;
-                    return ![1, 2].includes(val);
+                    return !isDigitalType.includes(val);
                 },
                 lowScale: setting => {
                     const val = setting['pointType'].value;
-                    return ![1, 2].includes(val);
+                    return !isDigitalType.includes(val);
                 },
                 highScale: setting => {
                     const val = setting['pointType'].value;
-                    return ![1, 2].includes(val);
+                    return !isDigitalType.includes(val);
                 },
                 mathValue: setting => {
                     const val = setting['mathFunc'].value;
-                    return ![10, 0].includes(val);
+                    return ![MathUtils_1.MATH_FUNC_TYPE.NUMBER_INVERT, MathUtils_1.MATH_FUNC_TYPE.NA].includes(val);
                 },
             },
         });
-        history_config_1.default.addHistorySettingsConfig(this, 0, false);
-    }
-    onCreated() {
-        super.onCreated();
-        history_config_1.default.historyOnCreated(this);
+        this.addHistorySettingsConfig(0, false);
     }
     onAdded() {
         super.onAdded();
         if (this.side !== container_1.Side.server)
             return;
-        try {
-            edge_utils_1.default.addPoint(this.getParentNode(), this);
-        }
-        catch (error) { }
-        history_config_1.default.historyFunctionsForAfterSettingsChange(this, this.settings['pointName'].value || this.settings['pointNumber'].value);
+        edge_utils_1.default.addPoint(this.getParentNode(), this);
     }
-    onAfterSettingsChange(oldSettings) {
-        super.onAfterSettingsChange(oldSettings);
-        history_config_1.default.historyFunctionsForAfterSettingsChange(this, this.settings['pointName'].value || this.settings['pointNumber'].value);
-        if (this.side !== container_1.Side.server)
-            return;
-        this.nodeColour();
-        const unitsType = this.settings['unitsType'].value;
-        this.settings['units'].config = {
-            items: BACnet_enums_units_1.default.unitType(unitsType),
-        };
-        this.broadcastSettingsToClients();
-        setTimeout(() => {
-            this.settings['pointDebug'].value = false;
-        }, 120 * 1000);
-    }
-    onInputUpdated() {
-        if (this.side !== container_1.Side.server)
-            return;
-        history_config_1.default.doHistoryFunctions(this);
+    onAfterSettingsChange() {
+        const _super = Object.create(null, {
+            onAfterSettingsChange: { get: () => super.onAfterSettingsChange }
+        });
+        return __awaiter(this, void 0, void 0, function* () {
+            yield _super.onAfterSettingsChange.call(this);
+            if (this.side !== container_1.Side.server)
+                return;
+            this.nodeColour();
+            const unitsType = this.settings['unitsType'].value;
+            this.settings['units'].config = {
+                items: BACnet_enums_units_1.default.unitType(unitsType),
+            };
+            this.broadcastSettingsToClients();
+            setTimeout(() => {
+                this.settings['pointDebug'].value = false;
+            }, 120 * 1000);
+        });
     }
     onRemoved() {
         super.onRemoved();
@@ -337,7 +345,6 @@ class Edge28InputPointNode extends container_node_1.ContainerNode {
         }
         else
             this.setOutputData(0, val, true);
-        history_config_1.default.doHistoryFunctions(this);
     }
     pointOffset(val) {
         return parseFloat(val) + parseFloat(this.settings['offset'].value);
@@ -347,10 +354,11 @@ class Edge28InputPointNode extends container_node_1.ContainerNode {
         const mathValue = this.settings['mathValue'].value;
         const decimals = this.settings['decimals'].value;
         const pointType = this.settings['pointType'].value;
+        const isDigitalType = [POINT_TYPE.DIGITAL, POINT_TYPE.UI_DIGITAL];
         let out;
         if (MathUtils_1.default.validateNumbers(val, mathValue)) {
-            if (mathFunc !== 0) {
-                if (![1, 2].includes(pointType)) {
+            if (mathFunc !== MathUtils_1.MATH_FUNC_TYPE.NA) {
+                if (!isDigitalType.includes(pointType)) {
                     out = MathUtils_1.default.mathSwitch(mathFunc, val, mathValue);
                     out = MathUtils_1.default.decimals(out, decimals);
                     out = this.pointOffset(out);
@@ -363,7 +371,7 @@ class Edge28InputPointNode extends container_node_1.ContainerNode {
                 }
             }
             else {
-                if (![1, 2].includes(pointType)) {
+                if (!isDigitalType.includes(pointType)) {
                     out = MathUtils_1.default.decimals(val, decimals);
                     out = this.pointOffset(out);
                 }
@@ -378,25 +386,25 @@ class Edge28InputPointNode extends container_node_1.ContainerNode {
         const lowScale = this.settings['lowScale'].value;
         const highScale = this.settings['highScale'].value;
         switch (type) {
-            case 1:
+            case POINT_TYPE.DIGITAL:
                 this.pointCalcs(edge_gpio_utils_1.default.diInvert(val));
                 break;
-            case 2:
+            case POINT_TYPE.UI_DIGITAL:
                 this.pointCalcs(edge_gpio_utils_1.default.uiAsDI(val));
                 break;
-            case 3:
+            case POINT_TYPE._0_10DC:
                 const limitValDc = utils_1.default.clamp(val, 0, highScale);
                 this.pointCalcs(edge_gpio_utils_1.default.scaleFromGPIOValue(limitValDc, lowScale, highScale));
                 break;
-            case 4:
+            case POINT_TYPE._0_20MA:
                 const limitValMaZero = utils_1.default.clamp(val, 0, highScale);
                 this.pointCalcs(edge_gpio_utils_1.default.scaleFromGPIOValue(limitValMaZero, lowScale, highScale));
                 break;
-            case 5:
+            case POINT_TYPE._4_20MA:
                 const limitValMaFour = edge_gpio_utils_1.default.scaleUI420ma(val, min_range, max_range);
                 this.pointCalcs(edge_gpio_utils_1.default.scale420maToRange(limitValMaFour, lowScale, highScale));
                 break;
-            case 6:
+            case POINT_TYPE._10K_THERMISTOR:
                 this.pointCalcs(edge_10k_sensor_calc_1.default.calc10kThermistor(val));
                 break;
         }
@@ -411,7 +419,7 @@ class Edge28InputPointNode extends container_node_1.ContainerNode {
                 let out;
                 let min_range;
                 let max_range;
-                if (pointType === 1) {
+                if (pointType === POINT_TYPE.DIGITAL) {
                     if (!['DI1', 'DI2', 'DI3', 'DI4', 'DI5', 'DI6', 'DI7'].includes(pointNumber))
                         return;
                     try {
@@ -421,10 +429,10 @@ class Edge28InputPointNode extends container_node_1.ContainerNode {
                         this.uiType(pointType, out, payload);
                     }
                     catch (err) {
-                        console.log(err);
+                        this.debugErr(err);
                     }
                 }
-                else if (pointType >= 2) {
+                else {
                     if (!['UI1', 'UI2', 'UI3', 'UI4', 'UI5', 'UI6', 'UI7'].includes(pointNumber))
                         return;
                     try {
@@ -436,7 +444,7 @@ class Edge28InputPointNode extends container_node_1.ContainerNode {
                         this.uiType(pointType, out, min_range, max_range);
                     }
                     catch (err) {
-                        console.log(err);
+                        this.debugErr(err);
                     }
                 }
                 break;

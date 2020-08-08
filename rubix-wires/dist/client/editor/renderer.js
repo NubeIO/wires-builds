@@ -2360,7 +2360,7 @@ class Renderer extends events_1.EventEmitter {
             const nodeTypesInCategory = this.filterRequiredNodesOnCategory(category)
                 .filter(child => child.show_in_menu)
                 .filter(child => {
-                return (child.title.toLowerCase().includes(this.searchText.toLowerCase()) ||
+                return (child.node_name.toLowerCase().includes(this.searchText.toLowerCase()) ||
                     category.toLowerCase().includes(this.searchText.toLowerCase()));
             })
                 .map(child => {

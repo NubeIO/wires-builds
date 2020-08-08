@@ -10,17 +10,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../../node");
-const container_node_1 = require("../../../container-node");
 const container_1 = require("../../../container");
-const utils_1 = require("../../../utils");
-const axios_1 = require("axios");
 const edge_utils_1 = require("./edge-utils");
 const edge_gpio_utils_1 = require("./edge-gpio-utils");
 const BACnet_enums_units_1 = require("../../../utils/points/BACnet-enums-units");
 const edge_constant_1 = require("./edge-constant");
-const history_config_1 = require("../../../utils/points/history-config");
 const constants_1 = require("../../../constants");
-class Edge28OutputPointNode extends container_node_1.ContainerNode {
+const HistoryBase_1 = require("../../history/HistoryBase");
+var OUTPUT_POINT_TYPE;
+(function (OUTPUT_POINT_TYPE) {
+    OUTPUT_POINT_TYPE[OUTPUT_POINT_TYPE["DO"] = 1] = "DO";
+    OUTPUT_POINT_TYPE[OUTPUT_POINT_TYPE["UO_AS_DIGITAL"] = 2] = "UO_AS_DIGITAL";
+    OUTPUT_POINT_TYPE[OUTPUT_POINT_TYPE["UO_AS_0_10DC"] = 3] = "UO_AS_0_10DC";
+})(OUTPUT_POINT_TYPE || (OUTPUT_POINT_TYPE = {}));
+class Edge28OutputPointNode extends HistoryBase_1.default {
     constructor(container) {
         super(container);
         this.uuid = null;
@@ -112,13 +115,13 @@ class Edge28OutputPointNode extends container_node_1.ContainerNode {
         };
         this.settings['pointType'] = {
             description: 'Point Type',
-            value: 1,
+            value: OUTPUT_POINT_TYPE.DO,
             type: node_1.SettingType.DROPDOWN,
             config: {
                 items: [
-                    { value: 1, text: `DO` },
-                    { value: 2, text: `UO As Digital` },
-                    { value: 3, text: `UO As 0-10dc` },
+                    { value: OUTPUT_POINT_TYPE.DO, text: `DO` },
+                    { value: OUTPUT_POINT_TYPE.UO_AS_DIGITAL, text: `UO As Digital` },
+                    { value: OUTPUT_POINT_TYPE.UO_AS_0_10DC, text: `UO As 0-10dc` },
                 ],
             },
         };
@@ -161,7 +164,6 @@ class Edge28OutputPointNode extends container_node_1.ContainerNode {
             value: BACnet_enums_units_1.default.COMMON_METRIC.NO_UNITS,
             type: node_1.SettingType.DROPDOWN,
         };
-        history_config_1.default.addHistorySettings(this);
         this.setSettingsConfig({
             groups: [
                 { pointNumber: {}, pointType: {} },
@@ -175,18 +177,7 @@ class Edge28OutputPointNode extends container_node_1.ContainerNode {
                 },
             },
         });
-        history_config_1.default.addHistorySettingsConfig(this);
-    }
-    writePointValue(host, port, apiVer, pointType, pointId, val, priority) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const url = `${utils_1.default.buildUrl(host, port)}/api/${apiVer}/write/${pointType}/${pointId}/${val}/${priority}`;
-            const pointValue = yield axios_1.default.get(url);
-            return pointValue.data;
-        });
-    }
-    onCreated() {
-        super.onCreated();
-        history_config_1.default.historyOnCreated(this);
+        this.addHistorySettingsConfig();
     }
     onAdded() {
         super.onAdded();
@@ -194,35 +185,62 @@ class Edge28OutputPointNode extends container_node_1.ContainerNode {
             return;
         this.EXECUTE_INTERVAL = 60000;
         this.lastSendTime = new Date().valueOf();
-        this.onInputUpdated();
-        try {
-            edge_utils_1.default.addPoint(this.getParentNode(), this);
-        }
-        catch (error) { }
+        this.inputChange();
+        edge_utils_1.default.addPoint(this.getParentNode(), this);
     }
     onExecute() {
-        if (this.side !== container_1.Side.server)
-            return;
-        if (new Date().valueOf() - 1000 > this.lastSendTime)
-            this.onInputUpdated();
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.side !== container_1.Side.server)
+                return;
+            if (new Date().valueOf() - 1000 > this.lastSendTime)
+                yield this.onInputUpdated();
+        });
     }
     pointType(type) {
         switch (type) {
-            case 1:
+            case OUTPUT_POINT_TYPE.DO:
                 return 'do';
-            case 2:
+            case OUTPUT_POINT_TYPE.UO_AS_DIGITAL:
                 return 'uo';
-            case 3:
+            case OUTPUT_POINT_TYPE.UO_AS_0_10DC:
                 return 'uo';
             default:
                 this.debugWarn('Unknown type of object');
         }
     }
     onInputUpdated() {
+        const _super = Object.create(null, {
+            onInputUpdated: { get: () => super.onInputUpdated }
+        });
+        return __awaiter(this, void 0, void 0, function* () {
+            yield _super.onInputUpdated.call(this);
+            this.inputChange();
+        });
+    }
+    onRemoved() {
+        super.onRemoved();
+        edge_utils_1.default.removePoint(this.getParentNode(), this);
+    }
+    onAfterSettingsChange() {
+        const _super = Object.create(null, {
+            onAfterSettingsChange: { get: () => super.onAfterSettingsChange }
+        });
+        return __awaiter(this, void 0, void 0, function* () {
+            yield _super.onAfterSettingsChange.call(this);
+            const unitsType = this.settings['unitsType'].value;
+            this.settings['units'].config = {
+                items: BACnet_enums_units_1.default.unitType(unitsType),
+            };
+            this.broadcastSettingsToClients();
+            this.inputChange();
+            if (this.side !== container_1.Side.server)
+                return;
+        });
+    }
+    inputChange() {
         if (this.side !== container_1.Side.server)
             return;
         const inputVal = this.getInputData(this.inInput);
-        history_config_1.default.doHistoryFunctions(this);
         this.apiCall(inputVal);
     }
     apiCall(inputVal) {
@@ -230,13 +248,12 @@ class Edge28OutputPointNode extends container_node_1.ContainerNode {
             return;
         if (this.settings['pointEnable'].value === false)
             return;
-        const pointType = this.pointType(this.settings['pointType'].value);
         const pointNumber = this.settings['pointNumber'].value;
         let outVal = null;
         const nodeVal = inputVal;
         if (inputVal === undefined || inputVal === null)
             return;
-        if (this.settings['pointType'].value === 1) {
+        if (this.settings['pointType'].value === OUTPUT_POINT_TYPE.DO) {
             if (typeof inputVal === 'boolean') {
                 outVal = inputVal ? 1 : 0;
             }
@@ -257,7 +274,7 @@ class Edge28OutputPointNode extends container_node_1.ContainerNode {
             else
                 this.debugInfo(`ERROR: input value must be a int 1 or 0 or a bool`);
         }
-        if (this.settings['pointType'].value === 2) {
+        else if (this.settings['pointType'].value === OUTPUT_POINT_TYPE.UO_AS_DIGITAL) {
             if (typeof inputVal === 'boolean') {
                 if (inputVal) {
                     outVal = 0;
@@ -282,7 +299,7 @@ class Edge28OutputPointNode extends container_node_1.ContainerNode {
             else
                 this.debugInfo(`ERROR: input value must be a int 1 or 0 or a bool`);
         }
-        if (this.settings['pointType'].value === 3) {
+        else if (this.settings['pointType'].value === OUTPUT_POINT_TYPE.UO_AS_0_10DC) {
             if (typeof inputVal === 'number') {
                 if (inputVal >= 100)
                     outVal = edge_gpio_utils_1.default.scaleToGPIOValue(100, 0, 100);
@@ -295,28 +312,13 @@ class Edge28OutputPointNode extends container_node_1.ContainerNode {
                 this.debugInfo(`ERROR: input value must be a float`);
             }
         }
-        this.writePointValue(edge_constant_1.edgeIp, edge_constant_1.edgePort, edge_constant_1.edgeApiVer, pointType, pointNumber, outVal, 16)
+        const pointType = this.pointType(this.settings['pointType'].value);
+        edge_utils_1.default.writePointValue(edge_constant_1.edgeIp, edge_constant_1.edgePort, edge_constant_1.edgeApiVer, pointType, pointNumber, outVal, 16)
             .then(e => {
             this.setOutputData(0, nodeVal, true);
             this.lastSendTime = new Date().valueOf();
         })
             .catch(err => this.debugInfo(`ERROR: getting edge point type: ${pointType} ${err}`));
-    }
-    onRemoved() {
-        super.onRemoved();
-        edge_utils_1.default.removePoint(this.getParentNode(), this);
-    }
-    onAfterSettingsChange(oldSettings) {
-        super.onAfterSettingsChange(oldSettings);
-        history_config_1.default.historyFunctionsForAfterSettingsChange(this, this.settings['pointName'].value || this.settings['pointNumber'].value);
-        const unitsType = this.settings['unitsType'].value;
-        this.settings['units'].config = {
-            items: BACnet_enums_units_1.default.unitType(unitsType),
-        };
-        this.broadcastSettingsToClients();
-        this.onInputUpdated();
-        if (this.side !== container_1.Side.server)
-            return;
     }
 }
 container_1.Container.registerNodeType(constants_1.EDGE_28_OUTPUT, Edge28OutputPointNode, constants_1.EDGE_28_NETWORK);

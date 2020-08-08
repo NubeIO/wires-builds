@@ -34,6 +34,11 @@ class CopyPasteExtension {
     }
     onPasteNodes() {
         const pos = this.getCurrentMousePosition();
+        if (!navigator.clipboard) {
+            this.editor.displayMessage("Insecure origin. Can't read from clipboard.");
+            this.editor.popUpImport(pos);
+            return;
+        }
         navigator.clipboard
             .readText()
             .then(text => {

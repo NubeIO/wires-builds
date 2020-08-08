@@ -175,12 +175,6 @@ class Edge28ApiNode extends container_node_1.ContainerNode {
             case edge_constant_1.REMOVE_POINT:
                 this.pointNodes = this.pointNodes.filter(pointNode => pointNode.id !== payload.id);
                 break;
-            case edge_constant_1.GET_POINTS:
-                return 'GET_POINTS';
-            case edge_constant_1.GET_PRESENT_VALUE:
-                return 'GET_PRESENT_VALUE';
-            case edge_constant_1.SEND_PAYLOAD_TO_CHILD:
-                return 'SEND_PAYLOAD_TO_CHILD';
             default:
                 this.debugWarn("Request action doesn't match");
         }
