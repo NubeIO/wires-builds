@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 require('source-map-support').install();
-console.log('----------------------------- Rubix Wires -----------------------------');
 const config = require('../config.json');
 const config_1 = require("./config");
 const server_1 = require("./server/server");
@@ -11,6 +10,7 @@ const dashboard_1 = require("./server/dashboard");
 const path = require("path");
 global.__rootdirname = path.resolve(__dirname);
 const log = require('logplease').create('app', { color: 2 });
+log.info('----------------------------- Rubix Wires -----------------------------');
 class App {
     constructor() {
         this.createServer();

@@ -6,7 +6,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const decorators_1 = require("../../../../decorators");
+const decorators_1 = require("../../../../utils/decorators");
 const container_1 = require("../../../container");
 const node_1 = require("../../../node");
 const registry_1 = require("../../../registry");
@@ -37,7 +37,10 @@ class MqttGenericNode extends node_mixin_1.AbleEnableNode(node_1.Node) {
         this.updateTitle();
     }
     onRemoved() {
-        this.doRemove({ identifier: this.settings['topic'].value, nodeId: registry_1.default.getId(this.cid, this.id) });
+        this.doRemove({
+            identifier: this.settings['topic'].value,
+            nodeId: registry_1.default.getId(this.cid, this.id),
+        });
     }
     reEvaluateSettingByInput() {
         var _a;
@@ -60,7 +63,6 @@ class MqttGenericNode extends node_mixin_1.AbleEnableNode(node_1.Node) {
             return this.doUpdate(current);
         }
     }
-    ;
     updateTitle() {
         this.title = `${this._title} (${this.settings['topic'].value})`;
     }
@@ -121,7 +123,7 @@ class MqttSubscriberNode extends MqttGenericNode {
         this.addOutput('out', node_1.Type.ANY);
     }
     onReceiveMessage(incomingMessage, nodeId) {
-        let self = (nodeId ? (registry_1.default._nodes[nodeId]) : this);
+        let self = (nodeId ? registry_1.default._nodes[nodeId] : this);
         if (self) {
             self.setOutputData(0, incomingMessage);
         }

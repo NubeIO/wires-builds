@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const point_model_1 = require("../../model/point-model");
+const point_model_1 = require("../../../../../backend/models/point-model");
 var PointKind;
 (function (PointKind) {
     PointKind["ANALOG_INPUT"] = "0";
@@ -14,7 +14,7 @@ var PointKind;
     PointKind["MULTI_STATE_VALUE"] = "19";
 })(PointKind = exports.PointKind || (exports.PointKind = {}));
 exports.PointKindOpts = Object.entries(PointKind).map(kv => {
-    return { 'text': kv[0].toLowerCase().replace('_', '-'), 'value': parseInt(kv[1]) };
+    return { text: kv[0].toLowerCase().replace('_', '-'), value: parseInt(kv[1]) };
 });
 class BacnetPointCreator {
     constructor() {
@@ -45,7 +45,10 @@ class DefaultBacnetPoint {
     }
     mightOnlyValueChanged(bp) {
         var _a, _b, _c, _d;
-        return this.enabled === ((_a = bp) === null || _a === void 0 ? void 0 : _a.enabled) && this.objectInstance === ((_b = bp) === null || _b === void 0 ? void 0 : _b.objectInstance) && this.objectType === ((_c = bp) === null || _c === void 0 ? void 0 : _c.objectType) && this.objectName === ((_d = bp) === null || _d === void 0 ? void 0 : _d.objectName);
+        return (this.enabled === ((_a = bp) === null || _a === void 0 ? void 0 : _a.enabled) &&
+            this.objectInstance === ((_b = bp) === null || _b === void 0 ? void 0 : _b.objectInstance) &&
+            this.objectType === ((_c = bp) === null || _c === void 0 ? void 0 : _c.objectType) &&
+            this.objectName === ((_d = bp) === null || _d === void 0 ? void 0 : _d.objectName));
     }
     equals(bp) {
         var _a;

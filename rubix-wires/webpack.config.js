@@ -39,6 +39,7 @@ module.exports = {
       'local-devices': 'empty-module',
       'twilio': 'empty-module',
       'dgram': 'empty-module',
+      'systeminformation': 'empty-module',
     },
   },
   module: {

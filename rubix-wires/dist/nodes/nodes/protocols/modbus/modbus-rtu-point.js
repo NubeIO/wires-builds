@@ -299,6 +299,7 @@ class ModbusPointNode extends container_node_1.ContainerNode {
         return {
             exist: this.dynamicSettingsExist,
             nullable: this.nullableInputs,
+            hidden: false,
         };
     }
     subscribe(payload) {

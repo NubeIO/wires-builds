@@ -6,7 +6,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const decorators_1 = require("../../../../decorators");
+const decorators_1 = require("../../../../utils/decorators");
 class AbstractContainerStore {
     register(payload, cb) {
         this.checkExistence(payload);
@@ -29,7 +29,6 @@ class AbstractContainerStore {
         }
         return afterRegister && afterRegister(payload);
     }
-    ;
     isDifferent(payload) {
         var _a, _b, _c;
         return ((_a = payload) === null || _a === void 0 ? void 0 : _a.identifier) !== ((_c = (_b = payload) === null || _b === void 0 ? void 0 : _b.prev) === null || _c === void 0 ? void 0 : _c.identifier);

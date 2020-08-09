@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const node_1 = require("../../node");
 const container_1 = require("../../container");
-const priority_config_1 = require("../../utils/points/priority-config");
+const node_1 = require("../../node");
 const history_config_1 = require("../../utils/points/history-config");
+const priority_config_1 = require("../../utils/points/priority-config");
 class GenericNode extends node_1.Node {
     constructor() {
         super();

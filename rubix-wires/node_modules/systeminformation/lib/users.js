@@ -26,8 +26,43 @@ const _openbsd = (_platform === 'openbsd');
 const _netbsd = (_platform === 'netbsd');
 const _sunos = (_platform === 'sunos');
 
+let _winDateFormat = {
+  dateFormat: '',
+  dateSeperator: '',
+  timeFormat: '',
+  timeSeperator: '',
+  amDesignator: '',
+  pmDesignator: ''
+};
+
 // --------------------------
 // array of users online = sessions
+
+function getWinCulture() {
+  return new Promise((resolve) => {
+    process.nextTick(() => {
+      if (!_winDateFormat.dateFormat) {
+        util.powerShell('(get-culture).DateTimeFormat')
+          .then(data => {
+            let lines = data.toString().split('\r\n');
+            _winDateFormat.dateFormat = util.getValue(lines, 'ShortDatePattern', ':');
+            _winDateFormat.dateSeperator = util.getValue(lines, 'DateSeparator', ':');
+            _winDateFormat.timeFormat = util.getValue(lines, 'ShortTimePattern', ':');
+            _winDateFormat.timeSeperator = util.getValue(lines, 'TimeSeparator', ':');
+            _winDateFormat.amDesignator = util.getValue(lines, 'AMDesignator', ':');
+            _winDateFormat.pmDesignator = util.getValue(lines, 'PMDesignator', ':');
+
+            resolve(_winDateFormat);
+          })
+          .catch(() => {
+            resolve(_winDateFormat);
+          });
+      } else {
+        resolve(_winDateFormat);
+      }
+    });
+  });
+}
 
 function parseUsersLinux(lines, phase) {
   let result = [];
@@ -141,7 +176,7 @@ function parseUsersDarwin(lines) {
   return result;
 }
 
-function parseUsersWin(lines) {
+function parseUsersWin(lines, culture) {
 
   let result = [];
   const header = lines[0];
@@ -164,7 +199,7 @@ function parseUsersWin(lines) {
       if (lines[i].trim()) {
         const user = lines[i].substring(headerDelimiter[0] + 1, headerDelimiter[1]).trim() || '';
         const tty = lines[i].substring(headerDelimiter[1] + 1, headerDelimiter[2] - 2).trim() || '';
-        const dateTime = util.parseDateTime(lines[i].substring(headerDelimiter[5] + 1, 2000).trim()) || '';
+        const dateTime = util.parseDateTime(lines[i].substring(headerDelimiter[5] + 1, 2000).trim(), culture) || '';
         result.push({
           user: user,
           tty: tty,
@@ -252,10 +287,16 @@ function users(callback) {
             if (stdout) {
               // lines / split
               let lines = stdout.toString().split('\r\n');
-              result = parseUsersWin(lines);
+              getWinCulture()
+                .then(culture => {
+                  result = parseUsersWin(lines, culture);
+                  if (callback) { callback(result); }
+                  resolve(result);
+                });
+            } else {
+              if (callback) { callback(result); }
+              resolve(result);
             }
-            if (callback) { callback(result); }
-            resolve(result);
           });
         } catch (e) {
           if (callback) { callback(result); }

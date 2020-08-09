@@ -6,7 +6,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const decorators_1 = require("../../../../decorators");
+const decorators_1 = require("../../../../utils/decorators");
 const container_1 = require("../../../container");
 const node_1 = require("../../../node");
 const registry_1 = require("../../../registry");
@@ -38,7 +38,10 @@ class BACnetServerPointNode extends point_node_1.PointNodeMixin(node_mixin_1.Abl
     }
     onRemoved() {
         let bp = this.initializePointBySettingObject();
-        bacnet_server_node_event_1.default.unregisterPoint(this.getParentNode(), { identifier: bp.identifier(), data: bp });
+        bacnet_server_node_event_1.default.unregisterPoint(this.getParentNode(), {
+            identifier: bp.identifier(),
+            data: bp,
+        });
     }
     handleOnUpdate(current, prev) {
         var _a, _b;

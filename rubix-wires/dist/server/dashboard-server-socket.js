@@ -111,6 +111,8 @@ class DashboardServerSocket {
                         cid: n.cid,
                         settings: node.settings,
                         name: n.name,
+                        oldSettings: oldSettings,
+                        oldName: oldName
                     };
                     app_1.default.server.editorSocket.io.emit('nodeSettings', args);
                     if (node.isDashboardNode) {

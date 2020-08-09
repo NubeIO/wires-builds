@@ -11,7 +11,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const node_utils_1 = require("../../utils/node-utils");
-let moment = require('moment-timezone');
 class PriorityConfig {
     static addPrioritySettings(self) {
         self.properties['priorityStartInput'] = self.getFreeInputId();
@@ -21,17 +20,20 @@ class PriorityConfig {
         self.addOutput('outputValue', node_1.Type.ANY);
         self.addOutput('outputPriority', node_1.Type.NUMBER);
         self.addOutput('outputJSON', node_1.Type.STRING);
-        for (var input in self.inputs) {
-            if (self.inputs[input].name == 'inputValue')
+        for (let input in self.inputs) {
+            if (self.inputs[input].name == 'inputValue') {
                 self.properties['valueInput'] = input;
+            }
             else if (self.inputs[input].name == 'inputPriority')
                 self.properties['priorityInput'] = input;
         }
-        for (var output in self.outputs) {
-            if (self.outputs[output].name == 'outputValue')
+        for (let output in self.outputs) {
+            if (self.outputs[output].name == 'outputValue') {
                 self.properties['valueOutput'] = output;
-            else if (self.outputs[output].name == 'outputPriority')
+            }
+            else if (self.outputs[output].name == 'outputPriority') {
                 self.properties['priorityOutput'] = output;
+            }
             else if (self.outputs[output].name == 'outputJSON')
                 self.properties['jsonOutput'] = output;
         }
@@ -150,8 +152,9 @@ class PriorityConfig {
         };
     }
     static addPrioritySettingsConfig(self) {
-        if (!self.settingConfigs.hasOwnProperty('groups') && !self.settingConfigs.hasOwnProperty('conditions'))
+        if (!self.settingConfigs.hasOwnProperty('groups') && !self.settingConfigs.hasOwnProperty('conditions')) {
             self.setSettingsConfig({ groups: [], conditions: {} });
+        }
         self.settingConfigs.groups.push({ input_group: {} });
         self.settingConfigs.conditions['priorityLevel'] = setting => {
             return setting['inputMethod'].value == 0;
@@ -250,7 +253,7 @@ class PriorityConfig {
                     break;
                 case 2:
                     input = self.getInputData(self.properties['priorityStartInput']);
-                    if (typeof input == 'string' && input != undefined) {
+                    if (typeof input === 'string') {
                         try {
                             self.properties['priorityArray'] = JSON.parse(input);
                         }
@@ -351,8 +354,9 @@ class PriorityConfig {
                 else if (!settingsArray[j]) {
                     for (var x = 0; x <= j; x++) {
                         const inputArrayatX = inputsArray[x];
-                        if (inputArrayatX == -1 || inputArrayatX > j + 1)
+                        if (inputArrayatX == -1 || inputArrayatX > j + 1) {
                             break;
+                        }
                         else if (inputsArray[x] == j + 1) {
                             self.removeInputAtPosition(startPosition + x);
                             inputsArray.splice(x, 1);

@@ -135,6 +135,7 @@ class EditorClientSocket {
             }
         });
         socket.on('nodeSettings', n => {
+            var _a, _b;
             let container = container_1.Container.containers[n.cid];
             if (!container) {
                 log.error(`Can't set node settings. Container id [${n.cid}] not found.`);
@@ -145,8 +146,8 @@ class EditorClientSocket {
                 log.error(`Can't set node settings. Node id [${n.cid}/${n.id}] not found.`);
                 return;
             }
-            let oldName = node.name;
-            let oldSettings = JSON.parse(JSON.stringify(node.settings));
+            let oldName = (_a = n.oldName, (_a !== null && _a !== void 0 ? _a : node.name));
+            let oldSettings = (_b = n.oldSettings, (_b !== null && _b !== void 0 ? _b : JSON.parse(JSON.stringify(node.settings))));
             if (node['onBeforeSettingsChange'])
                 node['onBeforeSettingsChange'](n.settings, n.name);
             node.settings = node.settingsWithValidation(n.settings);
@@ -181,7 +182,7 @@ class EditorClientSocket {
                 log.error(`Can't create link. Node id [${data.cid}/${data.id}] not found.`);
                 return;
             }
-            node.connect(data.link.origin_slot, data.link.target_id, data.link.target_slot);
+            node.connect(data.link.origin_slot, data.link.target_id, data.link.target_slot, data.link.target_input_id);
         });
         socket.on('link-delete', data => {
             let container = container_1.Container.containers[data.cid];
@@ -194,7 +195,7 @@ class EditorClientSocket {
                 log.error(`Can't delete link. Node id [${data.cid}/${data.id}] not found.`);
                 return;
             }
-            node.disconnectInputLink(data.link.target_slot);
+            node.disconnectInputLink(data.link.target_slot, data.link.target_input_id);
         });
         socket.on(events_1.CLONE, res => {
             const { cid, nodes, message } = res;
@@ -300,10 +301,12 @@ class EditorClientSocket {
         $.ajax({
             url: '/api/editor/state',
             success: function (state) {
-                if (state.isRunning)
+                if (state.isRunning) {
                     that.editor.onContainerRun();
-                else
+                }
+                else {
                     that.editor.onContainerStop();
+                }
             },
         });
     }
@@ -375,53 +378,36 @@ class EditorClientSocket {
             data: JSON.stringify({ size: node.size }),
         });
     }
-    sendCreateLink(origin_id, origin_slot, target_id, target_slot) {
-        let data = {
-            origin_id: origin_id,
-            origin_slot: origin_slot,
-            target_id: target_id,
-            target_slot: target_slot,
-        };
-        let that = this;
-        $.ajax({
-            url: '/api/editor/c/' + that.editor.renderer.container.id + '/l/',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(data),
-        });
+    sendCreateLink(origin_id, origin_slot, target_id, target_slot, target_index) {
+        this.requestLink('POST', origin_id, origin_slot, target_id, target_slot, target_index);
     }
-    sendRemoveLink(origin_id, origin_slot, target_id, target_slot) {
+    sendRemoveLink(origin_id, origin_slot, target_id, target_slot, target_index) {
+        this.requestLink('DELETE', origin_id, origin_slot, target_id, target_slot, target_index);
+    }
+    requestLink(action, origin_id, origin_slot, target_id, target_slot, target_index) {
         let data = {
             origin_id: origin_id,
             origin_slot: origin_slot,
             target_id: target_id,
             target_slot: target_slot,
+            target_input_id: target_index,
         };
         let that = this;
         $.ajax({
             url: '/api/editor/c/' + that.editor.renderer.container.id + '/l/',
-            type: 'DELETE',
+            type: action,
             contentType: 'application/json',
             data: JSON.stringify(data),
         });
     }
     sendRunContainer() {
-        $.ajax({
-            url: '/api/editor/run',
-            type: 'POST',
-        });
+        $.ajax({ url: '/api/editor/run', type: 'POST' });
     }
     sendStopContainer() {
-        $.ajax({
-            url: '/api/editor/stop',
-            type: 'POST',
-        });
+        $.ajax({ url: '/api/editor/stop', type: 'POST' });
     }
     sendStepContainer() {
-        $.ajax({
-            url: '/api/editor/step',
-            type: 'POST',
-        });
+        $.ajax({ url: '/api/editor/step', type: 'POST' });
     }
     sendJoinContainerRoom(cont_id) {
         log.debug('Join to editor room [' + cont_id + ']');

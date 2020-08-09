@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const point_model_1 = require("../../model/point-model");
+const point_model_1 = require("../../../../../backend/models/point-model");
 class MqttPointCreator {
     constructor() {
     }

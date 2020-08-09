@@ -14,7 +14,7 @@ const constants_1 = require("../../../constants");
 const container_1 = require("../../../container");
 const node_1 = require("../../../node");
 const utils_1 = require("../../../utils");
-const point_model_1 = require("../model/point-model");
+const point_model_1 = require("../../../../backend/models/point-model");
 const mqtt_utils_1 = require("./mqtt-utils");
 class MqttPointWriteNode extends node_1.Node {
     constructor() {
@@ -105,8 +105,7 @@ class MqttPointWriteNode extends node_1.Node {
                     return setting['enableHistory'].value;
                 },
                 threshold: setting => {
-                    return setting['enableHistory'].value && setting['historyMode'].value ===
-                        point_model_1.HistoryMode.COV;
+                    return setting['enableHistory'].value && setting['historyMode'].value === point_model_1.HistoryMode.COV;
                 },
                 maxRecords: setting => {
                     return setting['enableHistory'].value;

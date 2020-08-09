@@ -182,6 +182,7 @@ class FlexibleNode extends node_1.Node {
         return {
             exist: this.dynamicSettingsExist,
             nullable: this.nullableInputs,
+            hidden: false,
         };
     }
 }

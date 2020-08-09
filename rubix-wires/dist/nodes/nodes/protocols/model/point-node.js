@@ -6,11 +6,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const decorators_1 = require("../../../../decorators");
-const mixins_1 = require("../../../../mixins");
+const point_model_1 = require("../../../../backend/models/point-model");
+const decorators_1 = require("../../../../utils/decorators");
+const helper_1 = require("../../../../utils/helper");
 const node_1 = require("../../../node");
 const registry_1 = require("../../../registry");
-const point_model_1 = require("./point-model");
 function PointNodeMixin(Base) {
     class PointNodeMixinBase extends Base {
         onAdded() {
@@ -29,17 +29,20 @@ function PointNodeMixin(Base) {
             this.updateTitle();
         }
         reEvaluateSettingByInput() {
-            if (super['reEvaluateSettingByInput'] && mixins_1.isFunction(super['reEvaluateSettingByInput'])) {
+            if (super['reEvaluateSettingByInput'] && helper_1.isFunction(super['reEvaluateSettingByInput'])) {
                 super['reEvaluateSettingByInput']();
             }
             let prevPV = this.createPointValue(this.settings);
             let currentPV = point_model_1.PointValueCreator.init(this.inputs[this.presentValueInputIdx()].data, this.inputs[this.priorityInputIdx()].data, this.inputs[this.priorityArrayInputIdx()].data);
             let cov = currentPV.changedOfValue(prevPV);
-            this.settings['present-value'].value = this.inputs[this.presentValueInputIdx()].data = cov ? cov.presentValue
+            this.settings['present-value'].value = this.inputs[this.presentValueInputIdx()].data = cov
+                ? cov.presentValue
                 : currentPV.presentValue;
-            this.settings['point-priority'].value = this.inputs[this.priorityInputIdx()].data = cov ? cov.priority
+            this.settings['point-priority'].value = this.inputs[this.priorityInputIdx()].data = cov
+                ? cov.priority
                 : currentPV.priority;
-            this.settings['priority-array'].value = this.inputs[this.priorityArrayInputIdx()].data = cov ? cov.priorityArray
+            this.settings['priority-array'].value = this.inputs[this.priorityArrayInputIdx()].data = cov
+                ? cov.priorityArray
                 : currentPV.priorityArray;
             this.settings[this.modelSettingKey()].value = this.handler().initializePointBySettingInput();
         }
@@ -50,6 +53,20 @@ function PointNodeMixin(Base) {
             return this.priorityInputIdx() + 1;
         }
         mixinPointValueInputOutput() {
+            this.settings['input_group'] = { description: 'Input Settings', value: '', type: node_1.SettingType.GROUP };
+            this.settings['decimals'] = { description: 'Decimal Places (Limit 5)', value: 3, type: node_1.SettingType.NUMBER };
+            this.settings['inputMethod'] = {
+                description: 'Input Method',
+                type: node_1.SettingType.DROPDOWN,
+                config: {
+                    items: [
+                        { value: 0, text: 'Value and Priority' },
+                        { value: 1, text: 'Priority Array' },
+                        { value: 2, text: 'JSON' },
+                    ],
+                },
+                value: 0,
+            };
             this.addInputWithSettings('present-value', node_1.Type.NUMBER, null, 'Present Value');
             this.addInputWithSettings('point-priority', node_1.Type.NUMBER, 16, 'Point Priority');
             this.addInputWithSettings('priority-array', node_1.Type.JSON, null, 'Priority Array in JSON or Array');
@@ -64,7 +81,7 @@ function PointNodeMixin(Base) {
         }
         updateOutput(pv, nodeId) {
             var _a, _b, _c, _d;
-            let self = (nodeId ? (registry_1.default._nodes[nodeId]) : this);
+            let self = (nodeId ? registry_1.default._nodes[nodeId] : this);
             if (!self || !pv) {
                 return;
             }

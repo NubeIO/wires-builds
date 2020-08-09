@@ -337,7 +337,7 @@ class HistoryBase extends node_1.Node {
                 const dataType = this.settings['dataType'].value;
                 const loggedDataType = typeof log.payload;
                 if (dataType === node_1.Type.NUMBER) {
-                    log.payload = +log.payload.toFixed(decimals);
+                    log.payload = Number((isNaN(log.payload) ? 0 : Number(log.payload)).toFixed(decimals));
                 }
                 else if (dataType === node_1.Type.BOOLEAN) {
                     if (loggedDataType === 'boolean')
@@ -348,21 +348,6 @@ class HistoryBase extends node_1.Node {
                 else if (dataType === node_1.Type.STRING && loggedDataType !== 'string') {
                     log.payload = JSON.stringify(log.payload);
                 }
-                if (typeof log.payload === 'number') {
-                    log.payload = +log.payload.toFixed(decimals);
-                }
-                else if (typeof log.payload === 'boolean') {
-                    if (log.payload === true) {
-                        log.payload = 1;
-                    }
-                    else if (log.payload === false) {
-                        log.payload = 0;
-                    }
-                }
-                else if (typeof log.payload === 'string') {
-                }
-                else
-                    return;
                 const tagList = {};
                 tagList['point'] = this.settings['pointName'].value || 'undefined';
                 Object.keys(log).map(key => {
@@ -404,16 +389,17 @@ class HistoryBase extends node_1.Node {
                     ts: moment(Number(point.timestamp) / 1000000).toISOString(),
                 }));
                 const that = this;
-                axios_1.default({
-                    method: 'post',
-                    url: 'https://pgr.nube-io.com/histories',
-                    data: multiPointPost,
-                })
-                    .then(function () { })
-                    .catch(function (error) {
+                try {
+                    yield axios_1.default({
+                        method: 'post',
+                        url: 'https://pgr.nube-io.com/histories',
+                        data: multiPointPost,
+                    });
+                }
+                catch (error) {
                     this.setOutputData(that.histErrorOutput, String(error));
                     errorFlag = true;
-                });
+                }
             }
             else if (DataBaseType.InfluxDB === DataBaseType.InfluxDB) {
                 const writeOptions = {};
@@ -425,11 +411,14 @@ class HistoryBase extends node_1.Node {
                     username: this.settings['authentication'].value ? this.settings['user'].value : '',
                     password: this.settings['authentication'].value ? crypto_utils_1.default.decrypt(this.settings['password'].value) : '',
                 });
-                yield client.writePoints(points, writeOptions).catch(err => {
+                try {
+                    yield client.writePoints(points, writeOptions);
+                }
+                catch (err) {
                     this.setOutputData(this.histErrorOutput, String(err));
                     this.debugErr(err);
                     errorFlag = true;
-                });
+                }
             }
             if (!errorFlag) {
                 this.properties['obj'] = [];

@@ -181,47 +181,55 @@ router.post('/c/:cid/import', function (req, res) {
 });
 router.post('/c/:cid/l', function (req, res) {
     let container = container_1.Container.containers[req.params.cid];
-    if (!container)
+    if (!container) {
         return res.status(404).send(`Can't create link. Container id [${req.params.cid}] not found.`);
+    }
     let link = req.body;
     let node = container.getNodeById(link.origin_id);
     let targetNode = container.getNodeById(link.target_id);
-    if (!node)
+    if (!node) {
         return res.status(404).send(`Can't create link. Node id [${req.params.cid}/${link.origin_id}] not found.`);
-    if (!targetNode)
+    }
+    if (!targetNode) {
         return res.status(404).send(`Can't create link. Node id [${req.params.cid}/${link.target_id}] not found.`);
-    if (link.target_slot == -1) {
+    }
+    if (link.target_slot === -1) {
         let input = targetNode.getInputInfo(0);
-        if (!input)
+        if (!input) {
             return res
                 .status(404)
                 .send(`Can't create link. Node id [${req.params.cid}/${link.target_id}] has no free inputs.`);
+        }
         link.target_slot = 0;
     }
-    node.connect(link.origin_slot, targetNode.id, link.target_slot);
-    app_1.default.server.editorSocket.io.emit('link-create', {
-        cid: req.params.cid,
-        link: link,
-    });
-    res.send(`Link created: from [${node.container.id}/${node.id}] to [${targetNode.container.id}/${targetNode.id}]`);
+    if (node.connect(link.origin_slot, targetNode.id, link.target_slot, link.target_input_id)) {
+        app_1.default.server.editorSocket.io.emit('link-create', { cid: req.params.cid, link: link });
+        return res.send(`Link created: from [${node.container.id}/${node.id}] to [${targetNode.container.id}/${targetNode.id}]`);
+    }
+    return res
+        .status(400)
+        .send(`Link created: from [${node.container.id}/${node.id}] to [${targetNode.container.id}/${targetNode.id}]`);
 });
 router.delete('/c/:cid/l', function (req, res) {
     let container = container_1.Container.containers[req.params.cid];
     if (!container)
-        return res.status(404).send(`Can't create link. Container id [${req.params.cid}] not found.`);
+        return res.status(404).send(`Can't delete link. Container id [${req.params.cid}] not found.`);
     let link = req.body;
     let node = container.getNodeById(link.origin_id);
     let targetNode = container.getNodeById(link.target_id);
-    if (!node)
-        return res.status(404).send(`Can't create link. Node id [${req.params.cid}/${link.origin_id}] not found.`);
-    if (!targetNode)
-        return res.status(404).send(`Can't create link. Node id [${req.params.cid}/${link.target_id}] not found.`);
-    targetNode.disconnectInputLink(link.target_slot);
-    app_1.default.server.editorSocket.io.emit('link-delete', {
-        cid: req.params.cid,
-        link: link,
-    });
-    res.send(`Link deleted: from [${node.container.id}/${node.id}] to [${targetNode.container.id}/${targetNode.id}]`);
+    if (!node) {
+        return res.status(404).send(`Can't delete link. Node id [${req.params.cid}/${link.origin_id}] not found.`);
+    }
+    if (!targetNode) {
+        return res.status(404).send(`Can't delete link. Node id [${req.params.cid}/${link.target_id}] not found.`);
+    }
+    if (targetNode.disconnectInputLink(link.target_slot, link.target_input_id)) {
+        app_1.default.server.editorSocket.io.emit('link-delete', { cid: req.params.cid, link: link });
+        return res.send(`Link deleted: from [${node.container.id}/${node.id}] to [${targetNode.container.id}/${targetNode.id}]`);
+    }
+    return res
+        .status(400)
+        .send(`Cannot delete link: from [${node.container.id}/${node.id}] to [${targetNode.container.id}/${targetNode.id}]`);
 });
 router.get('/state', function (req, res) {
     let state = {

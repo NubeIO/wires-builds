@@ -1,11 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const moment = require("moment");
-const container_1 = require("./container");
-const utils_1 = require("./utils");
-const registry_1 = require("./registry");
-const events_1 = require("../events");
 const lodash_1 = require("lodash");
+const moment = require("moment");
+const events_1 = require("../events");
+const container_1 = require("./container");
+const node_link_1 = require("./node-link");
+const registry_1 = require("./registry");
+const utils_1 = require("./utils");
 const log = require('logplease').create('node', { color: 5 });
 const doNothing = () => { };
 class NodeOutput {
@@ -96,6 +97,7 @@ class Node {
         this.properties = {};
         this.settings = {};
         this.settingConfigs = {};
+        this.linkHandler = node_link_1.createLinkHandler(this);
         this.contextMenu = {};
         this.clonable = true;
         this.flags = {};
@@ -109,13 +111,16 @@ class Node {
             if (ser_node[key] == null)
                 continue;
             if (typeof ser_node[key] == 'object') {
-                if (this[key] && this[key].configure)
+                if (this[key] && this[key].configure) {
                     this[key].configure(ser_node[key]);
-                else
+                }
+                else {
                     this[key] = utils_1.default.cloneObject(ser_node[key], this[key]);
+                }
             }
-            else
+            else {
                 this[key] = ser_node[key];
+            }
         }
     }
     serialize() {
@@ -188,18 +193,21 @@ class Node {
     }
     emitTransformedInput(callback) {
         let val = this.getInputData(0);
-        if (val != null)
+        if (val != null) {
             this.setOutputData(0, callback(val));
-        else
+        }
+        else {
             this.setOutputData(0, null);
+        }
     }
     updateNodeInput() {
         if (this.container.db)
             this.container.db.updateNode(this.id, this.container.id, { $set: { inputs: this.inputs } });
     }
     updateNodeOutput() {
-        if (this.container.db)
+        if (this.container.db) {
             this.container.db.updateNode(this.id, this.container.id, { $set: { outputs: this.outputs } });
+        }
     }
     persistProperties(saveSettings = false, saveProperties = false, saveInputs = false, saveOutputs = false) {
         if (!this.container.db)
@@ -218,10 +226,18 @@ class Node {
         });
     }
     persistConfiguration(callback = doNothing) {
-        if (this.container.db)
+        if (this.container.db) {
             this.container.db.updateNode(this.id, this.container.id, {
                 $set: { settings: this.settings, properties: this.properties },
             }, callback);
+        }
+    }
+    updateNodeInputOutput() {
+        if (this.container.db) {
+            this.container.db.updateNode(this.id, this.container.id, {
+                $set: { inputs: this.inputs, outputs: this.outputs },
+            });
+        }
     }
     setOutputData(output_id, data, only_if_new = false) {
         if (!this.outputs[output_id])
@@ -285,7 +301,7 @@ class Node {
         if (this['onOutputRemoved'])
             this['onOutputRemoved'](id);
     }
-    addInput(name, type, setting = { exist: false, nullable: false }, extra_info) {
+    addInput(name, type, setting = { exist: false, nullable: false, hidden: false }, extra_info) {
         let id = this.getFreeInputId();
         let input = { name, type, setting };
         if (extra_info) {
@@ -300,7 +316,7 @@ class Node {
         return id;
     }
     addInputWithSettings(name, type, defaultValue, description = name, nullable = true, extra_info) {
-        const setting = { exist: true, nullable };
+        const setting = { exist: true, nullable, hidden: false };
         this.addInput(`[${name}]`, type, setting, extra_info);
         this.settings[name] = {
             description,
@@ -308,35 +324,33 @@ class Node {
             type: exports.convertType(type),
         };
     }
-    addInputAtPosition(position, name, type, setting = { exist: false, nullable: false }, extra_info = {}) {
+    addInputAtPosition(position, name, type, setting = { exist: false, nullable: false, hidden: false }, extra_info = {}) {
         if (!this.inputs)
             this.inputs = {};
         const inputsCount = this.getInputsCount();
-        if (position >= inputsCount)
+        if (position >= inputsCount) {
             return this.addInput(name, type, setting, extra_info);
-        else {
-            const myID = this.id;
-            for (let i = inputsCount; i > position; i--) {
-                this.inputs[i] = this.inputs[i - 1];
-                if (this.inputs[i].hasOwnProperty('link')) {
-                    const outputNode = this.container._nodes[`${this.inputs[i].link.target_node_id}`];
-                    let linksArray = outputNode.outputs[`${this.inputs[i].link.target_slot}`].links;
-                    const replaceLinkIndex = linksArray.findIndex(link => {
-                        return link.target_node_id == myID && link.target_slot == i - 1;
-                    });
-                    if (replaceLinkIndex != -1)
-                        linksArray.splice(replaceLinkIndex, 1, { target_node_id: myID, target_slot: i });
-                    outputNode.updateNodeOutput();
-                }
-            }
-            let input = Object.assign({ name, type, setting }, extra_info);
-            this.inputs[position] = input;
-            this.size = this.computeSize();
-            if (this['onInputAdded'])
-                this['onInputAdded'](input);
-            return position;
         }
-        this.updateNodeInput();
+        const myID = this.id;
+        for (let i = inputsCount; i > position; i--) {
+            this.inputs[i] = this.inputs[i - 1];
+            if (this.inputs[i].hasOwnProperty('link')) {
+                const outputNode = this.container._nodes[`${this.inputs[i].link.target_node_id}`];
+                let linksArray = outputNode.outputs[`${this.inputs[i].link.target_slot}`].links;
+                const replaceLinkIndex = linksArray.findIndex(link => {
+                    return link.target_node_id == myID && link.target_slot == i - 1;
+                });
+                if (replaceLinkIndex != -1)
+                    linksArray.splice(replaceLinkIndex, 1, { target_node_id: myID, target_slot: i });
+                outputNode.updateNodeOutput();
+            }
+        }
+        let input = Object.assign({ name, type, setting }, extra_info);
+        this.inputs[position] = input;
+        this.size = this.computeSize();
+        if (this['onInputAdded'])
+            this['onInputAdded'](input);
+        return position;
     }
     getFreeInputId() {
         if (!this.inputs)
@@ -346,6 +360,25 @@ class Node {
                 return i;
         }
     }
+    hideInput(immediateDirtyCanvas = true, ...ids) {
+        for (let id of ids) {
+            this.disconnectInputLink(null, id);
+            this.inputs[id].setting.hidden = true;
+        }
+        this.redrawNode(immediateDirtyCanvas);
+    }
+    showInput(immediateDirtyCanvas = true, ...ids) {
+        for (let id of ids) {
+            this.inputs[id].setting.hidden = false;
+        }
+        this.redrawNode(immediateDirtyCanvas);
+    }
+    redrawNode(immediateDirtyCanvas = true) {
+        if (immediateDirtyCanvas) {
+            this.size = this.computeSize();
+            this.setDirtyCanvas(true, true);
+        }
+    }
     removeInput(id) {
         this.disconnectInputLink(id);
         delete this.inputs[id];
@@ -353,11 +386,11 @@ class Node {
         if (this['onInputRemoved'])
             this['onInputRemoved'](id);
     }
-    removeInputAtPosition(position) {
-        this.disconnectInputLink(position);
+    removeInputAtPosition(slot) {
+        this.disconnectInputLink(slot);
         const inputsCount = this.getInputsCount();
         const myID = this.id;
-        for (let i = position; i < inputsCount - 1; i++) {
+        for (let i = slot; i < inputsCount - 1; i++) {
             this.inputs[i] = this.inputs[i + 1];
             if (this.inputs[i].hasOwnProperty('link')) {
                 const outputNode = this.container._nodes[`${this.inputs[i].link.target_node_id}`];
@@ -373,7 +406,7 @@ class Node {
         delete this.inputs[inputsCount - 1];
         this.size = this.computeSize();
         if (this['onInputRemoved'])
-            this['onInputRemoved'](position);
+            this['onInputRemoved'](slot);
     }
     getInputsCount() {
         return this.inputs ? Object.keys(this.inputs).length : 0;
@@ -409,27 +442,15 @@ class Node {
             }
         }
     }
-    getLastInputIndes() {
-        if (!this.inputs)
-            return -1;
-        let last = -1;
-        for (let i in this.inputs)
-            if (+i > last)
-                last = +i;
-        return last;
+    getLastInputIndex() {
+        return this.inputs ? Object.values(this.inputs).filter(value => !value.setting.hidden).length : 0;
     }
     getLastOutputIndex() {
-        if (!this.outputs)
-            return -1;
-        let last = -1;
-        for (let i in this.outputs)
-            if (+i > last)
-                last = +i;
-        return last;
+        return this.outputs ? Object.values(this.outputs).length : 0;
     }
     computeHeight() {
-        let i_slots = this.getLastInputIndes() + 1;
-        let o_slots = this.getLastOutputIndex() + 1;
+        let i_slots = this.getLastInputIndex();
+        let o_slots = this.getLastOutputIndex();
         let rows = (this.inputs ? i_slots : 0) + (this.outputs ? o_slots : 0);
         rows = Math.max(rows, 1);
         return rows * 15 + 6;
@@ -445,7 +466,7 @@ class Node {
         let title_width = compute_text_size(this.title);
         let maxLabelWidth = 0;
         let maxNameWidth = 0;
-        if (this.inputs)
+        if (this.inputs) {
             for (let i in this.inputs) {
                 let input = this.inputs[i];
                 let label = input.label || '';
@@ -457,7 +478,8 @@ class Node {
                 if (maxNameWidth < nameWidth)
                     maxNameWidth = nameWidth;
             }
-        if (this.outputs)
+        }
+        if (this.outputs) {
             for (let o in this.outputs) {
                 let output = this.outputs[o];
                 let label = output.label || '';
@@ -469,6 +491,7 @@ class Node {
                 if (maxNameWidth < nameWidth)
                     maxNameWidth = nameWidth;
             }
+        }
         if (maxLabelWidth == 0)
             maxLabelWidth = maxNameWidth;
         size[0] = Math.max(maxLabelWidth + maxNameWidth + 10, title_width);
@@ -483,143 +506,20 @@ class Node {
     calculateMinWidth(...width) {
         return Math.max(this.MIN_WIDTH, ...width);
     }
-    connect(output_id, target_node_id, input_id) {
-        let target_node = this.container.getNodeById(target_node_id);
-        if (!target_node) {
-            this.debugErr("Can't connect, target node not found");
-            return false;
-        }
-        if (!this.outputs || !this.outputs[output_id]) {
-            this.debugErr("Can't connect, output not found");
-            return false;
-        }
-        if (!target_node.inputs || !target_node.inputs[input_id]) {
-            this.debugErr("Can't connect, input not found");
-            return false;
-        }
-        let output = this.outputs[output_id];
-        let input = target_node.inputs[input_id];
-        if (target_node['onConnectInput'])
-            if (target_node['onConnectInput'](input_id, output) == false)
-                return false;
-        if (input.link)
-            target_node.disconnectInputLink(input_id);
-        if (!output.links)
-            output.links = [];
-        output.links.push({ target_node_id: target_node_id, target_slot: input_id });
-        input.link = { target_node_id: this.id, target_slot: output_id };
-        input.updated = true;
-        input.data = utils_1.default.parseValue(output.data, input.type);
-        target_node.isUpdated = true;
-        if (this.container.db) {
-            let s_node = this.serialize();
-            if (target_node.id == this.id) {
-                this.container.db.updateNode(this.id, this.container.id, {
-                    $set: { outputs: s_node.outputs, inputs: s_node.inputs },
-                });
-            }
-            else {
-                let s_t_node = target_node.serialize();
-                this.container.db.updateNode(this.id, this.container.id, {
-                    $set: { outputs: s_node.outputs },
-                });
-                this.container.db.updateNode(target_node.id, target_node.container.id, {
-                    $set: { inputs: s_t_node.inputs },
-                });
-            }
-        }
-        this.setDirtyCanvas(false, true);
-        this.debug('connected to ' + target_node.getReadableId());
-        return true;
+    connect(output_id, target_node_id, target_input_slot, target_input_id) {
+        return this.linkHandler.make({
+            origin_id: this.id,
+            origin_slot: output_id,
+            target_id: target_node_id,
+            target_slot: target_input_slot,
+            target_input_id: target_input_id,
+        });
     }
     disconnectOutputLinks(slot) {
-        if (!this.outputs || !this.outputs[slot]) {
-            this.debugErr(`Can't disconnect, output slot: ${slot} not found on node: ${this.id}`);
-            return false;
-        }
-        const output = this.outputs[slot];
-        if (!output.links)
-            return false;
-        let i = output.links.length;
-        while (i--) {
-            let link = output.links[i];
-            const targetNode = this.container.getNodeById(link.target_node_id);
-            if (!targetNode) {
-                this.debugErr(`Node: ${link.target_node_id} is not available`);
-            }
-            if (targetNode &&
-                targetNode.inputs &&
-                targetNode.inputs[link.target_slot] &&
-                targetNode.inputs[link.target_slot].link) {
-                delete targetNode.inputs[link.target_slot].link;
-                targetNode.inputs[link.target_slot].data = undefined;
-                targetNode.inputs[link.target_slot].updated = true;
-                targetNode.isUpdated = true;
-                if (this.container.db) {
-                    let s_t_node = targetNode.serialize();
-                    this.container.db.updateNode(targetNode.id, targetNode.container.id, {
-                        $set: { inputs: s_t_node.inputs },
-                    });
-                }
-            }
-            else {
-                log.error(`Tried to delete input link on: ${targetNode} of slot: ${link.target_slot}`);
-            }
-            output.links.splice(i, 1);
-            this.debug(`Disconnected from ${targetNode.getReadableId()}`);
-        }
-        delete output.links;
-        if (this.container.db) {
-            let s_node = this.serialize();
-            this.container.db.updateNode(this.id, this.container.id, {
-                $set: { outputs: s_node.outputs },
-            });
-        }
-        this.setDirtyCanvas(false, true);
-        return true;
+        return this.linkHandler.disconnectOutput(slot);
     }
-    disconnectInputLink(slot) {
-        if (!this.inputs || !this.inputs[slot]) {
-            this.debugErr(`Can't disconnect, input slot: ${slot} not found on node: ${this.id}`);
-            return false;
-        }
-        const input = this.inputs[slot];
-        const link = input.link;
-        if (!link)
-            return false;
-        let targetNode = this.container.getNodeById(link.target_node_id);
-        if (!targetNode)
-            return false;
-        let output = targetNode.outputs[link.target_slot];
-        if (!output || !output.links)
-            return false;
-        let i = output.links.length;
-        while (i--) {
-            let outputLink = output.links[i];
-            if (outputLink.target_node_id == this.id && outputLink.target_slot == slot) {
-                output.links.splice(i, 1);
-                break;
-            }
-        }
-        if (output.links.length == 0)
-            delete output.links;
-        delete input.link;
-        input.data = undefined;
-        input.updated = true;
-        this.isUpdated = true;
-        if (this.container.db) {
-            let serializedNode = this.serialize();
-            let serializedTargetNode = targetNode.serialize();
-            this.container.db.updateNode(this.id, this.container.id, {
-                $set: { inputs: serializedNode.inputs },
-            });
-            this.container.db.updateNode(targetNode.id, targetNode.container.id, {
-                $set: { outputs: serializedTargetNode.outputs },
-            });
-        }
-        this.setDirtyCanvas(false, true);
-        this.debug(`Disconnected from ${targetNode.getReadableId()}`);
-        return true;
+    disconnectInputLink(input_slot, input_id) {
+        return this.linkHandler.disconnectInput(input_slot, input_id);
     }
     setDirtyCanvas(dirty_foreground, dirty_background) {
         if (!this.container)
@@ -643,32 +543,38 @@ class Node {
         log.error(this.getReadableId() + ' ' + message);
     }
     getReadableId() {
-        if (this.container)
+        if (this.container) {
             return `[${this.type}][${this.container.id}/${this.id}]`;
-        else
+        }
+        else {
             return `[${this.type}][-/${this.id}]`;
+        }
     }
     sendMessageToServerSide(message) {
-        if (this.side == container_1.Side.server)
+        if (this.side === container_1.Side.server) {
             log.warn(`Node ${this.getReadableId()} is trying to send message from server side to server side`);
-        else
+        }
+        else {
             this.container.client_socket.emit('nodeMessageToServerSide', {
                 id: this.id,
                 cid: this.container.id,
                 message: message,
             });
+        }
     }
     sendMessageToEditorSide(message, onlyConnectedUsers = true) {
         let m = { id: this.id, cid: this.container.id, message };
         if (this.side == container_1.Side.editor) {
             log.warn(`Node ${this.getReadableId()} is trying to send message from editor side to editor side`);
         }
-        else if (this.side == container_1.Side.server) {
+        else if (this.side === container_1.Side.server) {
             let socket = this.container.server_editor_socket;
-            if (onlyConnectedUsers)
+            if (onlyConnectedUsers) {
                 socket.in('' + this.container.id).emit('nodeMessageToEditorSide', m);
-            else
+            }
+            else {
                 socket.emit('nodeMessageToEditorSide', m);
+            }
         }
         else {
             this.container.client_socket.emit('nodeMessageToEditorSide', m);
@@ -684,10 +590,10 @@ class Node {
                 extra_info: extra_info,
             },
         };
-        if (this.side == container_1.Side.editor) {
+        if (this.side === container_1.Side.editor) {
             log.warn('Node ' + this.getReadableId() + ' is trying to send message from editor side to editor side');
         }
-        else if (this.side == container_1.Side.server) {
+        else if (this.side === container_1.Side.server) {
             let socket = this.container.server_editor_socket;
             socket.emit('node-add-input', m);
         }
@@ -705,10 +611,10 @@ class Node {
                 extra_info: extra_info,
             },
         };
-        if (this.side == container_1.Side.editor) {
+        if (this.side === container_1.Side.editor) {
             log.warn('Node ' + this.getReadableId() + ' is trying to send message from editor side to editor side');
         }
-        else if (this.side == container_1.Side.server) {
+        else if (this.side === container_1.Side.server) {
             let socket = this.container.server_editor_socket;
             socket.emit('node-add-output', m);
         }
@@ -722,10 +628,10 @@ class Node {
             cid: this.container.id,
             input: id,
         };
-        if (this.side == container_1.Side.editor) {
+        if (this.side === container_1.Side.editor) {
             log.warn('Node ' + this.getReadableId() + ' is trying to send message from editor side to editor side');
         }
-        else if (this.side == container_1.Side.server) {
+        else if (this.side === container_1.Side.server) {
             let socket = this.container.server_editor_socket;
             socket.emit('node-remove-input', m);
         }
@@ -739,10 +645,10 @@ class Node {
             cid: this.container.id,
             output: id,
         };
-        if (this.side == container_1.Side.editor) {
+        if (this.side === container_1.Side.editor) {
             log.warn('Node ' + this.getReadableId() + ' is trying to send message from editor side to editor side');
         }
-        else if (this.side == container_1.Side.server) {
+        else if (this.side === container_1.Side.server) {
             let socket = this.container.server_editor_socket;
             socket.emit('node-remove-output', m);
         }
@@ -799,47 +705,25 @@ class Node {
         }
     }
     broadcastSettingsToClients() {
-        this.sendMessageToEditorSide({
-            action: BROADCAST.UPDATE_SETTINGS,
-            payload: this.settings,
-        });
+        this.sendMessageToEditorSide({ action: BROADCAST.UPDATE_SETTINGS, payload: this.settings });
     }
     broadcastPropertiesToClients() {
-        this.sendMessageToEditorSide({
-            action: BROADCAST.UPDATE_PROPERTIES,
-            payload: this.properties,
-        });
+        this.sendMessageToEditorSide({ action: BROADCAST.UPDATE_PROPERTIES, payload: this.properties });
     }
     broadcastOutputsToClients() {
-        this.sendMessageToEditorSide({
-            action: BROADCAST.UPDATE_OUTPUTS,
-            payload: this.outputs,
-        });
+        this.sendMessageToEditorSide({ action: BROADCAST.UPDATE_OUTPUTS, payload: this.outputs });
     }
     broadcastNodeStateToClients() {
-        this.sendMessageToEditorSide({
-            action: BROADCAST.UPDATE_STATE,
-            payload: this.nodeState,
-        });
+        this.sendMessageToEditorSide({ action: BROADCAST.UPDATE_STATE, payload: this.nodeState });
     }
     broadcastTitleToClients() {
-        this.sendMessageToEditorSide({
-            action: BROADCAST.UPDATE_TITLE,
-            payload: this.title,
-        });
+        this.sendMessageToEditorSide({ action: BROADCAST.UPDATE_TITLE, payload: this.title });
     }
     broadcastNameToClients() {
-        this.sendMessageToEditorSide({
-            action: BROADCAST.UPDATE_NAME,
-            payload: this.name,
-        });
+        this.sendMessageToEditorSide({ action: BROADCAST.UPDATE_NAME, payload: this.name });
     }
     broadcastValToClients(key, val) {
-        this.sendMessageToEditorSide({
-            action: BROADCAST.UPDATE_VALUE,
-            key: key,
-            payload: val,
-        });
+        this.sendMessageToEditorSide({ action: BROADCAST.UPDATE_VALUE, key: key, payload: val });
     }
     onGetMessageToEditorSide({ action, payload, key }) {
         switch (action) {
