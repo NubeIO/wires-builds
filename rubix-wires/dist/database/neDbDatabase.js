@@ -15,8 +15,10 @@ const NodeDataSource_1 = require("./datasource/NodeDataSource");
 const ScheduleDataSource_1 = require("./datasource/ScheduleDataSource");
 const HistorianDataSource_1 = require("./datasource/HistorianDataSource");
 const UserDataSource_1 = require("./datasource/UserDataSource");
+const AuthUserDataSource_1 = require("./datasource/AuthUserDataSource");
 class NeDbDatabase {
     constructor() {
+        this.authUserDatabase = new AuthUserDataSource_1.default();
         this.userDatabase = new UserDataSource_1.default();
         this.nodeDatabase = new NodeDataSource_1.default();
         this.dashboardDatabase = new DashboardDataSource_1.default();
@@ -27,6 +29,7 @@ class NeDbDatabase {
     asyncLoadDatabase(cleanUpInterval = NeDbDatabase.CLEANUP_INTERVAL) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                yield this.authUserDatabase.asyncLoadDatabase(cleanUpInterval);
                 yield this.userDatabase.asyncLoadDatabase(cleanUpInterval);
                 yield this.nodeDatabase.asyncLoadDatabase(cleanUpInterval);
                 yield this.dashboardDatabase.asyncLoadDatabase(cleanUpInterval);
@@ -141,6 +144,21 @@ class NeDbDatabase {
     }
     removeHistory(query, callback) {
         this.historianDatabase.removeHistory(query, callback);
+    }
+    addAuthUser(authUser) {
+        return this.authUserDatabase.addAuthUser(authUser);
+    }
+    getAuthUser() {
+        return this.authUserDatabase.getAuthUser();
+    }
+    deleteAuthUsers() {
+        return this.authUserDatabase.deleteAuthUsers();
+    }
+    getAuthToken(authUser) {
+        return this.authUserDatabase.getAuthToken(authUser);
+    }
+    isAuthenticated(token) {
+        return this.authUserDatabase.isAuthenticated(token);
     }
 }
 NeDbDatabase.CLEANUP_INTERVAL = 5 * 60 * 1000;

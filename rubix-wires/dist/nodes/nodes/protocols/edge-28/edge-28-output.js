@@ -186,7 +186,6 @@ class Edge28OutputPointNode extends HistoryBase_1.default {
         this.EXECUTE_INTERVAL = 60000;
         this.lastSendTime = new Date().valueOf();
         this.inputChange();
-        edge_utils_1.default.addPoint(this.getParentNode(), this);
     }
     onExecute() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -219,7 +218,6 @@ class Edge28OutputPointNode extends HistoryBase_1.default {
     }
     onRemoved() {
         super.onRemoved();
-        edge_utils_1.default.removePoint(this.getParentNode(), this);
     }
     onAfterSettingsChange() {
         const _super = Object.create(null, {

@@ -303,10 +303,16 @@ class Edge28InputPointNode extends HistoryBase_1.default {
         this.addHistorySettingsConfig(0, false);
     }
     onAdded() {
-        super.onAdded();
-        if (this.side !== container_1.Side.server)
-            return;
-        edge_utils_1.default.addPoint(this.getParentNode(), this);
+        const _super = Object.create(null, {
+            onAdded: { get: () => super.onAdded }
+        });
+        return __awaiter(this, void 0, void 0, function* () {
+            _super.onAdded.call(this);
+            if (this.side !== container_1.Side.server)
+                return;
+            yield utils_1.default.sleep(1000);
+            edge_utils_1.default.addPoint(this.getParentNode(), this);
+        });
     }
     onAfterSettingsChange() {
         const _super = Object.create(null, {

@@ -18,7 +18,7 @@ class StopwatchNode extends node_1.Node {
         this.title = 'Stopwatch';
         this.description =
             "This node converts between Time units Days('day'), Hours('hour'), Minutes('min'), Seconds('sec'), and Milliseconds('milli'). Input type can be selected from settings. Outputs will change based on selected input type. The number of decimal places that output values have can be set from the 'Precision' setting.  ‘interval’ units can be configured from settings. Maximum ‘interval’ setting is 587 hours.";
-        this.addInput('run', node_1.Type.BOOLEAN);
+        this.addInputWithSettings('enable', node_1.Type.BOOLEAN, 0, 'Enable', false);
         this.addInput('reset', node_1.Type.BOOLEAN);
         this.settings['units'] = {
             description: 'Output Units',

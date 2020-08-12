@@ -38,9 +38,12 @@ class BACnetDevice extends container_node_1.ContainerNode {
         this.title = 'BACnet Device';
         this.description =
             'This node acts as a container for bacnet-point nodes. All bacnet-device nodes should be added within the bacnet-network container.  All bacnet-point nodes should be added within a bacnet-device container node.  Configuration of BACnet device connections are set from settings.  Both IP and MSTP BACnet devices can be configured from the bacnet-device settings.';
+        this.addInput('get-point-list', node_1.Type.BOOLEAN);
         this.addOutput('out', node_1.Type.STRING);
         this.addOutput('out msg', node_1.Type.STRING);
         this.addOutput('error', node_1.Type.STRING);
+        this.addOutput('points-discovered', node_1.Type.STRING);
+        this.addOutput('points-to-poll', node_1.Type.STRING);
         this.properties['pointsList'] = null;
         this.settings['deviceEnable'] = {
             description: 'Device enable',
@@ -100,6 +103,24 @@ class BACnetDevice extends container_node_1.ContainerNode {
         this.settings['networkNumber'].value = this.networkNumber;
         this.broadcastSettingsToClients();
         this.persistSettings();
+    }
+    onInputUpdated() {
+        let pntList = [];
+        for (let pointNode of this.pointNodes) {
+            const settings = pointNode.settings;
+            const id = pointNode.id;
+            const cid = pointNode.id;
+            const name = pointNode.name;
+            let a = {
+                id: id,
+                cid: cid,
+                name: name,
+                settings: settings,
+            };
+            pntList.push(a);
+        }
+        this.setOutputData(4, JSON.stringify(pntList));
+        this.setOutputData(3, JSON.stringify(this.points));
     }
     requestPoll() {
         return __awaiter(this, void 0, void 0, function* () {

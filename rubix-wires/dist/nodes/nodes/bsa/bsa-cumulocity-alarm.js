@@ -13,6 +13,7 @@ const axios_1 = require("axios");
 const container_1 = require("../../container");
 const node_1 = require("../../node");
 const bsa_client_config_1 = require("./bsa-client-config");
+const system_utils_1 = require("../system/system-utils");
 let moment = require('moment-timezone');
 class BSACumulocityAlarmNode extends node_1.Node {
     constructor() {
@@ -57,7 +58,9 @@ class BSACumulocityAlarmNode extends node_1.Node {
         this.properties['alarmRegistry'] = {};
     }
     onAdded() {
-        this.onAfterSettingsChange().then();
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.onAfterSettingsChange();
+        });
     }
     onInputUpdated() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -69,65 +72,75 @@ class BSACumulocityAlarmNode extends node_1.Node {
     }
     onAfterSettingsChange() {
         return __awaiter(this, void 0, void 0, function* () {
-            this.onInputUpdated().then();
+            yield this.onInputUpdated();
         });
     }
     postAlarm(alarmInput) {
         return __awaiter(this, void 0, void 0, function* () {
-            let errorFlag = false;
+            let clientIdFromPlat;
+            let deviceIdFromPlat;
+            try {
+                clientIdFromPlat = yield system_utils_1.default.getClientID(this);
+            }
+            catch (e) {
+                clientIdFromPlat = 'unknownDeviceID';
+            }
+            try {
+                deviceIdFromPlat = yield system_utils_1.default.getDeviceID(this);
+            }
+            catch (e) {
+                deviceIdFromPlat = 'unknownClientID';
+            }
             let alarmName = this.settings['CumulocityAlarmName'].value || 'c8y_unknownAlarm';
             if (!alarmName.startsWith('c8y_'))
                 alarmName = 'c8y_' + alarmName;
             let cfg = bsa_client_config_1.bsaClientConfig('alarm');
-            const self = this;
             if (alarmInput) {
-                cfg['method'] = 'post';
-                cfg['data'] = {
-                    source: {
-                        id: this.settings['CumulocityDeviceID'].value,
+                cfg = {
+                    method: 'POST',
+                    data: {
+                        source: {
+                            id: this.settings['CumulocityDeviceID'].value,
+                            deviceid: deviceIdFromPlat,
+                            clientid: clientIdFromPlat,
+                        },
+                        text: this.settings['alarmText'].value || 'No Alarm Message Available',
+                        time: moment(new Date().valueOf())._d,
+                        type: alarmName,
+                        status: 'ACTIVE',
+                        severity: this.settings['alarmClass'].value || 'Unknown',
                     },
-                    text: this.settings['alarmText'].value || 'No Alarm Message Available',
-                    time: moment(new Date().valueOf())._d,
-                    type: alarmName,
-                    status: 'ACTIVE',
-                    severity: this.settings['alarmClass'].value || 'Unknown',
                 };
-                axios_1.default(cfg)
-                    .then(function (response) {
-                    console.log('RESPONSE', response);
-                    self.setOutputData(0, true);
-                    self.setOutputData(1, false);
-                    self.properties['lastAlarmID'] = response.data.id;
-                    self.properties['alarmRegistry'][alarmName] = response.data.id;
-                    self.debugInfo(`ALARM_REGISTRY ${self.properties['alarmRegistry']}`);
-                })
-                    .catch(function (error) {
-                    console.log('ERROR', error);
-                    self.setOutputData(0, false);
-                    self.setOutputData(1, String(error));
-                    errorFlag = true;
-                });
+                try {
+                    const response = yield axios_1.default(cfg);
+                    this.setOutputData(0, true);
+                    this.setOutputData(1, false);
+                    this.properties['lastAlarmID'] = response.data.id;
+                    this.properties['alarmRegistry'][alarmName] = response.data.id;
+                    this.debugInfo(`ALARM_REGISTRY ${this.properties['alarmRegistry']}`);
+                }
+                catch (error) {
+                    this.debugErr(error);
+                    this.setOutputData(0, false);
+                    this.setOutputData(1, String(error));
+                }
             }
             else if (!alarmInput) {
                 const alarmID = this.properties['alarmRegistry'].hasOwnProperty(alarmName)
                     ? this.properties['alarmRegistry'][alarmName]
                     : this.properties['lastAlarmID'];
-                cfg['method'] = 'put';
-                cfg['url'] = 'alarm/alarms/' + alarmID;
-                cfg['data'] = { status: 'CLEARED' };
-                axios_1.default(cfg)
-                    .then(function (response) {
-                    console.log('RESPONSE', response);
-                    self.setOutputData(0, true);
-                    self.setOutputData(1, false);
-                    delete self.properties['alarmRegistry'][alarmName];
-                })
-                    .catch(function (error) {
-                    self.debugErr(`ERROR ${error}`);
-                    self.setOutputData(0, false);
-                    self.setOutputData(1, String(error));
-                    errorFlag = true;
-                });
+                cfg = Object.assign(Object.assign({}, cfg), { method: 'PUT', url: `alarm/alarms/${alarmID}`, data: { status: 'CLEARED' } });
+                try {
+                    axios_1.default(cfg);
+                    this.setOutputData(0, true);
+                    this.setOutputData(1, false);
+                    delete this.properties['alarmRegistry'][alarmName];
+                }
+                catch (error) {
+                    this.debugErr(`ERROR ${error}`);
+                    this.setOutputData(0, false);
+                    this.setOutputData(1, String(error));
+                }
             }
             this.persistProperties(false, true);
         });

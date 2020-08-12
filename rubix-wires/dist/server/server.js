@@ -9,6 +9,7 @@ const socket = require("socket.io");
 const editor_server_socket_1 = require("./editor-server-socket");
 const dashboard_server_socket_1 = require("./dashboard-server-socket");
 const config_1 = require("../config");
+const middleware_1 = require("./middleware");
 const expressValidator = require('express-validator');
 const log = require('logplease').create('server', { color: 3 });
 const isDev = process.env.NODE_ENV !== 'production';
@@ -57,16 +58,17 @@ class Server {
         this.express.use('/api/', function (req, res, next) {
             const send = res.send;
             res.send = function (body) {
-                if (res.statusCode != 200)
+                if (![200, 201].includes(res.statusCode))
                     log.warn(body);
                 send.call(this, body);
             };
             next();
         });
-        this.express.use('/dashboard', require('./routes/dashboard'));
-        this.express.use('/api/dashboard', require('./routes/api-dashboard'));
-        this.express.use('/editor', require('./routes/editor'));
-        this.express.use('/api/editor', require('./routes/api-editor'));
+        this.express.use('/dashboard', middleware_1.authMiddleware(), require('./routes/dashboard'));
+        this.express.use('/api/dashboard', middleware_1.authMiddleware(), require('./routes/api-dashboard'));
+        this.express.use('/editor', middleware_1.authMiddleware(), require('./routes/editor'));
+        this.express.use('/api/editor', middleware_1.authMiddleware(), require('./routes/api-editor'));
+        this.express.use('/api/auth', require('./routes/auth'));
     }
     handleErrors() {
         this.express.use((req, res) => {

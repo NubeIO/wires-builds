@@ -13,7 +13,7 @@ const axios_1 = require("axios");
 const container_1 = require("../../container");
 const node_1 = require("../../node");
 const bsa_client_config_1 = require("./bsa-client-config");
-let moment = require('moment-timezone');
+const system_utils_1 = require("../system/system-utils");
 class BSACumulocityDeviceNode extends node_1.Node {
     constructor() {
         super();
@@ -29,148 +29,85 @@ class BSACumulocityDeviceNode extends node_1.Node {
         };
     }
     onAdded() {
-        this.onAfterSettingsChange();
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.onAfterSettingsChange();
+        });
     }
     onInputUpdated() {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.side !== container_1.Side.server)
                 return;
             if (this.getInputData(0) && this.inputs[0].updated) {
-                yield this.checkDeviceExists(this);
                 if (this.outputs[0].data && this.outputs[0].data.length == 0)
-                    yield this.createDevice(this);
-                yield this.checkDeviceExists(this);
+                    yield this.createDevice();
+                yield this.checkDeviceExists();
             }
         });
     }
     onAfterSettingsChange() {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.checkDeviceExists(this);
+            if (this.side !== container_1.Side.server)
+                return;
+            yield this.checkDeviceExists();
         });
     }
-    checkDeviceExists(self) {
+    getDeviceName() {
+        let deviceName = this.settings['CumulocityDeviceName'].value || 'unknownDevice';
+        if (!deviceName.startsWith('c8y_'))
+            deviceName = 'c8y_' + deviceName;
+        return deviceName;
+    }
+    checkDeviceExists() {
         return __awaiter(this, void 0, void 0, function* () {
-            var deviceName = self.settings['CumulocityDeviceName'].value || 'unknownDevice';
-            if (!deviceName.startsWith('c8y_'))
-                deviceName = 'c8y_' + deviceName;
-            var ids = [];
+            let deviceName = this.getDeviceName();
             let cfg = bsa_client_config_1.bsaClientConfig('device');
-            cfg['method'] = 'get';
-            cfg['params'] = { query: `name+eq+${deviceName}` };
-            axios_1.default(cfg)
-                .then(function (response) {
+            cfg = Object.assign(Object.assign({}, cfg), { method: 'GET', url: `${cfg.url}?query=name+eq+${deviceName}` });
+            try {
+                const response = yield axios_1.default(cfg);
+                const ids = [];
                 response.data.managedObjects.forEach(device => {
                     ids.push(Number(device.id));
                 });
-                self.setOutputData(0, ids);
-            })
-                .catch(function (error) {
-                self.setOutputData(1, String(error));
-            });
+                this.setOutputData(0, ids);
+                this.setOutputData(1, null);
+            }
+            catch (error) {
+                this.setOutputData(1, String(error));
+            }
         });
     }
-    createDevice(self) {
+    createDevice() {
         return __awaiter(this, void 0, void 0, function* () {
-            var errorFlag = false;
-            const clientIDfromPlat = yield this.getClientID();
-            const deviceIDfromPlat = yield this.getDeviceID();
-            let foundDeviceID = false;
-            let foundClientID = false;
-            typeof deviceIDfromPlat == 'string' ? (foundDeviceID = true) : null;
-            typeof clientIDfromPlat == 'string' ? (foundClientID = true) : null;
-            var deviceName = self.settings['CumulocityDeviceName'].value || 'c8y_unknownDevice';
-            if (!deviceName.startsWith('c8y_'))
-                deviceName = 'c8y_' + deviceName;
+            let clientIdFromPlat;
+            let deviceIdFromPlat;
+            try {
+                clientIdFromPlat = yield system_utils_1.default.getClientID(this);
+            }
+            catch (e) {
+                clientIdFromPlat = 'unknownDeviceID';
+            }
+            try {
+                deviceIdFromPlat = yield system_utils_1.default.getDeviceID(this);
+            }
+            catch (e) {
+                deviceIdFromPlat = 'unknownClientID';
+            }
+            let deviceName = this.getDeviceName();
             let cfg = bsa_client_config_1.bsaClientConfig('device');
-            cfg['method'] = 'post';
-            cfg['data'] = {
-                name: deviceName,
-                type: 'c8y_nube',
-                deviceid: foundDeviceID ? deviceIDfromPlat : 'c8y_unknownDeviceID',
-                clientid: foundClientID ? clientIDfromPlat : 'c8y_unknownClientID',
-                c8y_IsDevice: {},
-            };
-            axios_1.default(cfg)
-                .then(function (response) {
-            })
-                .catch(function (error) {
-                self.setOutputData(this.histErrorOutput, String(error));
-                errorFlag = true;
-            });
-        });
-    }
-    persistProperties() {
-        if (!this.container.db)
-            return;
-        this.container.db.updateNode(this.id, this.container.id, {
-            $set: {
-                properties: this.properties,
-                inputs: this.inputs,
-                settings: this.settings,
-            },
-        });
-    }
-    getDeviceID() {
-        return new Promise((resolve, reject) => {
+            cfg = Object.assign(Object.assign({}, cfg), { method: 'POST', data: {
+                    name: deviceName,
+                    type: 'c8y_nube',
+                    deviceid: deviceIdFromPlat,
+                    clientid: clientIdFromPlat,
+                    c8y_IsDevice: {},
+                } });
             try {
-                this.findMainContainer(this).db.getNodeType('system/platform', (err, docs) => {
-                    if (!err) {
-                        let output = [];
-                        output.push(docs);
-                        if (output[0] && output[0][0] && output[0][0].properties) {
-                            resolve(output[0][0].properties['deviceID'].trim());
-                            return output[0][0].properties['deviceID'].trim();
-                        }
-                        else {
-                        }
-                        resolve(output);
-                        return output;
-                    }
-                    else {
-                        console.log(err);
-                        reject(err);
-                    }
-                });
+                yield axios_1.default(cfg);
             }
             catch (error) {
-                console.log(error);
+                this.setOutputData(1, String(error));
             }
         });
-    }
-    getClientID() {
-        return new Promise((resolve, reject) => {
-            try {
-                this.findMainContainer(this).db.getNodeType('system/platform', (err, docs) => {
-                    if (!err) {
-                        let output = [];
-                        output.push(docs);
-                        if (output[0] && output[0][0] && output[0][0].settings) {
-                            resolve(output[0][0].settings['clientID'].value.trim());
-                            return output[0][0].settings['clientID'].value.trim();
-                        }
-                        else {
-                        }
-                        resolve(output);
-                        return output;
-                    }
-                    else {
-                        console.log(err);
-                        reject(err);
-                    }
-                });
-            }
-            catch (error) {
-                console.log(error);
-            }
-        });
-    }
-    findMainContainer(search) {
-        if (search.hasOwnProperty('container')) {
-            return this.findMainContainer(search['container']);
-        }
-        else {
-            return search;
-        }
     }
 }
 container_1.Container.registerNodeType('bsa/bsa-cumulocity-device', BSACumulocityDeviceNode);

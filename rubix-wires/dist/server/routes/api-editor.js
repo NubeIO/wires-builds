@@ -335,7 +335,8 @@ function moveNodesToNewContainer(container, nodes, paramsCid) {
             importedNodes.push(n);
             container.last_node_id = n.id;
         });
-        container_utils_1.default.updateSubContainerLastNodeId(container, container.last_node_id);
+        if (container.container_node)
+            container_utils_1.default.updateSubContainerLastNodeId(container, container.last_node_id);
     });
     container_utils_1.default.removeBrokenLinks(container_1.Container.containers[paramsCid]);
     container_utils_1.default.removeBrokenLinks(container_1.Container.containers[convertedParamsCid]);
@@ -373,7 +374,8 @@ function importNodes(container, nodes, paramsCid, pos, isCloned = false) {
                 importedNodes.push(n);
                 container.last_node_id = n.id;
             });
-            container_utils_1.default.updateSubContainerLastNodeId(container, container.last_node_id);
+            if (container.container_node)
+                container_utils_1.default.updateSubContainerLastNodeId(container, container.last_node_id);
         }
     });
     container_utils_1.default.addInputsLinkNodes(importedNodes, nodes, updateInputs);

@@ -16,7 +16,7 @@ const Logger = require('logplease');
 const logger = Logger.create('edge-utils', { color: Logger.Colors.Grey });
 class Edge28Utils {
     static sendPayloadToChild(childNode, payload) {
-        if (childNode['subscribe']) {
+        if (childNode && childNode['subscribe']) {
             childNode['subscribe'](this.createMessage(edge_constant_1.SEND_PAYLOAD_TO_CHILD, payload));
         }
         else {

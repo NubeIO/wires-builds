@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const AjaxRequest_1 = require("../../../client/helpers/AjaxRequest");
 const log = require('logplease').create('client', { color: 3 });
 class ChartLogPage {
     constructor() {
@@ -62,7 +63,7 @@ class ChartLogPage {
     createControles() {
         let that = this;
         $('#clear-button').click(function () {
-            $.ajax({
+            AjaxRequest_1.default.ajax({
                 url: '/api/editor/c/' + that.container_id + '/n/' + that.node_id + '/clear',
                 type: 'POST',
             });

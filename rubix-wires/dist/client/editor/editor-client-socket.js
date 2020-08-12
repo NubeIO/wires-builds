@@ -5,6 +5,7 @@ const io = require("socket.io-client");
 const utils_1 = require("../../nodes/utils");
 const events_1 = require("../../events");
 const container_utils_1 = require("../../nodes/container-utils");
+const AjaxRequest_1 = require("../helpers/AjaxRequest");
 const log = require('logplease').create('editor-socket', { color: 3 });
 class EditorClientSocket {
     constructor(editor) {
@@ -286,7 +287,7 @@ class EditorClientSocket {
     }
     configureNodes(callback) {
         let root_id = 0;
-        $.ajax({
+        AjaxRequest_1.default.ajax({
             url: '/api/editor/c/' + root_id,
             success: function (nodes) {
                 let rootContainer = container_1.Container.containers[root_id];
@@ -298,7 +299,7 @@ class EditorClientSocket {
     }
     getContainerState() {
         let that = this;
-        $.ajax({
+        AjaxRequest_1.default.ajax({
             url: '/api/editor/state',
             success: function (state) {
                 if (state.isRunning) {
@@ -317,7 +318,7 @@ class EditorClientSocket {
             position: position,
             container: that.editor.renderer.container.id,
         });
-        $.ajax({
+        AjaxRequest_1.default.ajax({
             url: '/api/editor/c/' + that.editor.renderer.container.id + '/n/',
             contentType: 'application/json',
             type: 'POST',
@@ -326,7 +327,7 @@ class EditorClientSocket {
     }
     sendRemoveNodes(ids) {
         let that = this;
-        $.ajax({
+        AjaxRequest_1.default.ajax({
             url: '/api/editor/c/' + that.editor.renderer.container.id + '/n/',
             type: 'DELETE',
             contentType: 'application/json',
@@ -335,7 +336,7 @@ class EditorClientSocket {
     }
     sendMoveToNewContainer(ids) {
         let that = this;
-        $.ajax({
+        AjaxRequest_1.default.ajax({
             url: '/api/editor/c/' + that.editor.renderer.container.id + '/move',
             type: 'PUT',
             contentType: 'application/json',
@@ -344,7 +345,7 @@ class EditorClientSocket {
     }
     sendCloneNode(ids, pos) {
         let that = this;
-        $.ajax({
+        AjaxRequest_1.default.ajax({
             url: '/api/editor/c/' + that.editor.renderer.container.id + '/clone',
             type: 'POST',
             contentType: 'application/json',
@@ -353,7 +354,7 @@ class EditorClientSocket {
     }
     sendExportNode(ids) {
         let that = this;
-        return $.ajax({
+        return AjaxRequest_1.default.ajax({
             url: '/api/editor/c/' + that.editor.renderer.container.id + '/export',
             type: 'POST',
             contentType: 'application/json',
@@ -362,7 +363,7 @@ class EditorClientSocket {
     }
     sendUpdateNodePosition(node) {
         let that = this;
-        $.ajax({
+        AjaxRequest_1.default.ajax({
             url: `/api/editor/c/${that.editor.renderer.container.id}/n/${node.id}/position`,
             contentType: 'application/json',
             type: 'PUT',
@@ -371,7 +372,7 @@ class EditorClientSocket {
     }
     sendUpdateNodeSize(node) {
         let that = this;
-        $.ajax({
+        AjaxRequest_1.default.ajax({
             url: `/api/editor/c/${that.editor.renderer.container.id}/n/${node.id}/size`,
             contentType: 'application/json',
             type: 'PUT',
@@ -393,7 +394,7 @@ class EditorClientSocket {
             target_input_id: target_index,
         };
         let that = this;
-        $.ajax({
+        AjaxRequest_1.default.ajax({
             url: '/api/editor/c/' + that.editor.renderer.container.id + '/l/',
             type: action,
             contentType: 'application/json',
@@ -401,13 +402,13 @@ class EditorClientSocket {
         });
     }
     sendRunContainer() {
-        $.ajax({ url: '/api/editor/run', type: 'POST' });
+        AjaxRequest_1.default.ajax({ url: '/api/editor/run', type: 'POST' });
     }
     sendStopContainer() {
-        $.ajax({ url: '/api/editor/stop', type: 'POST' });
+        AjaxRequest_1.default.ajax({ url: '/api/editor/stop', type: 'POST' });
     }
     sendStepContainer() {
-        $.ajax({ url: '/api/editor/step', type: 'POST' });
+        AjaxRequest_1.default.ajax({ url: '/api/editor/step', type: 'POST' });
     }
     sendJoinContainerRoom(cont_id) {
         log.debug('Join to editor room [' + cont_id + ']');

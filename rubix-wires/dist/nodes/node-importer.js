@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_validator_1 = require("./node-validator");
+const AjaxRequest_1 = require("../client/helpers/AjaxRequest");
 class NodeImporter {
     static importNodes(cid, text, pos) {
         return new Promise((resolve, reject) => {
@@ -18,14 +19,12 @@ class NodeImporter {
                 reject(output.error);
                 return;
             }
-            return $.ajax({
+            return AjaxRequest_1.default.ajax({
                 url: `/api/editor/c/${cid}/import`,
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({ ids: output.value, pos }),
-            }).then(() => {
-                resolve();
-            }, e => reject(e));
+            });
         });
     }
 }

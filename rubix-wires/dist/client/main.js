@@ -10,6 +10,7 @@ const vuebar_1 = require("vuebar");
 const vue_cookie_1 = require("vue-cookie");
 const vuetify_1 = require("./plugins/vuetify");
 const vue_toasted_1 = require("vue-toasted");
+const Registry_1 = require("./helpers/Registry");
 window.jQuery = require('jquery');
 window.$ = require('jquery');
 vue_1.default.use(vue_router_1.default);
@@ -32,4 +33,5 @@ new vue_1.default({
         },
     },
 });
+Registry_1.default.setRouter(router);
 //# sourceMappingURL=main.js.map

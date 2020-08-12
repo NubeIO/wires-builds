@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const AjaxRequest_1 = require("../../../client/helpers/AjaxRequest");
 const log = require('logplease').create('client', { color: 3 });
 class ChartIndexPage {
     constructor() {
@@ -92,7 +93,7 @@ class ChartIndexPage {
     }
     getDataFromServer() {
         let that = this;
-        $.ajax({
+        AjaxRequest_1.default.ajax({
             url: '/api/editor/c/' + this.container_id + '/n/' + this.node_id + '/log',
             type: 'GET',
             success: function (data) {
@@ -225,14 +226,14 @@ class ChartIndexPage {
         $('#chartstyle').change(function () {
             that.style = this.value;
             that.updateChartStyle();
-            $.ajax({
+            AjaxRequest_1.default.ajax({
                 url: '/api/editor/c/' + that.container_id + '/n/' + that.node_id + '/style',
                 type: 'POST',
                 data: { style: that.style },
             });
         });
         $('#clear-button').click(function () {
-            $.ajax({
+            AjaxRequest_1.default.ajax({
                 url: '/api/editor/c/' + that.container_id + '/n/' + that.node_id + '/clear',
                 type: 'POST',
             });
