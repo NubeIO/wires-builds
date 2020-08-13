@@ -335,19 +335,7 @@ class HistoryBase extends node_1.Node {
             const points = [];
             this.properties['obj'].forEach(log => {
                 const dataType = this.settings['dataType'].value;
-                const loggedDataType = typeof log.payload;
-                if (dataType === node_1.Type.NUMBER) {
-                    log.payload = Number((isNaN(log.payload) ? 0 : Number(log.payload)).toFixed(decimals));
-                }
-                else if (dataType === node_1.Type.BOOLEAN) {
-                    if (loggedDataType === 'boolean')
-                        log.payload = Number(log.payload);
-                    else
-                        log.payload = log.payload === 1 || log.payload === 'true' ? 1 : 0;
-                }
-                else if (dataType === node_1.Type.STRING && loggedDataType !== 'string') {
-                    log.payload = JSON.stringify(log.payload);
-                }
+                log.payload = this.convertInput(log.payload, dataType, decimals);
                 const tagList = {};
                 tagList['point'] = this.settings['pointName'].value || 'undefined';
                 Object.keys(log).map(key => {

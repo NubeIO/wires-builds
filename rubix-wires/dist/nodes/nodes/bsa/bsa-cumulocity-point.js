@@ -9,40 +9,34 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const axios_1 = require("axios");
-const container_1 = require("../../container");
+const moment = require("moment-timezone");
 const node_1 = require("../../node");
 const utils_1 = require("../../utils");
-const BACnet_enums_units_1 = require("../../utils/points/BACnet-enums-units");
 const time_utils_1 = require("../../utils/time-utils");
+const axios_1 = require("axios");
+const container_1 = require("../../container");
 const bsa_client_config_1 = require("./bsa-client-config");
-let moment = require('moment-timezone');
+var HistoryMode;
+(function (HistoryMode) {
+    HistoryMode[HistoryMode["COV"] = 0] = "COV";
+    HistoryMode[HistoryMode["PERIODIC"] = 1] = "PERIODIC";
+    HistoryMode[HistoryMode["TRIGGER_ONLY"] = 2] = "TRIGGER_ONLY";
+})(HistoryMode || (HistoryMode = {}));
 class BSACumulocityNode extends node_1.Node {
     constructor() {
         super();
-        this.inInput = 0;
+        this.valueInput = 0;
+        this.interval = -1;
         this.title = 'BSA Cumulocity Point (History)';
         this.description = '';
         this.addInput('input', node_1.Type.ANY);
+    }
+    addHistoryConfiguration() {
         this.addInput('histTrigger', node_1.Type.BOOLEAN);
+        this.addInput('clearStoredHis', node_1.Type.BOOLEAN);
         this.addOutput('histError', node_1.Type.ANY);
         this.addOutput('storedHistCount', node_1.Type.NUMBER);
         this.addOutput('lastHistExport', node_1.Type.STRING);
-        for (var input in this.inputs) {
-            if (this.inputs[input].name == 'histTrigger')
-                this.histTriggerInput = Number(input);
-        }
-        for (var output in this.outputs) {
-            if (this.outputs[output].name == 'histError') {
-                this.histErrorOutput = Number(output);
-            }
-            else if (this.outputs[output].name == 'storedHistCount') {
-                this.storedHistCountOutput = Number(output);
-            }
-            else if (this.outputs[output].name == 'lastHistExport') {
-                this.lastHistExportOutput = Number(output);
-            }
-        }
         this.settings['enable'] = {
             description: 'History Enable',
             value: false,
@@ -73,12 +67,24 @@ class BSACumulocityNode extends node_1.Node {
             type: node_1.SettingType.DROPDOWN,
             config: {
                 items: [
-                    { value: 0, text: 'Change Of Value (COV)' },
-                    { value: 1, text: 'Periodic' },
-                    { value: 2, text: 'Trigger Only' },
+                    { value: HistoryMode.COV, text: 'Change Of Value (COV)' },
+                    { value: HistoryMode.PERIODIC, text: 'Periodic' },
+                    { value: HistoryMode.TRIGGER_ONLY, text: 'Trigger Only' },
                 ],
             },
-            value: 0,
+            value: HistoryMode.COV,
+        };
+        this.settings['dataType'] = {
+            description: 'Data type for storing',
+            type: node_1.SettingType.DROPDOWN,
+            config: {
+                items: [
+                    { value: node_1.Type.NUMBER, text: 'Number' },
+                    { value: node_1.Type.BOOLEAN, text: 'Boolean' },
+                    { value: node_1.Type.STRING, text: 'String' },
+                ],
+            },
+            value: node_1.Type.NUMBER,
         };
         this.settings['threshold'] = {
             description: 'COV Threshold',
@@ -95,13 +101,13 @@ class BSACumulocityNode extends node_1.Node {
             type: node_1.SettingType.DROPDOWN,
             config: {
                 items: [
-                    { value: 'milliseconds', text: 'Milliseconds' },
-                    { value: 'seconds', text: 'Seconds' },
-                    { value: 'minutes', text: 'Minutes' },
-                    { value: 'hours', text: 'Hours' },
+                    { value: time_utils_1.TIME_TYPE.MILLISECONDS, text: 'Milliseconds' },
+                    { value: time_utils_1.TIME_TYPE.SECONDS, text: 'Seconds' },
+                    { value: time_utils_1.TIME_TYPE.MINUTES, text: 'Minutes' },
+                    { value: time_utils_1.TIME_TYPE.HOURS, text: 'Hours' },
                 ],
             },
-            value: 'minutes',
+            value: time_utils_1.TIME_TYPE.MINUTES,
         };
         this.settings['storage-limit'] = {
             description: 'Local Storage Limit (Max 50)',
@@ -119,7 +125,7 @@ class BSACumulocityNode extends node_1.Node {
             type: node_1.SettingType.NUMBER,
         };
         this.settings['timeAsString'] = {
-            description: 'Display Timestamp as:',
+            description: 'Display Timestamp as',
             type: node_1.SettingType.DROPDOWN,
             config: {
                 items: [
@@ -129,281 +135,197 @@ class BSACumulocityNode extends node_1.Node {
             },
             value: true,
         };
-        this.settings['unitsType'] = {
-            description: 'Units Category (save to get Units)',
-            type: node_1.SettingType.DROPDOWN,
-            config: {
-                items: BACnet_enums_units_1.default.unitCategory,
-            },
-        };
         this.settings['units'] = {
             description: 'Units',
-            value: BACnet_enums_units_1.default.COMMON_METRIC.NO_UNITS,
-            type: node_1.SettingType.DROPDOWN,
+            value: '',
+            type: node_1.SettingType.STRING,
         };
-        this.setSettingsConfig({ groups: [{ unitsType: {}, units: {} }], conditions: {} });
-        this.settingConfigs.groups.push({ period: { weight: 2 }, periodUnits: {} });
-        this.settingConfigs.conditions['threshold'] = setting => {
-            return !setting['historyMode'].value;
-        };
-        this.settingConfigs.conditions['period'] = setting => {
-            return setting['historyMode'].value == 1;
-        };
-        this.settingConfigs.conditions['periodUnits'] = setting => {
-            return setting['historyMode'].value == 1;
-        };
-        this.obj = [];
-        this.timeoutFunc;
-        this.useInterval = false;
-        this.properties['lastHistoryValue'] = null;
-        this.properties['dynamicInputStartPosition'] = this.getInputsCount();
-        this.properties['valueInput'] = 0;
-        this.properties['isOutput'] = true;
+        this.properties['obj'] = [];
+    }
+    setup() {
+        this.addHistoryConfiguration();
+    }
+    init() {
+        this.assignInputsOutputs();
     }
     onAdded() {
-        this.properties['pointName'] = this.settings['CumulocityPointName'].value || 'undefined';
-        this.onAfterSettingsChange();
+        this.assignInputsOutputs();
+        this.resetOutputs();
+        this.doPeriodicHistoryFunctions();
     }
     onInputUpdated() {
         return __awaiter(this, void 0, void 0, function* () {
-            if (this.side !== container_1.Side.server)
-                return;
-            let input = null;
-            if (this.properties['isOutput']) {
-                input = this.getInputData(this.properties['valueInput']);
+            if (this.getInputData(this.clearStoredHisInput)) {
+                this.properties['obj'] = [];
+                this.updateHistoryCountOutput();
             }
-            else {
-                input = this.outputs[this.properties['valueInput']].data;
-            }
-            if (this.getInputData(this.histTriggerInput) && this.inputs[this.histTriggerInput].updated) {
-                yield this.storeLogEntry(input);
-            }
-            else if (input != null && (yield this.checkCOV(input))) {
-                yield this.storeLogEntry(input);
-            }
-            if (this.obj.length > 0)
-                yield this.trySendStoredData(this);
-            this.setOutputData(this.storedHistCountOutput, this.obj.length);
+            yield this.doNonPeriodicHistoryFunctions();
         });
     }
     onAfterSettingsChange() {
-        this.properties['pointName'] = this.settings['CumulocityPointName'].value;
-        const unitsType = this.settings['unitsType'].value;
-        this.settings['units'].config = {
-            items: BACnet_enums_units_1.default.unitType(unitsType),
-        };
-        this.broadcastSettingsToClients();
-        this.setPeriodicLogging();
-        this.persistProperties();
-        if (this.properties['isOutput'])
-            this.onInputUpdated();
-        if (this.side !== container_1.Side.server)
-            return;
-    }
-    storeLogEntry(input) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (input == null)
-                return -1;
-            const storageLimit = utils_1.default.clamp(this.settings['storage-limit'].value, 0, 50);
-            const minuteRound = utils_1.default.clamp(this.settings['minuteRoundValue'].value, 0, 60);
-            const now = minuteRound ? yield this.nearestFutureMinutes(minuteRound, moment()) : moment();
-            let msg = {
-                payload: input,
-                timestamp: now._d,
-            };
-            for (var i = this.properties['dynamicInputStartPosition']; i < this.properties['dynamicInputStartPosition'] + Number(this.properties['alarmsCount']); i++) {
-                let alarmNum = i - this.properties['dynamicInputStartPosition'] + 1;
-                let alarmName = this.settings['alarm' + alarmNum].value || 'alarm' + alarmNum;
-                msg[alarmName] = this.getInputData(i) || 'null';
-            }
-            var tags = [];
-            var j = 1;
-            while (j <= Number(this.properties['tagsCount'])) {
-                if (this.settings['tag' + j].value)
-                    tags.push(this.settings['tag' + j].value);
-                j++;
-            }
-            msg['tags'] = tags;
-            this.obj.push(msg);
-            while (this.obj.length > storageLimit) {
-                this.obj.shift();
-            }
-            this.properties['lastHistoryValue'] = input;
-            this.persistProperties();
-            return this.obj.length;
+            yield this.doNonPeriodicHistoryFunctions();
+            this.doPeriodicHistoryFunctions();
         });
     }
-    trySendStoredData(self) {
+    onRemoved() {
+        clearInterval(this.timeoutFunc);
+    }
+    assignInputsOutputs() {
+        for (let input in this.inputs) {
+            if (this.inputs.hasOwnProperty(input)) {
+                if (this.inputs[input].name == 'histTrigger')
+                    this.histTriggerInput = Number(input);
+                if (this.inputs[input].name == 'clearStoredHis')
+                    this.clearStoredHisInput = Number(input);
+            }
+        }
+        for (let output in this.outputs) {
+            if (this.outputs.hasOwnProperty(output)) {
+                if (this.outputs[output].name == 'histError')
+                    this.histErrorOutput = Number(output);
+                else if (this.outputs[output].name == 'storedHistCount')
+                    this.storedHistCountOutput = Number(output);
+                else if (this.outputs[output].name == 'lastHistExport')
+                    this.lastHistExportOutput = Number(output);
+            }
+        }
+    }
+    resetOutputs() {
+        this.updateHistoryCountOutput();
+    }
+    doNonPeriodicHistoryFunctions() {
         return __awaiter(this, void 0, void 0, function* () {
-            let decimals = self.settings['decimals'].value;
-            if (decimals > 5)
-                decimals = 5;
-            var errorFlag = false;
-            var multiPointPost = [];
-            this.obj.forEach(point => {
-                var measurementName = self.settings['CumulocityPointName'].value || 'c8y_unknownPoint';
-                if (!measurementName.startsWith('c8y_'))
-                    measurementName = 'c8y_' + measurementName;
-                var measurementType = self.settings['CumulocityPointType'].value || 'c8y_unknownType';
-                if (!measurementType.startsWith('c8y_'))
-                    measurementType = 'c8y_' + measurementType;
-                const seriesName = this.settings['CumulocitySeries'].value || 'unknownSeries';
+            if (this.side !== container_1.Side.server)
+                return;
+            if (!this.settings['enable'].value)
+                return;
+            const input = this.getInputData(this.valueInput);
+            if (this.checkTriggered()) {
+                yield this.storeLogEntry(input);
+            }
+            else if (this.checkCOV(input)) {
+                yield this.storeLogEntry(input);
+            }
+            if (this.properties['obj'].length > 0)
+                yield this.trySendStoredData();
+        });
+    }
+    trySendStoredData() {
+        return __awaiter(this, void 0, void 0, function* () {
+            let decimals = this.settings['decimals'].value;
+            decimals = utils_1.default.clamp(decimals, 0, 5);
+            const multiPointPost = [];
+            let measurementName = this.settings['CumulocityPointName'].value || 'c8y_unknownPoint';
+            if (!measurementName.startsWith('c8y_'))
+                measurementName = 'c8y_' + measurementName;
+            let measurementType = this.settings['CumulocityPointType'].value || 'c8y_unknownType';
+            if (!measurementType.startsWith('c8y_'))
+                measurementType = 'c8y_' + measurementType;
+            const seriesName = this.settings['CumulocitySeries'].value || 'unknownSeries';
+            this.properties['obj'].forEach(log => {
+                const dataType = this.settings['dataType'].value;
+                log.payload = this.convertInput(log.payload, dataType, decimals);
                 multiPointPost.push({
                     source: {
-                        id: self.settings['CumulocityDeviceID'].value,
+                        id: this.settings['CumulocityDeviceID'].value,
                     },
-                    time: moment(point.timestamp.valueOf())._d,
+                    time: log.timestamp,
                     type: measurementType,
                     [measurementName]: {
                         [seriesName]: {
-                            value: point.payload,
+                            value: log.payload,
                             unit: String(this.settings['units'].value) || 'undefined',
                         },
                     },
                 });
             });
-            console.log('SEND DATA \n', multiPointPost);
+            this.debugInfo(`SENDING DATA: ${JSON.stringify(multiPointPost)}`);
             let cfg = bsa_client_config_1.bsaClientConfig('measurement');
-            cfg['data'] = { measurements: multiPointPost };
-            axios_1.default(cfg)
-                .then(function (response) {
-                console.log('RESPONSE', response);
-            })
-                .catch(function (error) {
-                console.log('ERROR', error);
-                self.setOutputData(this.histErrorOutput, String(error));
-                errorFlag = true;
-            });
-            if (!errorFlag) {
-                this.obj = [];
+            cfg = Object.assign(Object.assign({}, cfg), { method: 'POST', data: { measurements: multiPointPost } });
+            try {
+                const response = yield axios_1.default(cfg);
+                this.debugInfo(`RESPONSE FROM SERVER: ${JSON.stringify(response.data)}`);
+                this.properties['obj'] = [];
+                this.persistProperties(false, true);
                 this.setOutputData(this.histErrorOutput, '');
                 this.settings['timeAsString'].value
                     ? this.setOutputData(this.lastHistExportOutput, moment().format(), true)
                     : this.setOutputData(this.lastHistExportOutput, moment().valueOf(), true);
+                this.updateHistoryCountOutput();
+            }
+            catch (e) {
+                this.debugErr(`ERROR: ${e}`);
+                this.setOutputData(this.histErrorOutput, e);
             }
         });
+    }
+    storeLogEntry(input) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (input == null)
+                return;
+            const storageLimit = utils_1.default.clamp(this.settings['storage-limit'].value, 0, 50);
+            const minuteRound = utils_1.default.clamp(this.settings['minuteRoundValue'].value, 0, 60);
+            const now = minuteRound ? time_utils_1.default.nearestFutureMinutes(minuteRound, moment()) : moment();
+            const msg = {
+                payload: input,
+                timestamp: now.toISOString(),
+            };
+            this.properties['obj'].push(msg);
+            while (this.properties['obj'].length > storageLimit) {
+                this.properties['obj'].shift();
+            }
+            this.properties['lastHistoryValue'] = input;
+            this.persistProperties(false, true);
+            this.updateHistoryCountOutput();
+        });
+    }
+    checkTriggered() {
+        return (this.settings['historyMode'].value === HistoryMode.TRIGGER_ONLY &&
+            this.getInputData(this.histTriggerInput) &&
+            this.inputs[this.histTriggerInput].updated);
     }
     checkCOV(input) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (!this.settings['historyMode'].value) {
-                const threshold = this.settings['threshold'].value;
-                if (threshold === 0 && input !== this.properties['lastHistoryValue'])
-                    return true;
-                const isNumber = typeof input === 'number';
-                if (input !== this.properties['lastHistoryValue']) {
-                    if (typeof this.properties['lastHistoryValue'] !== 'number' ||
-                        !isNumber ||
-                        (isNumber &&
-                            Math.abs(input - this.properties['lastHistoryValue']) >=
-                                this.settings['threshold'].value)) {
-                        return true;
-                    }
-                }
+        if (this.settings['historyMode'].value === HistoryMode.COV) {
+            const threshold = this.settings['threshold'].value;
+            if (!isNaN(input) && !isNaN(this.properties['lastHistoryValue'])) {
+                return Math.abs(Number(input) - Number(this.properties['lastHistoryValue'])) >= threshold;
             }
-            return false;
-        });
-    }
-    setPeriodicLogging() {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (this.settings['historyMode'].value == 1 && !this.useInterval) {
-                this.useInterval = true;
-                let interval = this.settings['period'].value;
-                interval = time_utils_1.default.timeConvert(interval, this.settings['periodUnits'].value);
-                this.timeoutFunc = setInterval(() => __awaiter(this, void 0, void 0, function* () {
-                    let input = null;
-                    if (this.properties['isOutput']) {
-                        input = this.getInputData(this.properties['valueInput']);
-                    }
-                    else {
-                        input = this.outputs[this.properties['valueInput']].data;
-                    }
-                    yield this.storeLogEntry(input);
-                    if (this.obj.length > 0)
-                        yield this.trySendStoredData(this);
-                    this.setOutputData(this.storedHistCountOutput, this.obj.length);
-                }), interval);
+            else {
+                return input !== this.properties['lastHistoryValue'];
             }
-            else if (this.settings['historyMode'].value != 1 && this.useInterval) {
-                this.useInterval = false;
-                clearInterval(this.timeoutFunc);
-            }
-        });
+        }
+        return false;
     }
-    nearestFutureMinutes(interval, someMoment) {
-        const roundedMinutes = Math.ceil(someMoment.minute() / interval) * interval;
-        return someMoment
-            .clone()
-            .minute(roundedMinutes)
-            .second(0);
-    }
-    persistProperties() {
-        if (!this.container.db)
+    doPeriodicHistoryFunctions() {
+        if (this.side !== container_1.Side.server)
             return;
-        this.container.db.updateNode(this.id, this.container.id, {
-            $set: {
-                properties: this.properties,
-                inputs: this.inputs,
-                settings: this.settings,
-            },
-        });
-    }
-    getDeviceID() {
-        return new Promise((resolve, reject) => {
-            try {
-                this.findMainContainer(this).db.getNodeType('system/platform', (err, docs) => {
-                    if (!err) {
-                        let output = [];
-                        output.push(docs);
-                        if (output[0] && output[0][0] && output[0][0].properties) {
-                            resolve(output[0][0].properties['deviceID'].trim());
-                            return output[0][0].properties['deviceID'].trim();
-                        }
-                        else {
-                        }
-                        resolve(output);
-                        return output;
-                    }
-                    else {
-                        reject(err);
-                    }
-                });
+        const enable = this.settings['enable'].value;
+        const isPeriodic = this.settings['historyMode'].value === HistoryMode.PERIODIC;
+        if (!enable || !isPeriodic) {
+            if (this.timeoutFunc) {
+                this.interval = -1;
+                clearInterval(this.timeoutFunc);
+                this.debugInfo('Clearing Periodic interval data insertion...');
             }
-            catch (error) {
-            }
-        });
-    }
-    getClientID() {
-        return new Promise((resolve, reject) => {
-            try {
-                this.findMainContainer(this).db.getNodeType('system/platform', (err, docs) => {
-                    if (!err) {
-                        let output = [];
-                        output.push(docs);
-                        if (output[0] && output[0][0] && output[0][0].settings) {
-                            resolve(output[0][0].settings['clientID'].value.trim());
-                            return output[0][0].settings['clientID'].value.trim();
-                        }
-                        else {
-                        }
-                        resolve(output);
-                        return output;
-                    }
-                    else {
-                        reject(err);
-                    }
-                });
-            }
-            catch (error) {
-            }
-        });
-    }
-    findMainContainer(search) {
-        if (search.hasOwnProperty('container')) {
-            return this.findMainContainer(search['container']);
         }
-        else {
-            return search;
+        if (enable && isPeriodic) {
+            const interval = time_utils_1.default.timeConvert(this.settings['period'].value, this.settings['periodUnits'].value);
+            if (this.interval !== interval) {
+                clearInterval(this.timeoutFunc);
+                this.timeoutFunc = setInterval(() => __awaiter(this, void 0, void 0, function* () {
+                    const input = this.getInputData(this.valueInput);
+                    yield this.storeLogEntry(input);
+                    if (this.properties['obj'].length > 0)
+                        yield this.trySendStoredData();
+                }), interval);
+                this.interval = interval;
+                this.debugInfo(`Setting Periodic Period of: ${interval} ms`);
+            }
         }
+    }
+    updateHistoryCountOutput() {
+        this.setOutputData(this.storedHistCountOutput, (this.properties['obj'] && this.properties['obj'].length) || 0);
     }
 }
 container_1.Container.registerNodeType('bsa/bsa-cumulocity-point', BSACumulocityNode);

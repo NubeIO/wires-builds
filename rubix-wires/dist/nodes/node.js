@@ -102,6 +102,22 @@ class Node {
         this.clonable = true;
         this.flags = {};
         this.showIcon = true;
+        this.convertInput = (input, dataType, decimals = 3) => {
+            const inputDataType = typeof input;
+            if (dataType === Type.NUMBER) {
+                input = Number((isNaN(input) ? 0 : Number(input)).toFixed(decimals));
+            }
+            else if (dataType === Type.BOOLEAN) {
+                if (inputDataType === 'boolean')
+                    input = Number(input);
+                else
+                    input = input === 1 || input === 'true' ? 1 : 0;
+            }
+            else if (dataType === Type.STRING && inputDataType !== 'string') {
+                input = JSON.stringify(input);
+            }
+            return input;
+        };
     }
     onAfterSettingsChange(oldSettings, oldName) { }
     configure(ser_node) {
