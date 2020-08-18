@@ -12,6 +12,7 @@ class ConnectionLocalTransmitterSingleNode extends node_1.Node {
         this.addInputWithSettings('topic', node_1.Type.STRING, 'ID', 'Topic ID', false);
     }
     onAdded() {
+        this.onInputUpdated();
     }
     onInputUpdated() {
         const val = this.inputs[0].data;
@@ -27,7 +28,7 @@ class ConnectionLocalTransmitterSingleNode extends node_1.Node {
         this.updateTitle(name);
         let receivers = container_1.Container.containers[0].getNodesByType('connection/link-receiver-single', true);
         receivers.forEach(receiver => {
-            if (receiver.properties['topic_setting'] === topic) {
+            if (receiver.properties['topic'] === topic) {
                 receiver.properties['val'] = val;
                 receiver.properties['topic'] = topic;
                 receiver.setOutputData(0, val);

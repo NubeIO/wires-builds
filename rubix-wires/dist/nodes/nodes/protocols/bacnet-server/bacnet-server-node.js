@@ -7,6 +7,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const decorators_1 = require("../../../../utils/decorators");
+const helper_1 = require("../../../../utils/helper");
 const container_1 = require("../../../container");
 const node_1 = require("../../../node");
 const registry_1 = require("../../../registry");
@@ -46,12 +47,21 @@ class BACnetServerNode extends ProtocolDeviceNode_1.ProtocolDeviceNode {
                 this.debugWarn(`Request action doesn't match`);
         }
     }
+    dependantsConnectionNode() {
+        return this.points.listNodeIds()
+            .map(id => registry_1.default._nodes[id])
+            .filter(n => n)
+            .map(n => n);
+    }
     applyTitle() {
         super.applyTitle();
         this.title = `BACnet Server (ID: ${this.settings['id'].value}, Name: ${this.settings['name'].value})`;
         this.name = `BACnet Server ${this.settings['name'].value}`;
         this.broadcastSettingsToClients();
         this.broadcastNameToClients();
+    }
+    connectedCondition() {
+        return this.device !== null;
     }
     createThenStart() {
         this.device = new bacnet_device_1.default({
@@ -80,7 +90,7 @@ class BACnetServerNode extends ProtocolDeviceNode_1.ProtocolDeviceNode {
     }
     afterRegister(payload) {
         var _a, _b, _c, _d;
-        if ((_a = payload) === null || _a === void 0 ? void 0 : _a.enabled) {
+        if (((_a = payload) === null || _a === void 0 ? void 0 : _a.enabled) && this.getConnectionStatus().isConnected()) {
             this.device.addPoint((_b = payload) === null || _b === void 0 ? void 0 : _b.data);
             return (_d = (_c = payload) === null || _c === void 0 ? void 0 : _c.data) === null || _d === void 0 ? void 0 : _d.pointValue;
         }
@@ -88,7 +98,7 @@ class BACnetServerNode extends ProtocolDeviceNode_1.ProtocolDeviceNode {
     }
     pushValue(payload) {
         var _a, _b, _c, _d;
-        if ((_a = payload) === null || _a === void 0 ? void 0 : _a.enabled) {
+        if (((_a = payload) === null || _a === void 0 ? void 0 : _a.enabled) && this.getConnectionStatus().isConnected()) {
             this.device.updatePointValue((_b = payload) === null || _b === void 0 ? void 0 : _b.data);
             return (_d = (_c = payload) === null || _c === void 0 ? void 0 : _c.data) === null || _d === void 0 ? void 0 : _d.pointValue;
         }
@@ -96,7 +106,7 @@ class BACnetServerNode extends ProtocolDeviceNode_1.ProtocolDeviceNode {
     }
     afterUnregister(payload) {
         var _a, _b, _c, _d, _e, _f;
-        if (((_b = (_a = payload) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.objectInstance) && this.device) {
+        if (((_b = (_a = payload) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.objectInstance) && this.getConnectionStatus().isConnected()) {
             this.device.delObject((_d = (_c = payload) === null || _c === void 0 ? void 0 : _c.data) === null || _d === void 0 ? void 0 : _d.objectInstance, (_f = (_e = payload) === null || _e === void 0 ? void 0 : _e.data) === null || _f === void 0 ? void 0 : _f.objectType);
         }
         return null;
@@ -105,6 +115,9 @@ class BACnetServerNode extends ProtocolDeviceNode_1.ProtocolDeviceNode {
         let node = registry_1.default._nodes[nodeId];
         if (!node) {
             throw new Error(`Cannot find nodeId ${nodeId}`);
+        }
+        if (!node.getConnectionStatus().isConnected()) {
+            return;
         }
         let bp = bacnet_model_1.BacnetPointCreator.create(node.isEnabled(), objectId, objectType, null, presentValue, priority, priorityArray);
         let pointNode = node.points.lookup(bp.identifier());
@@ -117,16 +130,21 @@ class BACnetServerNode extends ProtocolDeviceNode_1.ProtocolDeviceNode {
 }
 __decorate([
     decorators_1.ErrorHandler
-], BACnetServerNode.prototype, "createThenStart", null);
+], BACnetServerNode.prototype, "onListenPointChange", null);
 class BacnetNodeServerStore extends container_node_store_1.AbstractContainerStore {
     constructor() {
         super(...arguments);
         this.pointNodes = {};
+        this.errors = new container_node_store_1.DefaultContainerErrorNode();
     }
     checkExistence(payload) {
-        var _a, _b;
-        if (this.pointNodes[payload.identifier]) {
-            throw new Error(`Already exist object with ${(_a = payload.data) === null || _a === void 0 ? void 0 : _a.objectInstance} and type ${(_b = payload.data) === null || _b === void 0 ? void 0 : _b.objectType}`);
+        var _a, _b, _c, _d, _e, _f, _g;
+        if (this.pointNodes[(_a = payload) === null || _a === void 0 ? void 0 : _a.identifier]) {
+            if (((_b = payload) === null || _b === void 0 ? void 0 : _b.lenient) && this.pointNodes[(_c = payload) === null || _c === void 0 ? void 0 : _c.identifier].nodeId === ((_d = payload) === null || _d === void 0 ? void 0 : _d.nodeId)) {
+                return;
+            }
+            this.errors.addError((_e = payload) === null || _e === void 0 ? void 0 : _e.nodeId);
+            throw new Error(`Already exist object with ${(_f = payload.data) === null || _f === void 0 ? void 0 : _f.objectInstance} and type ${(_g = payload.data) === null || _g === void 0 ? void 0 : _g.objectType}`);
         }
     }
     lookup(identifier) {
@@ -134,15 +152,23 @@ class BacnetNodeServerStore extends container_node_store_1.AbstractContainerStor
         return _a = this.pointNodes[identifier], (_a !== null && _a !== void 0 ? _a : null);
     }
     unregister(payload, force, cb) {
-        var _a, _b;
+        var _a, _b, _c, _d, _e;
+        let item = this.lookup((_a = payload) === null || _a === void 0 ? void 0 : _a.identifier);
+        if (item && item.nodeId !== ((_b = payload) === null || _b === void 0 ? void 0 : _b.nodeId)) {
+            this.errors.removeError((_c = payload) === null || _c === void 0 ? void 0 : _c.nodeId);
+            return null;
+        }
         if (force) {
-            delete this.pointNodes[(_a = payload) === null || _a === void 0 ? void 0 : _a.identifier];
+            delete this.pointNodes[(_d = payload) === null || _d === void 0 ? void 0 : _d.identifier];
         }
         else {
             this.add(payload);
-            this.pointNodes[(_b = payload) === null || _b === void 0 ? void 0 : _b.identifier].enabled = false;
+            this.pointNodes[(_e = payload) === null || _e === void 0 ? void 0 : _e.identifier].enabled = false;
         }
         return cb && cb(payload);
+    }
+    listNodeIds() {
+        return helper_1.unionToArray(Object.values(this.pointNodes).map(v => v.nodeId), this.errors.listErrors());
     }
     isDifferent(payload) {
         var _a, _b, _c;

@@ -40,6 +40,7 @@ class TimeConvertNode extends node_1.Node {
     }
     onAdded() {
         this.setConversionFunction();
+        this.onAfterSettingsChange();
     }
     onInputUpdated() {
         this.onInputOrSettingsChange();

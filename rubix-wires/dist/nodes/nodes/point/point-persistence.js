@@ -56,6 +56,7 @@ class PointPersistence extends node_1.Node {
         const message = this.getInputData(1);
         if (message !== undefined && message !== null && message.length) {
             this.properties['output'] = message;
+            this.setOutputData(0, this.properties['output']);
         }
         if (trigger) {
             if (this.properties['output'] !== undefined &&

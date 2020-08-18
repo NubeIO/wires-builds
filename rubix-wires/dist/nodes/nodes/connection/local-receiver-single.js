@@ -22,12 +22,7 @@ class ConnectionLocalReceiverSingleNode extends node_1.Node {
     }
     onInputUpdated() {
         const topicIn = this.getInputData(0);
-        const topicSetting = this.settings['topic'].value;
-        if (this.inputs[0].data) {
-            this.properties['topic_setting'] = topicIn;
-        }
-        else
-            this.properties['topic_setting'] = topicSetting;
+        this.properties['topic'] = topicIn;
         let name = 'Link Receiver Single [' + this.settings['topic'].value + ']';
         this.updateTitle(name);
         this.setOutputData(0, this.properties['val']);

@@ -14,6 +14,8 @@ const container_1 = require("../../container");
 const time_utils_1 = require("../../utils/time-utils");
 const axios_1 = require("axios");
 const system_utils_1 = require("../system/system-utils");
+const config_1 = require("../../../config");
+const btoa = require('btoa');
 class GetSchedulesNode extends node_1.Node {
     constructor() {
         super();
@@ -33,20 +35,16 @@ class GetSchedulesNode extends node_1.Node {
             type: node_1.SettingType.DROPDOWN,
             config: {
                 items: [
-                    { value: 'seconds', text: 'Seconds' },
-                    { value: 'minutes', text: 'Minutes' },
-                    { value: 'hours', text: 'Hours' },
+                    { value: time_utils_1.TIME_TYPE.SECONDS, text: 'Seconds' },
+                    { value: time_utils_1.TIME_TYPE.MINUTES, text: 'Minutes' },
+                    { value: time_utils_1.TIME_TYPE.HOURS, text: 'Hours' },
                 ],
             },
-            value: 'seconds',
+            value: time_utils_1.TIME_TYPE.SECONDS,
         };
         this.setSettingsConfig({
             groups: [{ interval: { weight: 2 }, time: {} }],
         });
-    }
-    onCreated() {
-        this.EXECUTE_INTERVAL = 60000;
-        this.enable = true;
     }
     onAdded() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -57,59 +55,45 @@ class GetSchedulesNode extends node_1.Node {
     }
     onAfterSettingsChange() {
         return __awaiter(this, void 0, void 0, function* () {
-            if (this.side == container_1.Side.server) {
-                this.setExecuteInterval();
-                yield this.onInputUpdated();
-            }
+            this.setExecuteInterval();
+            yield this.onInputUpdated();
         });
     }
     onInputUpdated() {
         return __awaiter(this, void 0, void 0, function* () {
-            if (this.side !== container_1.Side.server)
-                return;
-            if (!this.getInputData(0))
-                this.enable = false;
-            else {
-                this.enable = true;
-                yield this.getDittoSchedules();
-            }
+            yield this.getDittoSchedules();
         });
     }
     onExecute() {
         return __awaiter(this, void 0, void 0, function* () {
-            if (this.side !== container_1.Side.server || !this.enable)
-                return;
             yield this.getDittoSchedules();
         });
     }
     getDittoSchedules() {
         return __awaiter(this, void 0, void 0, function* () {
-            let errorFlag = false;
+            if (this.side !== container_1.Side.server || !this.getInputData(0))
+                return;
             try {
                 const deviceIdFromPlat = yield system_utils_1.default.getDeviceID(this);
-                const self = this;
-                axios_1.default({
+                const { username, password } = config_1.default.ditto;
+                const dittoUrl = config_1.default.ditto.baseURL;
+                const response = yield axios_1.default({
                     method: 'get',
-                    url: 'https://ditto1.nube-iot.com/api/2/things/com.nubeio:' + deviceIdFromPlat + '/features/schedules/properties',
+                    url: dittoUrl + deviceIdFromPlat + '/features/schedules/properties',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': 'Basic bnViZS1kaXR0bzpVeVJadjh6UG9P',
+                        'Authorization': `Basic ${btoa(`${username}:${password}`)}`,
                     },
-                })
-                    .then(function (response) {
-                    self.setOutputData(0, response.data);
-                    self.setOutputData(1, false);
-                    self.properties['scheduleData'] = response.data;
-                    self.persistProperties(false, true);
-                })
-                    .catch(function (error) {
-                    self.debugErr(error);
-                    self.setOutputData(1, String(error));
-                    errorFlag = true;
                 });
+                this.setOutputData(0, response.data);
+                this.setOutputData(1, false);
+                this.properties['scheduleData'] = response.data;
+                this.persistProperties(false, true);
             }
-            catch (e) {
-                this.debugErr(e);
+            catch (error) {
+                this.setOutputData(0, null);
+                this.setOutputData(1, error);
+                this.debugErr(error);
                 return;
             }
         });
@@ -117,7 +101,7 @@ class GetSchedulesNode extends node_1.Node {
     setExecuteInterval() {
         let interval = this.settings['interval'].value;
         interval = time_utils_1.default.timeConvert(interval, this.settings['time'].value);
-        interval = Math.min(interval, 10000);
+        interval = Math.max(interval, 10000);
         this.EXECUTE_INTERVAL = interval;
     }
 }

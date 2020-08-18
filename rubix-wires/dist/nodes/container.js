@@ -406,9 +406,6 @@ class Container {
         if (this.side === Side.server) {
             this.remove(node);
             this.server_editor_socket.emit('nodes-delete', { nodes: [node.id], cid: node.cid });
-            if (node.isDashboardNode) {
-                this.server_dashboard_socket.in('' + node.cid).emit('nodes-delete', { nodes: [node], cid: node.cid });
-            }
         }
     }
     remove(node) {

@@ -23,6 +23,8 @@ class InfluxDBNode extends node_1.Node {
         this.description = 'A node for sending data to influxDB';
         this.addInput('input', node_1.Type.ANY);
         this.addInput('trigger', node_1.Type.BOOLEAN);
+        this.addInputWithSettings('tableName', node_1.Type.STRING, '', 'Measurement Name');
+        this.addInputWithSettings('pointName', node_1.Type.STRING, '', 'Point Name');
         this.addOutput('error', node_1.Type.ANY);
         this.addOutput('storedCount', node_1.Type.NUMBER);
         this.addOutput('lastExport', node_1.Type.STRING);
@@ -38,16 +40,6 @@ class InfluxDBNode extends node_1.Node {
         this.settings['password'] = { description: 'Password', value: '', type: node_1.SettingType.STRING };
         this.settings['databaseName'] = {
             description: 'Database Name',
-            value: '',
-            type: node_1.SettingType.STRING,
-        };
-        this.settings['tableName'] = {
-            description: 'Measurement Name',
-            value: '',
-            type: node_1.SettingType.STRING,
-        };
-        this.settings['pointName'] = {
-            description: 'Point Name',
             value: '',
             type: node_1.SettingType.STRING,
         };
@@ -168,12 +160,12 @@ class InfluxDBNode extends node_1.Node {
                 if (typeof log.payload == 'number')
                     log.payload = log.payload.toFixed(decimals);
                 points.push({
-                    measurement: this.settings['tableName'].value,
+                    measurement: this.getInputData(2),
                     fields: {
                         val: log.payload,
                     },
                     tags: {
-                        point: this.settings['pointName'].value || 'undefined',
+                        point: this.getInputData(3) || 'undefined',
                     },
                     time: log.timestamp.valueOf(),
                 });

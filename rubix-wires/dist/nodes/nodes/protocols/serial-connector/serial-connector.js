@@ -12,7 +12,11 @@ class SerialConnectorNode extends node_1.Node {
         this.port = null;
         this.title = 'Serial Connector';
         this.description =
-            'This node reads/writes serial data from/to the onboard serial ports.  These ports can be RS485 ports, or Rubix Compute wireless interface ports.  Once the Port and Baud Rate settings are configured, when enabled, the ‘output’ will be raw messages received over the configured serial port.  Any values written to the ‘writeValue’ input will be sent on the configured serial port.';
+            `## Description\n ` +
+                ` This node reads/writes serial data from/to the onboard serial ports.  These ports can be RS485 ports, or Rubix Compute wireless interface ports.  Once the Port and Baud Rate settings are configured, when enabled, the ‘output’ will be raw messages received over the configured serial port.  Any values written to the ‘writeValue’ input will be sent on the configured serial port.\n ` +
+                `   \n ` +
+                `## Nube LoRa Raw Baud Rate\n ` +
+                ` Default Baud Rate For Nube LoRa Raw is ***38400*** \n `;
         this.addInput('writeValue', node_1.Type.STRING);
         this.addInput('enable', node_1.Type.BOOLEAN);
         this.addInput('list-ports', node_1.Type.BOOLEAN);

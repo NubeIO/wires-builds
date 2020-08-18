@@ -35,6 +35,7 @@ var Type;
     Type["BOOLEAN"] = "boolean";
     Type["ANY"] = "any";
     Type["JSON"] = "json";
+    Type["DROPDOWN"] = "dropdown";
 })(Type = exports.Type || (exports.Type = {}));
 var NodeState;
 (function (NodeState) {
@@ -76,6 +77,8 @@ exports.convertType = (type) => {
             return SettingType.NUMBER;
         case Type.BOOLEAN:
             return SettingType.BOOLEAN;
+        case Type.DROPDOWN:
+            return SettingType.DROPDOWN;
     }
     return SettingType.STRING;
 };
@@ -269,12 +272,20 @@ class Node {
     }
     getInputData(slotId) {
         try {
-            let data = this.inputs[slotId].data;
+            const input = this.inputs[slotId];
+            let data = input.data;
             if (this.inputs[slotId] &&
                 this.inputs[slotId].setting &&
                 this.inputs[slotId].setting.exist &&
-                !utils_1.default.hasValidInput(data, this.inputs[slotId].setting.nullable)) {
-                data = utils_1.default.parseValue(this.settings[this.inputs[slotId].name.match(/\[(.*?)\]/)[1]].value, this.inputs[slotId].type);
+                (!utils_1.default.hasValidInput(data, this.inputs[slotId].setting.nullable) || input.type === Type.DROPDOWN)) {
+                const settingName = this.inputs[slotId].name.match(/\[(.*?)\]/)[1];
+                const setting = this.settings[settingName];
+                if (input.type === Type.DROPDOWN) {
+                    if (!setting.config.items.map(x => x.value).includes(data))
+                        data = setting.value;
+                }
+                else
+                    data = utils_1.default.parseValue(setting.value, input.type);
             }
             return data;
         }
@@ -331,7 +342,7 @@ class Node {
             this['onInputAdded'](input);
         return id;
     }
-    addInputWithSettings(name, type, defaultValue, description = name, nullable = true, extra_info) {
+    addInputWithSettings(name, type, defaultValue, description = name, nullable = true, config, extra_info) {
         const setting = { exist: true, nullable, hidden: false };
         this.addInput(`[${name}]`, type, setting, extra_info);
         this.settings[name] = {
@@ -339,6 +350,9 @@ class Node {
             value: defaultValue,
             type: exports.convertType(type),
         };
+        if (config) {
+            this.settings[name] = Object.assign(Object.assign({}, this.settings[name]), { config: config });
+        }
     }
     addInputAtPosition(position, name, type, setting = { exist: false, nullable: false, hidden: false }, extra_info = {}) {
         if (!this.inputs)

@@ -52,15 +52,13 @@ class BACnetDevice extends BACnetObject {
                 msg.header.sender.forwardedFrom = null;
             }
             logger.debug(msg.header.sender, this.instance, this.getProperty(PI.SEGMENTATION_SUPPORTED).value, this.getProperty(PI.VENDOR_IDENTIFIER).value);
-            logger.debug(`[send] Replying to whoIs(${msg.payload.lowLimit}..` +
-                `${msg.payload.highLimit}): iAm ${this.instance} -> ` +
+            logger.debug(`[send] Replying to whoIs(${msg.payload.lowLimit}..` + `${msg.payload.highLimit}): iAm ${this.instance} -> ` +
                 `${msg.header.sender.address}/${msg.header.sender.forwardedFrom}`);
             this.client.iAmResponse(msg.header.sender, this.instance, this.getProperty(PI.SEGMENTATION_SUPPORTED).value, this.getProperty(PI.VENDOR_IDENTIFIER).value);
         }
     }
     onWriteProperty(data) {
         logger.debug(`onWriteProperty: ${JSON.stringify(data)}`);
-        logger.debug('============================================');
         const object = this.getObject(data.payload.objectId.instance, data.payload.objectId.type);
         if (!object) {
             return this.client.errorResponse(data.header.sender, data.service, data.invokeId, BE.ErrorClass.OBJECT, BE.ErrorCode.UNKNOWN_OBJECT);
@@ -69,7 +67,7 @@ class BACnetDevice extends BACnetObject {
         let property3 = object.getProperty(PI.PRIORITY_ARRAY);
         let value2 = this.encodePropValue(property3);
         if (!property) {
-            return client.errorResponse(data.header.sender, data.service, data.invokeId, BE.ErrorClass.PROPERTY, BE.ErrorCode.UNKNOWN_PROPERTY);
+            return this.client.errorResponse(data.header.sender, data.service, data.invokeId, BE.ErrorClass.PROPERTY, BE.ErrorCode.UNKNOWN_PROPERTY);
         }
         logger.debug(data.payload.value.property.index);
         if (data.payload.value.property.index === 0xffffffff) {
@@ -86,7 +84,6 @@ class BACnetDevice extends BACnetObject {
                 return arr;
             }
             let aa = arrType(value2, pri, val);
-            logger.debug(aa[0].value);
             let arr = [];
             let p;
             for (p in aa) {
@@ -113,17 +110,14 @@ class BACnetDevice extends BACnetObject {
         }
         else {
             let slot = data.payload.value.property.index;
-            logger.debug(data.payload.value.property.index);
             if (!slot) {
                 return this.client.errorResponse(data.header.sender, data.service, data.invokeId, BE.ErrorClass.PROPERTY, BE.ErrorCode.INVALID_ARRAY_INDEX);
             }
-            slot = data.payload.value.value[0];
             this.client.simpleAckResponse(data.header.sender, data.service, data.invokeId);
         }
     }
     onReadProperty(msg) {
         logger.debug('onReadProperty', msg);
-        logger.debug('============================================');
         const propertyName = Util.getEnumName(PI, msg.payload.property.id);
         const typeName = Util.getEnumName(BE.ObjectType, msg.payload.objectId.type);
         const objectIdName = typeName + ':' + msg.payload.objectId.instance;
@@ -174,16 +168,14 @@ class BACnetDevice extends BACnetObject {
             propGroup.properties.forEach(item => {
                 let content;
                 if (!object) {
-                    content = [
-                        {
+                    content = [{
                             type: 0,
                             value: {
                                 type: 'BacnetError',
                                 errorClass: BE.ErrorClass.OBJECT,
                                 errorCode: BE.ErrorCode.UNKNOWN_OBJECT,
                             },
-                        },
-                    ];
+                        }];
                 }
                 else {
                     if (item.id === PI.ALL) {
@@ -197,16 +189,14 @@ class BACnetDevice extends BACnetObject {
                     }
                     const property = object.getProperty(item.id);
                     if (!property) {
-                        content = [
-                            {
+                        content = [{
                                 type: 0,
                                 value: {
                                     type: 'BacnetError',
                                     errorClass: BE.ErrorClass.PROPERTY,
                                     errorCode: BE.ErrorCode.UNKNOWN_PROPERTY,
                                 },
-                            },
-                        ];
+                            }];
                     }
                     else if (item.index === BE.ASN1_ARRAY_ALL) {
                         content = this.encodePropValue(property);
@@ -248,9 +238,8 @@ class BACnetDevice extends BACnetObject {
             this.client.errorResponse(msg.header.sender, msg.service, msg.invokeId, BE.ErrorClass.OBJECT, BE.ErrorCode.UNKNOWN_OBJECT);
             return;
         }
-        object.subscriptions = object.subscriptions.filter(sub => sub.subscriberAddress !== msg.header.sender &&
-            sub.subscriberProcessId !== msg.payload.subscriberProcessId &&
-            sub.lifetime > 0);
+        object.subscriptions = object.subscriptions.filter(sub => sub.subscriberAddress !== msg.header.sender && sub.subscriberProcessId !==
+            msg.payload.subscriberProcessId && sub.lifetime > 0);
         if (msg.payload.lifetime) {
             const sub = {
                 subscriberAddress: msg.header.sender,
@@ -301,9 +290,8 @@ class BACnetDevice extends BACnetObject {
             this.client.errorResponse(msg.header.sender, msg.service, msg.invokeId, BE.ErrorClass.PROPERTY, BE.ErrorCode.UNKNOWN_PROPERTY);
             return;
         }
-        property.subscriptions = property.subscriptions.filter(sub => sub.subscriberAddress != msg.header.sender &&
-            sub.subscriberProcessId != msg.payload.subscriberProcessId &&
-            sub.lifetime > 0);
+        property.subscriptions = property.subscriptions.filter(sub => sub.subscriberAddress !== msg.header.sender && sub.subscriberProcessId !==
+            msg.payload.subscriberProcessId && sub.lifetime > 0);
         if (msg.payload.lifetime) {
             const sub = {
                 subscriberAddress: msg.header.sender,
@@ -352,9 +340,7 @@ class BACnetDevice extends BACnetObject {
         const objectIdName = typeName + ':' + sub.monitoredObjectId.instance;
         logger.debug(`[send/${sub.subscriberAddress.address}] confirmedCOVNotification: object ${objectIdName}, ${propList.length} items`);
         if (sub.issueConfirmedNotifications) {
-            this.client.confirmedCOVNotification(sub.subscriberAddress, sub.monitoredObjectId, sub.subscriberProcessId, this.instance, sub.lifetime, propList, {
-                invokeId: sub.invokeId,
-            }, err => {
+            this.client.confirmedCOVNotification(sub.subscriberAddress, sub.monitoredObjectId, sub.subscriberProcessId, this.instance, sub.lifetime, propList, { invokeId: sub.invokeId }, err => {
                 if (err) {
                     logger.debug(`[recv/${sub.subscriberAddress.address}] confirmedCOVNotification was rejected:`, err);
                 }

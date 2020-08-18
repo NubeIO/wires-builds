@@ -127,8 +127,8 @@ class Utils {
             if (typeofVal === 'object') {
                 val = JSON.stringify(val);
             }
-            if (val.length > 15)
-                val = val.substr(0, 15) + '...';
+            if (val.length > 30)
+                val = val.substr(0, 30) + '...';
             return val;
         }
         return val;

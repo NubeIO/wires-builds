@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const point_model_1 = require("../../../../../backend/models/point-model");
+const helper_1 = require("../../../../../utils/helper");
 class MqttPointCreator {
     constructor() {
     }
@@ -8,6 +9,9 @@ class MqttPointCreator {
 exports.MqttPointCreator = MqttPointCreator;
 MqttPointCreator.from = (json) => {
     var _a, _b, _c, _d, _e, _f;
+    if (helper_1.isNull(json)) {
+        return null;
+    }
     let pv = (_a = json) === null || _a === void 0 ? void 0 : _a.pointValue;
     return MqttPointCreator.by((_b = json) === null || _b === void 0 ? void 0 : _b.enabled, (_c = json) === null || _c === void 0 ? void 0 : _c.mqttTopic, point_model_1.PointValueCreator.create((_d = pv) === null || _d === void 0 ? void 0 : _d.presentValue, (_e = pv) === null || _e === void 0 ? void 0 : _e.priority, (_f = pv) === null || _f === void 0 ? void 0 : _f.priorityArray));
 };
@@ -44,22 +48,40 @@ class MqttPointValue {
     static parse(message) {
         var _a, _b;
         try {
-            let payload = typeof message === 'object' ? JSON.stringify(message) : message.toString();
-            let m = JSON.parse(payload);
-            return new MqttPointValue((_a = m) === null || _a === void 0 ? void 0 : _a.value, (_b = m) === null || _b === void 0 ? void 0 : _b.priority);
+            let payload = helper_1.isJSON(message) ? message : JSON.parse(message);
+            return new MqttPointValue((_a = payload) === null || _a === void 0 ? void 0 : _a.value, (_b = payload) === null || _b === void 0 ? void 0 : _b.priority);
         }
         catch (e) {
-            throw new Error('Invalid JSON');
+            throw new Error('Invalid JSON when parsing MQTTMessage');
         }
     }
     to() {
-        let pv = point_model_1.PointValueCreator.create(this.value, this.priority);
-        pv.priorityArray = null;
-        return pv;
+        return point_model_1.PointValueCreator.init(this.value, this.priority);
     }
     toString() {
         return JSON.stringify(this);
     }
 }
 exports.MqttPointValue = MqttPointValue;
+class SillyMqttPoint extends DefaultMqttPoint {
+    constructor(mqttPoint, isReqRes) {
+        super(mqttPoint.enabled, mqttPoint.mqttTopic, mqttPoint.pointValue);
+        this.isReqRes = false;
+        this.isReqRes = isReqRes;
+    }
+    mightOnlyValueChanged(point) {
+        var _a;
+        return super.mightOnlyValueChanged(point) && this.isReqRes === ((_a = point) === null || _a === void 0 ? void 0 : _a.isReqRes);
+    }
+    subscribedTopic() {
+        return this.isReqRes ? `${this.mqttTopic}/req` : this.mqttTopic;
+    }
+    publishedTopic() {
+        return this.isReqRes ? `${this.mqttTopic}/res` : this.mqttTopic;
+    }
+}
+exports.SillyMqttPoint = SillyMqttPoint;
+SillyMqttPoint.by = (mqttPoint, isReqRes) => {
+    return helper_1.isNull(mqttPoint) ? null : new SillyMqttPoint(mqttPoint, isReqRes);
+};
 //# sourceMappingURL=mqtt-model.js.map

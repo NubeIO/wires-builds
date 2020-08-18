@@ -3,14 +3,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mqtt_1 = require("mqtt");
 const logger = require('logplease').create('mqtt', { color: 6 });
 class DefaultMqttClient {
-    constructor(options, successConnected, dispatcher) {
+    constructor(options, callbackWhenConnected, callbackWhenOffline, callbackIncomingMessage) {
         this.connected = false;
         this.options = options;
-        this.successConnected = successConnected;
-        this.dispatcher = dispatcher;
+        this.callbackWhenConnected = callbackWhenConnected;
+        this.callbackWhenOffline = callbackWhenOffline;
+        this.callbackIncomingMessage = callbackIncomingMessage;
     }
-    static init(options, successConnected, dispatchMessage) {
-        return new DefaultMqttClient(options, successConnected, dispatchMessage).start();
+    static init(options, callbackWhenConnected, callbackWhenOffline, callbackIncomingMessage) {
+        return new DefaultMqttClient(options, callbackWhenConnected, callbackWhenOffline, callbackIncomingMessage).start();
     }
     onClose() {
         logger.debug(`MQTT Client ${this.clientId} closed`);
@@ -19,17 +20,23 @@ class DefaultMqttClient {
     onConnect(connack) {
         logger.info(`MQTT Client ${this.clientId} connected ${JSON.stringify(connack)}`);
         this.connected = true;
-        if (this.successConnected) {
-            this.successConnected(this);
+        if (this.callbackWhenConnected) {
+            this.callbackWhenConnected(this);
         }
     }
     onDisconnect() {
         logger.warn(`MQTT Client ${this.clientId} disconnected`);
         this.connected = false;
+        if (this.callbackWhenOffline) {
+            this.callbackWhenOffline(this, `Unable connect to server`);
+        }
     }
     onEnd() {
         logger.info(`MQTT Client ${this.clientId} ended`);
         this.connected = false;
+        if (this.callbackWhenOffline) {
+            this.callbackWhenOffline(this);
+        }
     }
     onError(err) {
         logger.error(`Error connection in MQTT Client ${this.clientId}`, err);
@@ -37,11 +44,14 @@ class DefaultMqttClient {
     }
     onMessage(topic, message, packet) {
         logger.info(`MQTT Client '${this.clientId}' dispatch message on topic '${topic}'`);
-        this.dispatcher({ topic, message: message.toString() });
+        this.callbackIncomingMessage({ topic, message: message.toString() });
     }
     onOffline() {
         logger.warn(`MQTT Client '${this.clientId}' is offline`);
         this.connected = false;
+        if (this.callbackWhenOffline) {
+            this.callbackWhenOffline(this, `Unable connect to server`);
+        }
     }
     onPacketReceive(packet) {
         var _a;
@@ -53,8 +63,8 @@ class DefaultMqttClient {
     }
     onReconnect() {
         logger.info(`MQTT Client '${this.clientId}' reconnected`);
-        if (this.successConnected) {
-            this.successConnected(this);
+        if (this.callbackWhenConnected) {
+            this.callbackWhenConnected(this);
         }
     }
     start() {

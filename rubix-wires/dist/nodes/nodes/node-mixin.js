@@ -6,12 +6,9 @@ class NodeInputOutputDecoratorProxy {
     constructor(func) {
         this.func = func;
     }
-    static execute(func) {
-        new NodeInputOutputDecoratorProxy(func).reEvaluateSettingByInput();
-    }
-    reEvaluateSettingByInput() {
+    reEvaluateSettingByInput(inputs, settings) {
         if (this.func && helper_1.isFunction(this.func)) {
-            this.func();
+            this.func(inputs, settings);
         }
     }
 }
@@ -22,10 +19,10 @@ function AbleEnableNode(Base) {
             this.addInputWithSettings(this.enableSettingKey(), node_1.Type.BOOLEAN, false, this.enableDescription());
             return { conditions: {} };
         }
-        reEvaluateSettingByInput() {
+        reEvaluateSettingByInput(inputs, settings) {
             var _a;
-            if (super['reEvaluateSettingByInput'] && helper_1.isFunction(super['reEvaluateSettingByInput'])) {
-                super['reEvaluateSettingByInput']();
+            if (helper_1.isFunction(super['reEvaluateSettingByInput'])) {
+                super['reEvaluateSettingByInput'](inputs, settings);
             }
             this.settings[this.enableSettingKey()].value = (_a = this.inputs[this.enableInputIdx()].data, (_a !== null && _a !== void 0 ? _a : this.settings[this.enableSettingKey()].value));
         }
@@ -36,11 +33,12 @@ function AbleEnableNode(Base) {
             return 'enable';
         }
         isEnabled() {
+            var _a;
             let parentIsEnabled = true;
-            if (super['isEnabled'] && helper_1.isFunction(super['isEnabled'])) {
+            if (helper_1.isFunction(super['isEnabled'])) {
                 parentIsEnabled = super['isEnabled']();
             }
-            return parentIsEnabled && this.settings[this.enableSettingKey()].value;
+            return parentIsEnabled && ((_a = this.settings[this.enableSettingKey()]) === null || _a === void 0 ? void 0 : _a.value);
         }
     }
     return AbleEnableNodeBase;

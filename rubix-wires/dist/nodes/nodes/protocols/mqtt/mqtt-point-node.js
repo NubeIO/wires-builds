@@ -1,75 +1,96 @@
 "use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const decorators_1 = require("../../../../utils/decorators");
 const container_1 = require("../../../container");
 const node_1 = require("../../../node");
 const registry_1 = require("../../../registry");
-const node_mixin_1 = require("../../node-mixin");
 const point_node_1 = require("../model/point-node");
+const ProtocolDeviceNode_1 = require("../ProtocolDeviceNode");
 const mqtt_model_1 = require("./core/mqtt-model");
 const mqtt_client_node_1 = require("./mqtt-client-node");
 const mqtt_client_node_event_1 = require("./mqtt-client-node-event");
-class MqttPointNode extends point_node_1.PointNodeMixin(node_mixin_1.AbleEnableNode(node_1.Node)) {
+const mqtt_client_node_store_1 = require("./mqtt-client-node-store");
+class MqttPointNode extends ProtocolDeviceNode_1.DependantConnectionNodeMixin(point_node_1.PointNodeMixin(node_1.Node)) {
     constructor() {
         super();
+        this._iTopic = 'topic';
         this.title = 'MQTT Point';
-        this.description = `Mqtt Point Node includes MQTT publisher and subscriber inside.`;
+        this.description =
+            'Mqtt Point Node includes MQTT publisher and subscriber inside. ' +
+                'This node connects to an MQTT Broker, subscribes to a topic, ' +
+                'and can publish values once we enable the node.';
         this.mixinEnableInputSetting();
-        this.addInputWithSettings('topic', node_1.Type.STRING, '', 'MQTT Topic');
-        let pvSettingCfg = this.mixinPointValueInputOutput();
-        this.setSettingsConfig(pvSettingCfg);
+        this.mixinConnectionStatusOutput();
+        this.addInputWithSettings(this._iTopic, node_1.Type.STRING, '', 'MQTT Topic');
+        this.settings['enabledReqRes'] = {
+            description: 'Enable Request Response pattern',
+            type: node_1.SettingType.BOOLEAN,
+            value: false,
+        };
+        this.setSettingsConfig(this.mixinPointValueInputOutput());
     }
     onRemoved() {
-        let mqttPoint = this.initializePointBySettingInput();
-        let payload = this.createStoreItem(mqttPoint);
-        mqtt_client_node_event_1.default.unregisterSubscriber(this.getParentNode(), payload);
-        mqtt_client_node_event_1.default.unregisterPublisher(this.getParentNode(), payload);
+        let mqttPoint = this.initializePointBySettingObject();
+        if (mqttPoint) {
+            mqtt_client_node_event_1.default.unregisterPoint(this.getParentNode(), this.createMqttPointStoreItem(mqttPoint));
+        }
+    }
+    reEvaluateSettingByInput(inputs, settings) {
+        settings[this._iTopic].value = inputs[this.topicInputIdx()].updated ? inputs[this.topicInputIdx()].data
+            : settings[this._iTopic].value;
+        super.reEvaluateSettingByInput(inputs, settings);
     }
     handleOnUpdate(current, prev) {
         var _a, _b;
         if (this.side !== container_1.Side.server || (!((_a = prev) === null || _a === void 0 ? void 0 : _a.mqttTopic) && !((_b = current) === null || _b === void 0 ? void 0 : _b.mqttTopic))) {
             return null;
         }
-        let publisherPayload = this.createStoreItem(current, (data) => this.onConvertMessage(data));
-        let subscribePayload = this.createStoreItem(current, (msg, n) => this.onReceiveMessage(msg, n));
+        let payload = this.createMqttPointStoreItem(current);
         if (!prev) {
-            mqtt_client_node_event_1.default.registerSubscriber(this.getParentNode(), subscribePayload);
-            return mqtt_client_node_event_1.default.registerPublisher(this.getParentNode(), publisherPayload);
+            return mqtt_client_node_event_1.default.registerPoint(this.getParentNode(), payload);
         }
         if (!current.mightOnlyValueChanged(prev)) {
-            let prevItem = this.createStoreItem(prev);
-            publisherPayload.prev = prevItem;
-            subscribePayload.prev = prevItem;
-            mqtt_client_node_event_1.default.updateSubscriber(this.getParentNode(), subscribePayload);
-            return mqtt_client_node_event_1.default.updatePublisher(this.getParentNode(), publisherPayload);
+            payload.publisher.prev = this.createMqttPointStoreItem(prev);
+            payload.subscriber.prev = this.createMqttPointStoreItem(prev);
+            return mqtt_client_node_event_1.default.updatePoint(this.getParentNode(), payload);
+        }
+        if (current.isReqRes) {
+            return mqtt_client_node_event_1.default.publishData(this.getParentNode(), payload.toPublisher());
         }
         let cov = current.pointValue.changedOfValue(prev.pointValue);
         if (cov) {
-            publisherPayload.data = cov;
+            payload.publisher.data = cov;
         }
-        return mqtt_client_node_event_1.default.publishData(this.getParentNode(), publisherPayload);
+        return mqtt_client_node_event_1.default.publishData(this.getParentNode(), payload.toPublisher());
     }
     initializePointBySettingInput(settings) {
         let st = ((settings !== null && settings !== void 0 ? settings : this.settings));
-        return mqtt_model_1.MqttPointCreator.by(this.isEnabled(), st['topic'].value, this.createPointValue(st));
+        return mqtt_model_1.SillyMqttPoint.by(mqtt_model_1.MqttPointCreator.by(this.isEnabled(), st['topic'].value, this.createPointValue(st)), this.settings['enabledReqRes'].value);
     }
     initializePointBySettingObject(settings) {
         let st = ((settings !== null && settings !== void 0 ? settings : this.settings));
-        return st[this.modelSettingKey()].value
-            ? mqtt_model_1.MqttPointCreator.from(st[this.modelSettingKey()].value)
-            : this.initializePointBySettingInput(st);
+        return mqtt_model_1.SillyMqttPoint.by(mqtt_model_1.MqttPointCreator.from(st[this.modelSettingKey()].value), this.settings['enabledReqRes'].value);
     }
     onConvertMessage(data) {
         return mqtt_model_1.MqttPointValue.by(data).toString();
     }
     onReceiveMessage(msg, nodeId) {
-        return this.updateOutput(mqtt_model_1.MqttPointValue.parse(msg).to(), nodeId);
+        return this.updatePointValueOutput(mqtt_model_1.MqttPointValue.parse(msg).to(), nodeId);
+    }
+    statusOutputIdx() {
+        return 0;
+    }
+    updatePointValueOutput(pv, nodeId) {
+        let npv = super.updatePointValueOutput(pv, nodeId);
+        let self = (nodeId ? registry_1.default._nodes[nodeId] : this);
+        if (!self || !npv) {
+            return;
+        }
+        let current = this.initializePointBySettingInput();
+        let payload = this.createMqttPointStoreItem(current);
+        if (this.settings['enabledReqRes'].value) {
+            mqtt_client_node_event_1.default.publishData(this.getParentNode(), payload);
+        }
+        return npv;
     }
     handler() {
         return this;
@@ -77,7 +98,10 @@ class MqttPointNode extends point_node_1.PointNodeMixin(node_mixin_1.AbleEnableN
     modelSettingKey() {
         return `mqttp`;
     }
-    presentValueInputIdx() {
+    valueInputIdx() {
+        return 2;
+    }
+    valueOutputIdx() {
         return 2;
     }
     computeTitle() {
@@ -86,24 +110,20 @@ class MqttPointNode extends point_node_1.PointNodeMixin(node_mixin_1.AbleEnableN
     enableDescription() {
         return 'Enable MQTT Point';
     }
-    createStoreItem(mqttPoint, callback) {
-        return {
-            identifier: mqttPoint.identifier(),
-            enabled: mqttPoint.enabled,
-            nodeId: registry_1.default.getId(this.cid, this.id),
-            data: mqttPoint.pointValue,
-            callback: callback,
-        };
+    topicInputIdx() {
+        return 1;
+    }
+    createMqttPointStoreItem(mqttPoint) {
+        var _a, _b;
+        return new mqtt_client_node_store_1.MqttPointStoreItem(mqttPoint.identifier(), registry_1.default.getId(this.cid, this.id), (_a = mqttPoint) === null || _a === void 0 ? void 0 : _a.enabled, {
+            identifier: mqttPoint.publishedTopic(),
+            data: (_b = mqttPoint) === null || _b === void 0 ? void 0 : _b.pointValue,
+            callback: (data) => this.onConvertMessage(data),
+        }, {
+            identifier: mqttPoint.subscribedTopic(),
+            callback: (msg, n) => this.onReceiveMessage(msg, n),
+        });
     }
 }
-__decorate([
-    decorators_1.ErrorHandler
-], MqttPointNode.prototype, "handleOnUpdate", null);
-__decorate([
-    decorators_1.ErrorHandler
-], MqttPointNode.prototype, "initializePointBySettingInput", null);
-__decorate([
-    decorators_1.ErrorHandler
-], MqttPointNode.prototype, "initializePointBySettingObject", null);
 container_1.Container.registerNodeType('protocols/mqtt/mqtt-point', MqttPointNode, mqtt_client_node_1.MQTT_CLIENT_NODE);
 //# sourceMappingURL=mqtt-point-node.js.map

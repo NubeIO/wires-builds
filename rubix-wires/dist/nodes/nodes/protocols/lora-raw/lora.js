@@ -29,6 +29,7 @@ class LoraSensorDecoderNode extends node_1.Node {
         };
         this.addInput('rawInput', node_1.Type.STRING);
         this.addInputWithSettings('nodeID', node_1.Type.STRING, '', 'NodeID');
+        this.addInputWithSettings('topic', node_1.Type.STRING, '', 'Set topic for use elsewhere in wires');
         this.addOutput('json', node_1.Type.STRING);
         this.addOutput('id', node_1.Type.STRING);
         this.addOutput('voltage', node_1.Type.NUMBER);
@@ -238,7 +239,23 @@ class LoraSensorDecoderNode extends node_1.Node {
         }
         return output;
     }
+    lastMessageTimeStamp() {
+        return new Date();
+    }
     microEdgeDecode(data) {
+        const topic = this.getInputData(2);
+        const topicsBuilder = {
+            id: topic + "/id",
+            pulses: topic + "/pulses",
+            voltage: topic + "/voltage",
+            a1: topic + "/a1",
+            a2: topic + "/a2",
+            a3: topic + "/a3",
+            rssi: topic + "/rssi",
+            snr: topic + "/snr"
+        };
+        let lastMessage = null;
+        lastMessage = this.lastMessageTimeStamp();
         return {
             id: data.substring(0, 8),
             pulses: parseInt(data.substring(8, 16), 16),
@@ -248,9 +265,26 @@ class LoraSensorDecoderNode extends node_1.Node {
             a3: parseInt(data.substring(26, 30), 16),
             rssi: parseInt(data.substring(data.length - 4, data.length - 2), 16) * -1,
             snr: parseInt(data.substring(data.length - 2, data.length), 16) / 10,
+            nodeName: this.name,
+            topic: topicsBuilder,
+            lastMessage: lastMessage
         };
     }
     dropletDecode(data) {
+        const topic = this.getInputData(2);
+        const topicsBuilder = {
+            id: topic + "/id",
+            temp: topic + "/temp",
+            pressure: topic + "/pressure",
+            humidity: topic + "/humidity",
+            lux: topic + "/lux",
+            movement: topic + "/movement",
+            voltage: topic + "/voltage",
+            rssi: topic + "/rssi",
+            snr: topic + "/snr"
+        };
+        let lastMessage = null;
+        lastMessage = this.lastMessageTimeStamp();
         let output = {
             id: data.substring(0, 8),
             temp: parseInt(data.substring(10, 12) + data.substring(8, 10), 16) / 100,
@@ -259,6 +293,9 @@ class LoraSensorDecoderNode extends node_1.Node {
             voltage: parseInt(data.substring(22, 24), 16) / 50,
             rssi: parseInt(data.substring(data.length - 4, data.length - 2), 16) * -1,
             snr: parseInt(data.substring(data.length - 2, data.length), 16) / 10,
+            nodeName: this.name,
+            topic: topicsBuilder,
+            lastMessage: lastMessage
         };
         if (data.substring(2, 4) === 'B1' || data.substring(2, 4) === 'B2') {
             const b1Sensor = output;

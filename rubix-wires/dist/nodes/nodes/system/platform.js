@@ -15,6 +15,7 @@ const container_1 = require("../../container");
 const os_utils_1 = require("../../utils/os-utils");
 const file_utils_1 = require("../../utils/file-utils");
 const uuid_utils_1 = require("../../utils/uuid-utils");
+const config_1 = require("../../../config");
 class PlatNode extends container_node_1.ContainerNode {
     constructor(container) {
         super(container);
@@ -31,12 +32,14 @@ class PlatNode extends container_node_1.ContainerNode {
         };
         this.title = 'Platform';
         this.description =
-            'This node provides global settings for the Wires instance.  It should be added to the main(root) Editor Pane of each Wires instance.  ‘Client ID’ and ‘Device ID’ are used by each node with a history logging configuration to store data. ';
-        this.settings['clientID'] = {
-            description: 'Client ID',
-            value: 'unknownClientID',
-            type: node_1.SettingType.STRING,
-        };
+            'This node provides global settings for the Wires instance. It should be added to the main(root) Editor Pane of each Wires instance. ‘Client ID’ and ‘Device ID’ are used by each node with a history logging configuration to store data.';
+        this.addInputWithSettings('client-id', node_1.Type.STRING, 'client abc', 'Client ID/Name', false);
+        this.addInputWithSettings('site-id', node_1.Type.STRING, 'site 123', 'Site/Building ID/Name', false);
+        this.addOutput('device-id', node_1.Type.STRING);
+        this.addOutput('client-id', node_1.Type.STRING);
+        this.addOutput('site-id', node_1.Type.STRING);
+        this.addOutput('wires-version', node_1.Type.STRING);
+        this.addOutput('output-json', node_1.Type.JSON);
         this.settings['deviceIdType'] = {
             description: 'Device ID Type',
             type: node_1.SettingType.DROPDOWN,
@@ -79,10 +82,14 @@ class PlatNode extends container_node_1.ContainerNode {
                 },
             },
         });
-        this.properties['deviceID'];
+        this.properties['deviceID'] = {};
     }
     onAdded() {
+        const _super = Object.create(null, {
+            onAdded: { get: () => super.onAdded }
+        });
         return __awaiter(this, void 0, void 0, function* () {
+            _super.onAdded.call(this);
             yield this.haystackAbout.serverName.then(e => {
                 this.settings['serverName'].value = e;
                 this.broadcastSettingsToClients();
@@ -90,18 +97,40 @@ class PlatNode extends container_node_1.ContainerNode {
             yield this.haystackAbout.productVersion.then(e => {
                 this.settings['productVersion'].value = e;
                 this.broadcastSettingsToClients();
+                this.setOutputData(3, e);
             });
-            this.onAfterSettingsChange();
+            yield this.onAfterSettingsChange(null);
         });
     }
-    onAfterSettingsChange() {
-        if (this.side !== container_1.Side.server)
-            return;
-        this.doUUIDSteps();
-        this.settings['deviceIdType'].value
-            ? (this.properties['deviceID'] = this.settings['deviceIDcustom'].value)
-            : (this.properties['deviceID'] = this.settings['deviceIDFixed'].value);
-        this.persistSettings();
+    onInputUpdated() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.onAfterSettingsChange(null);
+        });
+    }
+    onAfterSettingsChange(oldSettings) {
+        const _super = Object.create(null, {
+            onAfterSettingsChange: { get: () => super.onAfterSettingsChange }
+        });
+        return __awaiter(this, void 0, void 0, function* () {
+            _super.onAfterSettingsChange.call(this, oldSettings);
+            if (this.side !== container_1.Side.server)
+                return;
+            yield this.doUUIDSteps();
+            this.properties['deviceID'] = this.settings['deviceIdType'].value
+                ? this.settings['deviceIDcustom'].value
+                : this.settings['deviceIDFixed'].value;
+            this.persistSettings();
+            this.setOutputData(0, this.properties['deviceID']);
+            this.setOutputData(1, this.getInputData(0));
+            this.setOutputData(2, this.getInputData(1));
+            const out = {
+                deviceID: this.properties['deviceID'],
+                clientID: this.getInputData(0),
+                siteID: this.getInputData(1)
+            };
+            this.setOutputData(4, out);
+            console.log(JSON.stringify(out));
+        });
     }
     persistSettings() {
         if (!this.container.db)
@@ -116,108 +145,33 @@ class PlatNode extends container_node_1.ContainerNode {
     doUUIDSteps() {
         return __awaiter(this, void 0, void 0, function* () {
             const fileName = 'deviceUUID.txt';
-            const dirPath = '/data/rubix-wires/ids';
+            const dirPath = `${config_1.default.dataDir}/ids`;
             const filePath = `${dirPath}/${fileName}`;
-            const oldIdFile = yield this.checkForOldDirectory('/data/rubix-wires/db/deviceUUID.txt');
-            if (oldIdFile) {
-                yield this.copyOldIdFileToNewDir(dirPath, fileName, oldIdFile);
-            }
-            else {
-                let result = yield this.checkUUIDFile(filePath);
-                if (!result)
-                    yield this.makeUUIDFile(dirPath, fileName);
+            const isOldFileExist = yield file_utils_1.default.checkForOldDirectory(filePath);
+            if (!isOldFileExist) {
+                const isUUIDFile = yield uuid_utils_1.default.isUUIDFile(filePath);
+                if (!isUUIDFile) {
+                    try {
+                        yield uuid_utils_1.default.makeUUIDFile(dirPath, fileName);
+                    }
+                    catch (e) {
+                        this.debugErr(e);
+                    }
+                }
             }
             yield this.getDeviceUUID(filePath);
         });
     }
-    checkUUIDFile(filePath) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let fileContent;
-            yield file_utils_1.default.readFile(filePath)
-                .then(data => {
-                fileContent = data;
-            })
-                .catch(err => {
-                fileContent = false;
-                this.debugWarn(err);
-            });
-            if (!fileContent)
-                return false;
-            const fileDataArray = fileContent
-                .toString()
-                .trim()
-                .split('-');
-            if (!(fileDataArray[0].length == 8 &&
-                fileDataArray[1].length == 4 &&
-                fileDataArray[2].length == 4 &&
-                fileDataArray[3].length == 4 &&
-                fileDataArray[4].length == 12))
-                return false;
-            return true;
-        });
-    }
     getDeviceUUID(filePath) {
         return __awaiter(this, void 0, void 0, function* () {
-            file_utils_1.default.readFile(filePath)
-                .then(data => {
+            try {
+                const data = yield file_utils_1.default.readFile(filePath);
                 this.settings['deviceIDFixed'].value = data.toString().trim();
                 this.broadcastSettingsToClients();
-            })
-                .catch(err => {
-                this.debugWarn(err);
-            });
-        });
-    }
-    makeUUIDFile(dirPath, fileName) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let dirExists = false;
-            yield file_utils_1.default.createDirectory(dirPath)
-                .then(data => {
-                dirExists = true;
-            })
-                .catch(err => {
-                this.debugWarn(err);
-            });
-            yield file_utils_1.default.writeFile(`${dirPath}/${fileName}`, uuid_utils_1.default.createUUID())
-                .then(data => {
-                dirExists = true;
-            })
-                .catch(err => {
-                this.debugWarn(err);
-            });
-        });
-    }
-    checkForOldDirectory(filePath) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let fileContent;
-            yield file_utils_1.default.readFile(filePath)
-                .then(data => {
-                fileContent = data;
-            })
-                .catch(err => {
-                fileContent = false;
-                this.debugWarn(err);
-            });
-            if (!fileContent)
-                return false;
-            return fileContent.toString();
-        });
-    }
-    copyOldIdFileToNewDir(dirPath, fileName, oldIdFile) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let dirExists = false;
-            yield file_utils_1.default.createDirectory(dirPath)
-                .then(data => {
-                dirExists = true;
-            })
-                .catch(err => {
-                this.debugWarn(err);
-            });
-            yield file_utils_1.default.writeFile(`${dirPath}/${fileName}`, oldIdFile)
-                .then(data => { })
-                .catch(err => {
-                this.debugWarn(err);
-            });
+            }
+            catch (e) {
+                this.debugWarn(e);
+            }
         });
     }
 }

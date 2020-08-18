@@ -7,7 +7,19 @@ exports.PUBLISH_MQTT_DATA = 'PUBLISH_MQTT_DATA';
 exports.REGISTER_MQTT_SUBSCRIBER = 'REGISTER_MQTT_SUBSCRIBER';
 exports.UPDATE_MQTT_SUBSCRIBER = 'UPDATE_MQTT_SUBSCRIBER';
 exports.UNREGISTER_MQTT_SUBSCRIBER = 'UNREGISTER_MQTT_SUBSCRIBER';
+exports.REGISTER_MQTT_POINT = 'REGISTER_MQTT_POINT';
+exports.UPDATE_MQTT_POINT = 'UPDATE_MQTT_POINT';
+exports.UNREGISTER_MQTT_POINT = 'UNREGISTER_MQTT_POINT';
 class MqttClientNodeEvent {
+    static registerPoint(parentNode, payload) {
+        return this.execute(parentNode, payload, exports.REGISTER_MQTT_POINT);
+    }
+    static unregisterPoint(parentNode, payload) {
+        return this.execute(parentNode, payload, exports.UNREGISTER_MQTT_POINT);
+    }
+    static updatePoint(parentNode, payload) {
+        return this.execute(parentNode, payload, exports.UPDATE_MQTT_POINT);
+    }
     static registerPublisher(parentNode, payload) {
         return this.execute(parentNode, payload, exports.REGISTER_MQTT_PUBLISHER);
     }

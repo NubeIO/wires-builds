@@ -300,5 +300,5 @@ class MqttBroker extends node_1.Node {
         }
     }
 }
-container_1.Container.registerNodeType('protocols/mqtt/mqtt-broker', MqttBroker);
+container_1.Container.registerNodeType('protocols/mqtt-broker/mqtt-broker', MqttBroker);
 //# sourceMappingURL=mqtt-broker.js.map

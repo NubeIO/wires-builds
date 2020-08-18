@@ -60,7 +60,7 @@ class StopwatchNode extends node_1.Node {
         this.setOutputData(0, this.elapsed);
         this.inputs[2]['name'] = `[interval] (${this.settings['time'].value})`;
         this.outputs[0]['name'] = '[elapsed] (milliseconds)';
-        this.onInputUpdated();
+        this.onAfterSettingsChange();
     }
     onInputUpdated() {
         let run = this.getInputData(0);

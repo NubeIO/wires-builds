@@ -15,6 +15,21 @@ const container_1 = require("../../container");
 const node_1 = require("../../node");
 const bsa_client_config_1 = require("./bsa-client-config");
 let moment = require('moment-timezone');
+var ALARM_TYPE;
+(function (ALARM_TYPE) {
+    ALARM_TYPE["WARNING"] = "WARNING";
+    ALARM_TYPE["MINOR"] = "MINOR";
+    ALARM_TYPE["MAJOR"] = "MAJOR";
+    ALARM_TYPE["CRITICAL"] = "CRITICAL";
+})(ALARM_TYPE || (ALARM_TYPE = {}));
+const alarmConfig = {
+    items: [
+        { value: ALARM_TYPE.WARNING, text: ALARM_TYPE.WARNING },
+        { value: ALARM_TYPE.MINOR, text: ALARM_TYPE.MINOR },
+        { value: ALARM_TYPE.MAJOR, text: ALARM_TYPE.MAJOR },
+        { value: ALARM_TYPE.CRITICAL, text: ALARM_TYPE.CRITICAL },
+    ],
+};
 class BSACumulocityAlarmNode extends node_1.Node {
     constructor() {
         super();
@@ -22,19 +37,7 @@ class BSACumulocityAlarmNode extends node_1.Node {
         this.description = '';
         this.addInput('alarmInput', node_1.Type.BOOLEAN);
         this.addInputWithSettings('alarmText', node_1.Type.STRING, 'No Alarm Message Available', 'Enter Alarm Message');
-        this.settings['alarmClass'] = {
-            description: 'Alarm Class',
-            type: node_1.SettingType.DROPDOWN,
-            config: {
-                items: [
-                    { value: 'WARNING', text: 'WARNING' },
-                    { value: 'MINOR', text: 'MINOR' },
-                    { value: 'MAJOR', text: 'MAJOR' },
-                    { value: 'CRITICAL', text: 'CRITICAL' },
-                ],
-            },
-            value: 'WARNING',
-        };
+        this.addInputWithSettings('alarmClass', node_1.Type.DROPDOWN, ALARM_TYPE.WARNING, 'Alarm Class', false, alarmConfig);
         this.addOutput('status', node_1.Type.BOOLEAN);
         this.addOutput('error', node_1.Type.STRING);
         this.settings['enable'] = {
@@ -83,11 +86,11 @@ class BSACumulocityAlarmNode extends node_1.Node {
                         source: {
                             id: this.settings['CumulocityDeviceID'].value,
                         },
-                        text: this.settings['alarmText'].value || 'No Alarm Message Available',
+                        text: this.getInputData(1),
                         time: moment().toISOString(),
                         type: alarmName,
                         status: 'ACTIVE',
-                        severity: this.settings['alarmClass'].value || 'Unknown',
+                        severity: this.getInputData(2),
                     } });
                 try {
                     const response = yield axios_1.default(cfg);
@@ -109,7 +112,7 @@ class BSACumulocityAlarmNode extends node_1.Node {
                 cfg = Object.assign(Object.assign({}, cfg), { method: 'PUT', url: `alarm/alarms/${alarmID}`, data: { status: 'CLEARED' } });
                 try {
                     yield axios_1.default(cfg);
-                    this.setOutputData(0, true);
+                    this.setOutputData(0, false);
                     this.setOutputData(1, false);
                     delete this.properties['alarmRegistry'][alarmName];
                     this.debugInfo(`Cleared alarm ${alarmName}`);

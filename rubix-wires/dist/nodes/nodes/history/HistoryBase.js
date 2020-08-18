@@ -18,6 +18,7 @@ const crypto_utils_1 = require("../../utils/crypto-utils");
 const axios_1 = require("axios");
 const container_1 = require("../../container");
 const system_utils_1 = require("../system/system-utils");
+const config_1 = require("../../../config");
 const Influx = require('influx');
 var HistoryMode;
 (function (HistoryMode) {
@@ -84,11 +85,7 @@ class HistoryBase extends node_1.Node {
             value: '',
             type: node_1.SettingType.STRING,
         };
-        this.settings['pointName'] = {
-            description: 'Point Name',
-            value: '',
-            type: node_1.SettingType.STRING,
-        };
+        this.addInputWithSettings('pointName', node_1.Type.STRING, '', 'Point Name');
         this.settings['historyMode'] = {
             description: 'History Logging Mode',
             type: node_1.SettingType.DROPDOWN,
@@ -188,8 +185,22 @@ class HistoryBase extends node_1.Node {
         this.addHistoryConfiguration();
     }
     init(properties) {
-        this.assignInputsOutputs();
         this.historyFunctionsForAfterSettingsChange(properties['settings'], false);
+    }
+    changeInputDynamically(settings) {
+        this.assignInputsOutputs();
+        if (this.tableNameInput === -1 && settings['databaseType'].value === DataBaseType.InfluxDB) {
+            if (this.pointNameInput)
+                this.removeInput(this.pointNameInput);
+            this.addInput('[tableName]', node_1.Type.STRING, { exist: true, nullable: false, hidden: false });
+            this.addInput('[pointName]', node_1.Type.STRING, { exist: true, nullable: false, hidden: false });
+        }
+        else if (this.tableNameInput !== -1 && settings['databaseType'].value === DataBaseType.POSTGRES) {
+            if (this.pointNameInput)
+                this.removeInput(this.pointNameInput);
+            this.removeInput(this.tableNameInput);
+            this.addInput('[pointName]', node_1.Type.STRING, { exist: true, nullable: false, hidden: false });
+        }
     }
     onAdded() {
         this.assignInputsOutputs();
@@ -216,12 +227,18 @@ class HistoryBase extends node_1.Node {
         clearInterval(this.timeoutFunc);
     }
     assignInputsOutputs() {
+        this.tableNameInput = -1;
+        this.pointNameInput = -1;
         for (let input in this.inputs) {
             if (this.inputs.hasOwnProperty(input)) {
                 if (this.inputs[input].name == 'histTrigger')
                     this.histTriggerInput = Number(input);
                 if (this.inputs[input].name == 'clearStoredHis')
                     this.clearStoredHisInput = Number(input);
+                if (this.inputs[input].name == '[tableName]')
+                    this.tableNameInput = Number(input);
+                if (this.inputs[input].name == '[pointName]')
+                    this.pointNameInput = Number(input);
             }
         }
         for (let output in this.outputs) {
@@ -337,7 +354,7 @@ class HistoryBase extends node_1.Node {
                 const dataType = this.settings['dataType'].value;
                 log.payload = this.convertInput(log.payload, dataType, decimals);
                 const tagList = {};
-                tagList['point'] = this.settings['pointName'].value || 'undefined';
+                tagList['point'] = this.getInputData(this.pointNameInput) || 'undefined';
                 Object.keys(log).map(key => {
                     if (key !== 'payload' && key !== 'timestamp' && key !== 'tags') {
                         tagList[key] = log[key];
@@ -347,7 +364,7 @@ class HistoryBase extends node_1.Node {
                     tagList['tag' + (i + 1)] = log['tags'][i] || null;
                 }
                 points.push({
-                    measurement: this.settings['tableName'].value,
+                    measurement: this.getInputData(this.tableNameInput),
                     fields: { val: log.payload },
                     timestamp: moment(log.timestamp).valueOf() * 1000000,
                     tags: tagList,
@@ -377,10 +394,11 @@ class HistoryBase extends node_1.Node {
                     ts: moment(Number(point.timestamp) / 1000000).toISOString(),
                 }));
                 const that = this;
+                const pgUrl = config_1.default.pg.baseURL;
                 try {
                     yield axios_1.default({
                         method: 'post',
-                        url: 'https://pgr.nube-io.com/histories',
+                        url: pgUrl,
                         data: multiPointPost,
                     });
                 }
@@ -419,10 +437,13 @@ class HistoryBase extends node_1.Node {
         });
     }
     historyFunctionsForAfterSettingsChange(configSettings = null, save = true) {
+        this.changeInputDynamically(configSettings || this.settings);
+        this.assignInputsOutputs();
         if (this.settings['databaseType'].value === DataBaseType.POSTGRES) {
             this.settings['alarms_count'].value = 0;
             this.settings['tags_count'].value = 0;
         }
+        this.dynamicInputStartPosition = this.pointNameInput + 1;
         this.changeAlarmsCount(this.settings['alarms_count'].value);
         this.renameAlarmInputs(configSettings);
         this.changeTagsCount(this.settings['tags_count'].value);

@@ -8,7 +8,7 @@ class DateNode extends node_1.Node {
         this.interval = 5000;
         this.title = 'Date';
         this.description =
-            "Ouputs various date information based on the system time.  String 'dateString' is the current date.  String 'dayString' is the current day of the week. Numeric 'dayOfWeek' is an integer between 0 and 6 corresponding to Sunday(0) through Saturday(6).  Numeric 'date' is and integer of the current date.  Numeric 'month' is an integer of the current month Jan(0) - Dec(12).  Numeric 'year' is an integer of the current year.";
+            "Outputs various date information based on the system time.  String 'dateString' is the current date.  String 'dayString' is the current day of the week. Numeric 'dayOfWeek' is an integer between 0 and 6 corresponding to Sunday(0) through Saturday(6).  Numeric 'date' is and integer of the current date.  Numeric 'month' is an integer of the current month Jan(0) - Dec(12).  Numeric 'year' is an integer of the current year.";
         this.addOutput('dateString', node_1.Type.STRING);
         this.addOutput('dayString', node_1.Type.STRING);
         this.addOutput('dayOfWeek', node_1.Type.NUMBER);

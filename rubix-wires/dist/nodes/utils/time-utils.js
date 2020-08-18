@@ -146,6 +146,99 @@ class TimeUtils {
                 return (mm.days().toString() + ':' + mm.hours() + ':' + mm.minutes() + ':' + mm.seconds() + ':' + mm.milliseconds());
         }
     }
+    static timeConvertPlus(d) {
+        try {
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            let dts = d.toDateString();
+            let e = d.getTime();
+            let mnu = this.pad(d.getMonth() + 1, 2);
+            let mnt = (d.getMonth());
+            let mn = (monthNames[mnt]);
+            let dy = (dayNames[d.getDay()]);
+            let dt = this.pad(d.getDate(), 2);
+            let yr = d.getFullYear();
+            let hr = d.getHours();
+            let mi = d.getMinutes();
+            let ny = Math.ceil((d - new Date(d.getFullYear(), 0, 1)) / 86400000);
+            let h = this.pad(hr, 2);
+            let m = this.pad(mi, 2);
+            let s = this.pad(d.getSeconds(), 2);
+            let mil = this.pad(d.getMilliseconds(), 3);
+            let thr = null;
+            if (hr === 0) {
+                thr = 12;
+            }
+            else if (hr > 12) {
+                thr = hr - 12;
+            }
+            else {
+                thr = hr;
+            }
+            thr = '' + thr;
+            let amp = ((hr * 60) + mi);
+            if (amp < 720) {
+                amp = "AM";
+            }
+            else {
+                amp = "PM";
+            }
+            let hm = (h + ":" + m);
+            let hms = (h + ":" + m + ":" + s);
+            let ms = (m + ":" + s);
+            let date = dts;
+            let yearMonthDay = '' + yr + '-' + mnu + '-' + dt;
+            let year = '' + yr;
+            let month = mn;
+            let monthAsNumber = mnu;
+            let dayAsNumber = dt;
+            let dayOfYearNumber = '' + ny;
+            let day = dy;
+            let hourAsAmPm = thr;
+            let hour = h;
+            let timeHourMin = hm;
+            let time = hms;
+            let minute = m;
+            let minutesSeconds = ms;
+            let seconds = s;
+            let milliseconds = mil;
+            let epoch = '' + e;
+            let rawDate = d;
+            let pmOrAm = amp;
+            return {
+                date: date,
+                yearMonthDay: yearMonthDay,
+                year: year,
+                month: month,
+                monthAsNumber: monthAsNumber,
+                dayAsNumber: dayAsNumber,
+                dayOfYearNumber: dayOfYearNumber,
+                day: day,
+                pmOrAm: pmOrAm,
+                hourAsAmPm: hourAsAmPm,
+                hour: hour,
+                timeHourMin: timeHourMin,
+                time: time,
+                minute: minute,
+                minutesSeconds: minutesSeconds,
+                seconds: seconds,
+                milliseconds: milliseconds,
+                epoch: epoch,
+                rawDate: rawDate,
+            };
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }
+    ;
+    static pad(num, size) {
+        let s = num + "";
+        while (s.length < size)
+            s = "0" + s;
+        return s;
+    }
+    ;
 }
 exports.default = TimeUtils;
 //# sourceMappingURL=time-utils.js.map

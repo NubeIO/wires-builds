@@ -37,9 +37,22 @@ function replaceBackend() {
   shell.sed('-i', /'\$POINT_REFRESH_INTERVAL_SEC'/g, process.env.POINT_REFRESH_INTERVAL_SEC || 60, 'src/config.ts');
 }
 
+function replaceDittoConfig() {
+  shell.sed('-i', /\$DITTO_BASEURL/g, process.env.DITTO_BASEURL|| '', 'src/config.ts');
+  shell.sed('-i', /\$DITTO_USERNAME/g, process.env.DITTO_USERNAME || '', 'src/config.ts');
+  shell.sed('-i', /\$DITTO_PASSWORD/g, process.env.DITTO_PASSWORD || '', 'src/config.ts');
+}
+
+
+function replacePostgresConfig() {
+  shell.sed('-i', /\$PG_BASEURL/g, process.env.PG_BASEURL|| '', 'src/config.ts');
+  shell.sed('-i', /\$PG_USERNAME/g, process.env.PG_USERNAME || '', 'src/config.ts');
+  shell.sed('-i', /\$PG_PASSWORD/g, process.env.PG_PASSWORD || '', 'src/config.ts');
+}
+
 const updateEnv = () => {
-  dotenv.config();
   let dataDir = process.env.DATA_DIR || (process.env.NODE_ENV === 'production' ? '/data/rubix-wires' : './db');
+  dotenv.config({ path: `${dataDir}/.env` });
   shell.sed('-i', /\$SECRET_KEY/g, process.env.SECRET_KEY || '__SECRET_KEY__', 'src/config.ts');
   shell.sed('-i', /'\$PORT'/g, process.env.PORT || 1313, 'src/config.ts');
   shell.sed('-i', /\$DATA_DIR/g, dataDir, 'src/config.ts');
@@ -47,6 +60,8 @@ const updateEnv = () => {
   replaceBackend();
   replaceRubixInfo();
   replaceBSA();
+  replaceDittoConfig();
+  replacePostgresConfig();
 };
 
 updateEnv();

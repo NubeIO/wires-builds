@@ -14,11 +14,15 @@ class MqttClientNode extends node_1.Node {
         this.rateLimitMS = 200;
         this.title = 'MQTT client';
         this.description =
-            'This node connects to an MQTT Broker, subscribes to topics, and can publish values to topics.  Once configured (in settings) with a valid ‘Broker URL’, ‘Broker Port’, and ‘Authentication’ (if required), this node will read and write to MQTT topics when ‘enable’ is ‘true’.  Number of topics, and the topic names can be configured from settings.  Each topic will have a corresponding input and output. ';
+            'This node connects to an MQTT Broker, subscribes to topics, and can publish values to topics.  ' +
+                'Once configured (in settings) with a valid ‘Broker URL’, ‘Broker Port’, and ‘Authentication’ (if required), ' +
+                'this node will read and write to MQTT topics when ‘enable’ is ‘true’.  ' +
+                'Number of topics, and the topic names can be configured from settings. ' +
+                'Each topic will have a corresponding input and output. ';
         this.addInput('[enable]', node_1.Type.BOOLEAN);
         this.addOutput('connected', node_1.Type.BOOLEAN);
-        this.settings['server'] = { description: 'Broker URL', value: '', type: node_1.SettingType.STRING };
-        this.settings['port'] = { description: 'Broker port', value: '', type: node_1.SettingType.STRING };
+        this.settings['server'] = { description: 'Broker URL', value: '0.0.0.0', type: node_1.SettingType.STRING };
+        this.settings['port'] = { description: 'Broker port', value: '1883', type: node_1.SettingType.STRING };
         this.settings['enable'] = { description: 'Enable', value: false, type: node_1.SettingType.BOOLEAN };
         this.settings['authentication'] = {
             description: 'Use Authentication',

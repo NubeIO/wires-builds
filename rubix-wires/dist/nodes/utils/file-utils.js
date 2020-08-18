@@ -88,16 +88,28 @@ class FileUtils {
                 throw err;
         }
     }
-    static readFile(fileName) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return new Promise((resolve, reject) => {
-                fs.readFile(fileName, (err, buff) => {
-                    if (err) {
-                        reject(err);
-                    }
-                    resolve(buff);
-                });
+    static readFile(filePath) {
+        return new Promise((resolve, reject) => {
+            fs.readFile(filePath, (err, buff) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve(buff);
             });
+        });
+    }
+    static checkForOldDirectory(filePath) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const fileContent = yield FileUtils.readFile(filePath);
+                if (fileContent)
+                    Boolean(fileContent.toString());
+                else
+                    return false;
+            }
+            catch (e) {
+                return false;
+            }
         });
     }
     static readFileReturnJson(fileName) {

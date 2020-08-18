@@ -17,6 +17,7 @@ const setting_utils_1 = require("../setting-utils");
 const crypto_utils_1 = require("../crypto-utils");
 const node_utils_1 = require("../../utils/node-utils");
 const axios_1 = require("axios");
+const config_1 = require("../../../config");
 const Influx = require('influx');
 const moment = require('moment-timezone');
 class HistoryConfig {
@@ -280,7 +281,7 @@ class HistoryConfig {
                     tagList['tag' + (i + 1)] = log['tags'][i] || null;
                 }
                 points.push({
-                    measurement: self.settings['tableName'].value,
+                    measurement: self.getInputData(2),
                     fields: {
                         val: log.payload,
                     },
@@ -300,6 +301,7 @@ class HistoryConfig {
                 var inputVal;
                 var typeOfVal;
                 var valAsNum;
+                const pgUrl = config_1.default.pg.baseURL;
                 points.forEach(point => {
                     inputVal = point['fields']['val'];
                     typeOfVal = typeof inputVal;
@@ -317,7 +319,7 @@ class HistoryConfig {
                 });
                 axios_1.default({
                     method: 'post',
-                    url: 'https://pgr.nube-io.com/histories',
+                    url: pgUrl,
                     data: multiPointPost,
                 })
                     .then(function () { })

@@ -1,12 +1,23 @@
 "use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const decorators_1 = require("../../../../utils/decorators");
+class DefaultContainerErrorNode {
+    constructor() {
+        this.nodeIdErrors = new Set();
+    }
+    hasError(nodeId) {
+        return this.nodeIdErrors.has(nodeId);
+    }
+    addError(nodeId) {
+        this.nodeIdErrors.add(nodeId);
+    }
+    removeError(nodeId) {
+        this.nodeIdErrors.delete(nodeId);
+    }
+    listErrors() {
+        return this.nodeIdErrors;
+    }
+}
+exports.DefaultContainerErrorNode = DefaultContainerErrorNode;
 class AbstractContainerStore {
     register(payload, cb) {
         this.checkExistence(payload);
@@ -34,11 +45,5 @@ class AbstractContainerStore {
         return ((_a = payload) === null || _a === void 0 ? void 0 : _a.identifier) !== ((_c = (_b = payload) === null || _b === void 0 ? void 0 : _b.prev) === null || _c === void 0 ? void 0 : _c.identifier);
     }
 }
-__decorate([
-    decorators_1.ErrorHandler
-], AbstractContainerStore.prototype, "register", null);
-__decorate([
-    decorators_1.ErrorHandler
-], AbstractContainerStore.prototype, "update", null);
 exports.AbstractContainerStore = AbstractContainerStore;
 //# sourceMappingURL=container-node-store.js.map

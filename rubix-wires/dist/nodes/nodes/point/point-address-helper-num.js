@@ -8,12 +8,12 @@ class AddressHelperNumber extends flexible_node_1.FlexibleNode {
         super();
         this.dynamicOutputsExist = true;
         this.dynamicInputsExist = false;
-        this.dynamicSettingsExist = false;
+        this.dynamicSettingsExist = true;
         super.dynamicOutputsType = node_1.Type.NUMBER;
         this.title = 'Point Address Builder Number';
         this.description =
             "Numeric integer 'select' passes Numeric 'input' to the corresponding Numeric 'output'. If 'select' is 2, 'input' will be passed to 'out 2' (likewise for other integer 'select' values). If the 'select' value does not have a corresponding 'out #' value, no values will be passed. The number of outputs can be modified from settings.";
-        this.addInput('input', node_1.Type.NUMBER);
+        this.addInputWithSettings('input', node_1.Type.NUMBER, 0, 'Set Start Value');
     }
     onInputUpdated() {
         let input = this.getInputData(0);
@@ -25,6 +25,10 @@ class AddressHelperNumber extends flexible_node_1.FlexibleNode {
                 this.setOutputData(i, i + input);
             }
         }
+    }
+    onAfterSettingsChange() {
+        super.onAfterSettingsChange();
+        this.onInputUpdated();
     }
 }
 exports.AddressHelperNumber = AddressHelperNumber;

@@ -32,6 +32,7 @@ class AddressHelperString extends node_1.Node {
     }
     onAdded() {
         this.topicsCount = this.settings['topics_count'].value;
+        this.onAfterSettingsChange();
     }
     onAfterSettingsChange() {
         this.changeOutputsAndSettings();

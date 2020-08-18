@@ -76,9 +76,10 @@ class ConnectionLocalTransmitterNode extends node_1.Node {
         this.properties['inputsCount'] = target_count;
     }
     renameInputs() {
+        var _a, _b;
         for (let i = 0; i <= this.properties['inputsCount'] - 1; i++) {
-            let topic = this.settings['in' + (i + 1)].value;
-            if (topic.length > 20)
+            let topic = (_a = this.settings['in' + (i + 1)]) === null || _a === void 0 ? void 0 : _a.value;
+            if (((_b = topic) === null || _b === void 0 ? void 0 : _b.length) > 20)
                 topic = '...' + topic.substr(topic.length - 20, 20);
             this.inputs[String(i)].name = '' + (i + 1) + ' | ' + topic;
         }

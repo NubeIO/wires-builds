@@ -3,14 +3,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const container_1 = require("../../../container");
 const node_1 = require("../../../node");
 const registry_1 = require("../../../registry");
+const crypto_utils_1 = require("../../../utils/crypto-utils");
 const ProtocolDeviceNode_1 = require("../ProtocolDeviceNode");
 const mqtt_device_1 = require("./core/mqtt-device");
 const mqtt_client_node_event_1 = require("./mqtt-client-node-event");
 const mqtt_client_node_store_1 = require("./mqtt-client-node-store");
-const mqtt_utils_1 = require("./mqtt-utils");
 class MqttClientNode extends ProtocolDeviceNode_1.ProtocolDeviceNode {
     constructor(container) {
-        super(container, `MQTT Client`, 'This node acts as a container for MQTT nodes. ' +
+        super(container, `MQTT Network`, 'This node acts as a container for MQTT nodes. ' +
             'All MQTT nodes should be added within the MQTT-Network container. ' +
             'The MQTT broker details can be configured in settings.');
         this.mqttClient = null;
@@ -18,11 +18,7 @@ class MqttClientNode extends ProtocolDeviceNode_1.ProtocolDeviceNode {
         this.subscribers = new mqtt_client_node_store_1.MqttSubscriberStore();
         this.retriedItems = [];
         this.mixinEnableInputSetting();
-        this.settings['server'] = {
-            description: 'Broker URL',
-            value: 'localhost',
-            type: node_1.SettingType.STRING,
-        };
+        this.settings['server'] = { description: 'Broker URL', value: 'localhost', type: node_1.SettingType.STRING };
         this.settings['port'] = { description: 'Broker port', value: 1883, type: node_1.SettingType.NUMBER };
         this.settings['authentication'] = { description: 'Use Authentication', value: false, type: node_1.SettingType.BOOLEAN };
         this.settings['username'] = { description: 'User name', value: '', type: node_1.SettingType.STRING };
@@ -39,9 +35,28 @@ class MqttClientNode extends ProtocolDeviceNode_1.ProtocolDeviceNode {
             },
         });
     }
+    static createMqttConnectionOptions(settings) {
+        const options = { host: settings['server'].value };
+        const port = settings['port'].value;
+        const username = settings['username'].value;
+        const password = settings['password'].value;
+        if (port != null)
+            options.port = port;
+        if (username != null && username != '')
+            options.username = username;
+        if (password != null && password != '')
+            options.password = crypto_utils_1.default.decrypt(password);
+        return options;
+    }
     subscribe({ action, payload }) {
         this.debugInfo(`Handling ${action}:${payload.identifier}...`);
         switch (action) {
+            case mqtt_client_node_event_1.REGISTER_MQTT_POINT:
+                return this.registerMqttPoint(payload);
+            case mqtt_client_node_event_1.UNREGISTER_MQTT_POINT:
+                return this.unregisterMqttPoint(payload);
+            case mqtt_client_node_event_1.UPDATE_MQTT_POINT:
+                return this.updateMqttPoint(payload);
             case mqtt_client_node_event_1.REGISTER_MQTT_PUBLISHER:
                 return this.publishers.register(payload, p => this.publishMqttData(p));
             case mqtt_client_node_event_1.UNREGISTER_MQTT_PUBLISHER:
@@ -60,10 +75,18 @@ class MqttClientNode extends ProtocolDeviceNode_1.ProtocolDeviceNode {
                 this.debugWarn('Request action doesn\'t match');
         }
     }
+    dependantsConnectionNode() {
+        let nodeIds = [...new Set(this.publishers.listNodeIds().concat(this.subscribers.listNodeIds()))];
+        return nodeIds.map(id => registry_1.default._nodes[id]).filter(n => n).map(n => n);
+    }
+    connectedCondition() {
+        var _a;
+        return (_a = this.mqttClient) === null || _a === void 0 ? void 0 : _a.isConnected();
+    }
     createThenStart() {
-        const options = mqtt_utils_1.default.createMqttConnectionOptions(this);
+        const options = MqttClientNode.createMqttConnectionOptions(this.settings);
         options.clientId = `mqttjs_wires_cid_${this.container.id}_id${this.id}`;
-        this.mqttClient = mqtt_device_1.DefaultMqttClient.init(options, (client) => this.retryConnection(client), (msg) => this.dispatchMessage(msg));
+        this.mqttClient = mqtt_device_1.DefaultMqttClient.init(options, (client) => this.retryConnection(client), (client, msg) => this.updateClientStatus(client, msg), (msg) => this.dispatchMessage(msg));
     }
     stop() {
         if (this.mqttClient) {
@@ -71,8 +94,13 @@ class MqttClientNode extends ProtocolDeviceNode_1.ProtocolDeviceNode {
             this.mqttClient = null;
         }
     }
+    updateClientStatus(client, errMsg) {
+        ProtocolDeviceNode_1.ProtocolDeviceNode.setOutputStatus(this, this.getConnectionStatus(), errMsg);
+        this.emit(this.connectionStatus, this.dependantsConnectionNode());
+    }
     retryConnection(client) {
         this.debugInfo('Retry connection after MQTT client connected...');
+        this.updateClientStatus(client);
         let count = 0, max = 500;
         while (this.retriedItems.length > 0 && count < max) {
             this.subscribe(this.retriedItems.shift());
@@ -143,7 +171,25 @@ class MqttClientNode extends ProtocolDeviceNode_1.ProtocolDeviceNode {
             }
         });
     }
+    registerMqttPoint(payload) {
+        let item = payload;
+        let d = this.subscribe({ action: mqtt_client_node_event_1.REGISTER_MQTT_PUBLISHER, payload: item.toPublisher() });
+        this.subscribe({ action: mqtt_client_node_event_1.REGISTER_MQTT_SUBSCRIBER, payload: item.toSubscriber() });
+        return d;
+    }
+    unregisterMqttPoint(payload) {
+        let item = payload;
+        let d = this.subscribe({ action: mqtt_client_node_event_1.UNREGISTER_MQTT_PUBLISHER, payload: item.toPublisher() });
+        this.subscribe({ action: mqtt_client_node_event_1.UNREGISTER_MQTT_SUBSCRIBER, payload: item.toSubscriber() });
+        return d;
+    }
+    updateMqttPoint(payload) {
+        let item = payload;
+        let d = this.subscribe({ action: mqtt_client_node_event_1.UPDATE_MQTT_PUBLISHER, payload: item.toPublisher() });
+        this.subscribe({ action: mqtt_client_node_event_1.UPDATE_MQTT_SUBSCRIBER, payload: item.toSubscriber() });
+        return d;
+    }
 }
-exports.MQTT_CLIENT_NODE = 'protocols/mqtt/mqtt-client-v2';
+exports.MQTT_CLIENT_NODE = 'protocols/mqtt/mqtt-network';
 container_1.Container.registerNodeType(exports.MQTT_CLIENT_NODE, MqttClientNode);
 //# sourceMappingURL=mqtt-client-node.js.map

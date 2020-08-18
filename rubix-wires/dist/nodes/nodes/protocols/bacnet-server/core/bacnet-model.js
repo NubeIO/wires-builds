@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const point_model_1 = require("../../../../../backend/models/point-model");
+const helper_1 = require("../../../../../utils/helper");
 var PointKind;
 (function (PointKind) {
     PointKind["ANALOG_INPUT"] = "0";
@@ -23,6 +24,9 @@ class BacnetPointCreator {
 exports.BacnetPointCreator = BacnetPointCreator;
 BacnetPointCreator.from = (json) => {
     var _a, _b, _c, _d, _e, _f, _g, _h;
+    if (helper_1.isNull(json)) {
+        return null;
+    }
     let pv = (_a = json) === null || _a === void 0 ? void 0 : _a.pointValue;
     return BacnetPointCreator.create((_b = json) === null || _b === void 0 ? void 0 : _b.enabled, (_c = json) === null || _c === void 0 ? void 0 : _c.objectInstance, (_d = json) === null || _d === void 0 ? void 0 : _d.objectType, (_e = json) === null || _e === void 0 ? void 0 : _e.objectName, (_f = pv) === null || _f === void 0 ? void 0 : _f.presentValue, (_g = pv) === null || _g === void 0 ? void 0 : _g.priority, (_h = pv) === null || _h === void 0 ? void 0 : _h.priorityArray);
 };
@@ -45,10 +49,8 @@ class DefaultBacnetPoint {
     }
     mightOnlyValueChanged(bp) {
         var _a, _b, _c, _d;
-        return (this.enabled === ((_a = bp) === null || _a === void 0 ? void 0 : _a.enabled) &&
-            this.objectInstance === ((_b = bp) === null || _b === void 0 ? void 0 : _b.objectInstance) &&
-            this.objectType === ((_c = bp) === null || _c === void 0 ? void 0 : _c.objectType) &&
-            this.objectName === ((_d = bp) === null || _d === void 0 ? void 0 : _d.objectName));
+        return (this.enabled === ((_a = bp) === null || _a === void 0 ? void 0 : _a.enabled) && this.objectInstance === ((_b = bp) === null || _b === void 0 ? void 0 : _b.objectInstance) &&
+            this.objectType === ((_c = bp) === null || _c === void 0 ? void 0 : _c.objectType) && this.objectName === ((_d = bp) === null || _d === void 0 ? void 0 : _d.objectName));
     }
     equals(bp) {
         var _a;

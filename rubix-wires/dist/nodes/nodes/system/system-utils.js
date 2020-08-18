@@ -3,11 +3,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 class SystemUtils {
     static getDeviceID(self) {
         return new Promise((resolve, reject) => {
-            if (self.db) {
-                self.db.getNodeType('system/platform', (err, docs) => {
+            if (self.container && self.container.db) {
+                self.container.db.getNodeType('system/platform', (err, docs) => {
                     if (!err) {
-                        if (docs && docs.length && docs[0] && docs[0].settings) {
-                            resolve(docs[0].settings['deviceID'].trim());
+                        if (docs && docs.length && docs[0] && docs[0].properties) {
+                            resolve(docs[0].properties['deviceID'].trim());
                         }
                         else {
                             reject('No deviceID');
@@ -26,8 +26,8 @@ class SystemUtils {
     }
     static getClientID(self) {
         return new Promise((resolve, reject) => {
-            if (self.db) {
-                self.db.getNodeType('system/platform', (err, docs) => {
+            if (self.container && self.container.db) {
+                self.container.db.getNodeType('system/platform', (err, docs) => {
                     if (!err) {
                         if (docs && docs.length && docs[0] && docs[0].settings) {
                             resolve(docs[0].settings['clientID'].trim());

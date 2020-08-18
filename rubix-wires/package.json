@@ -1,6 +1,6 @@
 {
   "name": "rubix-wires",
-  "version": "1.3.4",
+  "version": "1.3.5",
   "author": "zero, binod, marc, ap, hilly, ritesh, ig, dan <dev@nube-io.com>",
   "private": false,
   "scripts": {
@@ -43,13 +43,14 @@
     "cross-env": "^5.1.1",
     "crypto-js": "^3.1.9-1",
     "dx-cron-builder": "^0.3.1",
+    "enumify": "^2.0.0",
     "events": "^1.1.1",
     "express": "^4.14.1",
     "express-validator": "^4.3.0",
     "influx": "^5.5.1",
     "ip": "^1.1.5",
     "jquery": "^3.2.1",
-    "jsmodbus": "^4.0.0",
+    "jsmodbus": "^4.0.4",
     "jsonata": "^1.8.1",
     "jsonwebtoken": "^8.5.1",
     "local-devices": "^3.0.0",
@@ -59,17 +60,17 @@
     "material-icons": "^0.3.1",
     "microcache": "^1.0.0",
     "miio": "^0.13.0",
-    "modbus-serial": "^7.8.0",
+    "modbus-serial": "^7.8.1",
     "moment": "^2.19.1",
     "moment-timezone": "^0.5.28",
     "morgan": "^1.8.1",
-    "mqtt": "^2.4.0",
+    "mqtt": "^2.18.8",
     "mqtt-match": "^2.0.3",
     "nedb": "^1.8.0",
     "net": "^1.0.2",
     "network": "^0.5.0",
     "nexmo": "^2.6.0",
-    "node-bacnet": "^0.1.2-beta.1",
+    "node-bacnet": "^0.1.2-beta.3",
     "nodemailer": "^6.4.2",
     "perm": "^1.0.0",
     "ping": "^0.2.2",
@@ -106,7 +107,7 @@
     "@types/lodash": "^4.14.149",
     "@types/moment": "^2.13.0",
     "@types/morgan": "^1.7.32",
-    "@types/mqtt": "2.5.0",
+    "@types/mqtt": "^2.5.0",
     "@types/nedb": "^1.8.5",
     "@types/node": "^8.10.59",
     "@types/serve-favicon": "^2.2.28",
@@ -140,8 +141,8 @@
     "sass": "^1.25.0",
     "sass-loader": "^8.0.2",
     "shelljs": "^0.8.3",
-    "source-map-support": "^0.5.16",
     "source-map-loader": "1.0.0",
+    "source-map-support": "^0.5.16",
     "style-loader": "^1.1.3",
     "ts-jest": "^25.2.1",
     "ts-loader": "^6.2.1",
@@ -160,16 +161,5 @@
     "webpack-cli": "^3.3.10",
     "webpack-dev-middleware": "^1.12.2",
     "webpack-hot-middleware": "^2.25.0"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "*.{js,ts,css,json,md}": [
-      "prettier --write",
-      "git add"
-    ]
   }
 }
