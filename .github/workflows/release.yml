@@ -18,8 +18,8 @@ jobs:
         shell: bash
         run: |
           targetVersion=$(echo "${{ github.ref }}" | sed -e "s#^refs/tags/v##")
-          echo ::set-output name=currentVersion::$(cat package.json | jq -r .version)
-          echo ::set-output name=projectName::$(head -n 5 package.json | grep name | cut -d ":" -f2 | grep -oP "(?<=\")([^\"]+)(?=\")")
+          echo ::set-output name=currentVersion::$(cat rubix-wires/package.json | jq -r .version)
+          echo ::set-output name=projectName::$(head -n 5 rubix-wires/package.json | grep name | cut -d ":" -f2 | grep -oP "(?<=\")([^\"]+)(?=\")")
           echo ::set-output name=targetVersion::$targetVersion
 
       - name: Validate version
