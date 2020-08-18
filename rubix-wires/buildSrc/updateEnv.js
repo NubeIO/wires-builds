@@ -38,16 +38,27 @@ function replaceBackend() {
 }
 
 function replaceDittoConfig() {
-  shell.sed('-i', /\$DITTO_BASEURL/g, process.env.DITTO_BASEURL|| '', 'src/config.ts');
+  shell.sed('-i', /\$DITTO_BASEURL/g, process.env.DITTO_BASEURL || '', 'src/config.ts');
   shell.sed('-i', /\$DITTO_USERNAME/g, process.env.DITTO_USERNAME || '', 'src/config.ts');
   shell.sed('-i', /\$DITTO_PASSWORD/g, process.env.DITTO_PASSWORD || '', 'src/config.ts');
 }
 
-
 function replacePostgresConfig() {
-  shell.sed('-i', /\$PG_BASEURL/g, process.env.PG_BASEURL|| '', 'src/config.ts');
-  shell.sed('-i', /\$PG_USERNAME/g, process.env.PG_USERNAME || '', 'src/config.ts');
-  shell.sed('-i', /\$PG_PASSWORD/g, process.env.PG_PASSWORD || '', 'src/config.ts');
+  shell.sed('-i', /\$PG_BASEURL/g, process.env.PG_BASEURL || '', 'src/config.ts');
+}
+
+function replaceInfluxDbConfig() {
+  shell.sed(
+    '-i',
+    /\$INFLUX_DB_PROTOCOL/g,
+    process.env.INFLUX_DB_PROTOCOL === 'https' ? 'https' : 'http',
+    'src/config.ts',
+  );
+  shell.sed('-i', /\$INFLUX_DB_HOST/g, process.env.INFLUX_DB_HOST || 'localhost', 'src/config.ts');
+  shell.sed('-i', /'\$INFLUX_DB_PORT'/g, process.env.INFLUX_DB_PORT || 8086, 'src/config.ts');
+  shell.sed('-i', /\$INFLUX_DB_DB_NAME/g, process.env.INFLUX_DB_DB_NAME || 'db', 'src/config.ts');
+  shell.sed('-i', /\$INFLUX_DB_USERNAME/g, process.env.INFLUX_DB_USERNAME || '', 'src/config.ts');
+  shell.sed('-i', /\$INFLUX_DB_PASSWORD/g, process.env.INFLUX_DB_PASSWORD || '', 'src/config.ts');
 }
 
 const updateEnv = () => {
@@ -62,6 +73,7 @@ const updateEnv = () => {
   replaceBSA();
   replaceDittoConfig();
   replacePostgresConfig();
+  replaceInfluxDbConfig();
 };
 
 updateEnv();

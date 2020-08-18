@@ -35,6 +35,9 @@ class PlatNode extends container_node_1.ContainerNode {
             'This node provides global settings for the Wires instance. It should be added to the main(root) Editor Pane of each Wires instance. ‘Client ID’ and ‘Device ID’ are used by each node with a history logging configuration to store data.';
         this.addInputWithSettings('client-id', node_1.Type.STRING, 'client abc', 'Client ID/Name', false);
         this.addInputWithSettings('site-id', node_1.Type.STRING, 'site 123', 'Site/Building ID/Name', false);
+        this.addInputWithSettings('client-name', node_1.Type.STRING, 'client 123', 'Client Name', false);
+        this.addInputWithSettings('site-name', node_1.Type.STRING, 'site 123', 'Site/Building Name', false);
+        this.addInputWithSettings('site-address', node_1.Type.STRING, '123 my street', 'Site/Building Address', false);
         this.addOutput('device-id', node_1.Type.STRING);
         this.addOutput('client-id', node_1.Type.STRING);
         this.addOutput('site-id', node_1.Type.STRING);
@@ -126,10 +129,12 @@ class PlatNode extends container_node_1.ContainerNode {
             const out = {
                 deviceID: this.properties['deviceID'],
                 clientID: this.getInputData(0),
-                siteID: this.getInputData(1)
+                siteID: this.getInputData(1),
+                clientName: this.getInputData(2),
+                siteName: this.getInputData(3),
+                siteAddress: this.getInputData(4),
             };
             this.setOutputData(4, out);
-            console.log(JSON.stringify(out));
         });
     }
     persistSettings() {

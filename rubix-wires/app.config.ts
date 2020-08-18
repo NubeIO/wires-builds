@@ -40,10 +40,16 @@ const config = {
     username: '$DITTO_USERNAME',
     password: '$DITTO_PASSWORD',
   },
-  pg: { //postgres for nube cloud rest api
+  pg: {
     baseURL: '$PG_BASEURL',
-    username: '$PG_USERNAME',
-    password: '$PG_PASSWORD',
+  },
+  influxDb: {
+    protocol: '$INFLUX_DB_PROTOCOL',
+    host: '$INFLUX_DB_HOST',
+    port: '$INFLUX_DB_PORT',
+    databaseName: '$INFLUX_DB_DB_NAME',
+    username: '$INFLUX_DB_USERNAME',
+    password: '$INFLUX_DB_PASSWORD',
   },
 };
 

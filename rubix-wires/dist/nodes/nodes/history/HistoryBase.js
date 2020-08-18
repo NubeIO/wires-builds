@@ -14,7 +14,6 @@ const node_1 = require("../../node");
 const utils_1 = require("../../utils");
 const time_utils_1 = require("../../utils/time-utils");
 const setting_utils_1 = require("../../utils/setting-utils");
-const crypto_utils_1 = require("../../utils/crypto-utils");
 const axios_1 = require("axios");
 const container_1 = require("../../container");
 const system_utils_1 = require("../system/system-utils");
@@ -65,20 +64,6 @@ class HistoryBase extends node_1.Node {
             description: 'History Enable',
             value: false,
             type: node_1.SettingType.BOOLEAN,
-        };
-        this.settings['host'] = { description: 'Host', value: '0.0.0.0', type: node_1.SettingType.STRING };
-        this.settings['port'] = { description: 'Port', value: '8086', type: node_1.SettingType.STRING };
-        this.settings['authentication'] = {
-            description: 'Use Authentication',
-            value: false,
-            type: node_1.SettingType.BOOLEAN,
-        };
-        this.settings['user'] = { description: 'Username', value: '', type: node_1.SettingType.STRING };
-        this.settings['password'] = { description: 'Password', value: '', type: node_1.SettingType.STRING };
-        this.settings['databaseName'] = {
-            description: 'Database Name',
-            value: '',
-            type: node_1.SettingType.STRING,
         };
         this.settings['tableName'] = {
             description: 'Measurement Name',
@@ -259,31 +244,9 @@ class HistoryBase extends node_1.Node {
                 conditions: this.settingConfigs['conditions'] || {},
             });
         }
-        this.settingConfigs.groups.push({ history_group: {} });
-        this.settingConfigs.groups.push({ databaseType: {} });
-        this.settingConfigs.groups.push({ host: { weight: 3 }, port: { weight: 1 } });
-        this.settingConfigs.groups.push({ user: {}, password: {} });
         this.settingConfigs.groups.push({ period: { weight: 2 }, periodUnits: {} });
-        this.settingConfigs.conditions['authentication'] = setting => {
-            return setting['databaseType'].value == 1;
-        };
-        this.settingConfigs.conditions['host'] = setting => {
-            return setting['databaseType'].value == 1;
-        };
-        this.settingConfigs.conditions['port'] = setting => {
-            return setting['databaseType'].value == 1;
-        };
-        this.settingConfigs.conditions['databaseName'] = setting => {
-            return setting['databaseType'].value == 1;
-        };
         this.settingConfigs.conditions['tableName'] = setting => {
-            return setting['databaseType'].value == 1;
-        };
-        this.settingConfigs.conditions['user'] = setting => {
-            return !!setting['authentication'].value && setting['databaseType'].value == 1;
-        };
-        this.settingConfigs.conditions['password'] = setting => {
-            return !!setting['authentication'].value && setting['databaseType'].value == 1;
+            return setting['databaseType'].value === DataBaseType.InfluxDB;
         };
         this.settingConfigs.conditions['threshold'] = setting => {
             return setting['historyMode'].value === HistoryMode.COV;
@@ -294,28 +257,12 @@ class HistoryBase extends node_1.Node {
         this.settingConfigs.conditions['periodUnits'] = setting => {
             return setting['historyMode'].value === HistoryMode.PERIODIC;
         };
-        this.settingConfigs.conditions['alarm_group'] = setting => {
-            return setting['databaseType'].value == 1;
-        };
         this.settingConfigs.conditions['alarms_count'] = setting => {
-            return setting['databaseType'].value == 1;
-        };
-        this.settingConfigs.conditions['tags_group'] = setting => {
-            return setting['databaseType'].value == 1;
+            return setting['databaseType'].value === DataBaseType.InfluxDB;
         };
         this.settingConfigs.conditions['tags_count'] = setting => {
-            return setting['databaseType'].value == 1;
+            return setting['databaseType'].value === DataBaseType.InfluxDB;
         };
-        if (this.settings['authentication']) {
-            this.settingConfigs.groups.push({ host: { weight: 3 }, port: { weight: 1 } });
-            this.settingConfigs.groups.push({ user: {}, password: {} });
-            this.settingConfigs.conditions['user'] = setting => {
-                return !!setting['authentication'].value;
-            };
-            this.settingConfigs.conditions['password'] = setting => {
-                return !!setting['authentication'].value;
-            };
-        }
         this.valueInput = valueInput;
         this.takeValueFromInput = takeValueFromInput;
     }
@@ -409,13 +356,14 @@ class HistoryBase extends node_1.Node {
             }
             else if (DataBaseType.InfluxDB === DataBaseType.InfluxDB) {
                 const writeOptions = {};
+                const { protocol, host, port, databaseName, username, password } = config_1.default.influxDb;
                 const client = new Influx.InfluxDB({
-                    host: this.settings['host'].value || 'localhost',
-                    port: this.settings['port'].value || 8086,
-                    protocol: 'http',
-                    database: this.settings['databaseName'].value || 'undefined',
-                    username: this.settings['authentication'].value ? this.settings['user'].value : '',
-                    password: this.settings['authentication'].value ? crypto_utils_1.default.decrypt(this.settings['password'].value) : '',
+                    host,
+                    port,
+                    protocol: protocol === 'https' ? 'https' : 'http',
+                    database: databaseName,
+                    username,
+                    password,
                 });
                 try {
                     yield client.writePoints(points, writeOptions);

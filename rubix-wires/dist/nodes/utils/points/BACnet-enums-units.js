@@ -3,19 +3,55 @@ Object.defineProperty(exports, "__esModule", { value: true });
 class BACnetEnumsUnits {
     static unitType(type) {
         switch (type) {
-            case 'COMMON METRIC':
+            case 'Common Metric':
                 return Object.keys(BACnetEnumsUnits.COMMON_METRIC);
-            case 'COMMON IMPERIAL':
+            case 'Common Imperial':
                 return Object.keys(BACnetEnumsUnits.COMMON_IMPERIAL);
-            case 'TEMPERATURE':
-                return Object.keys(BACnetEnumsUnits.TEMPERATURE);
-            case 'ELECTRICAL':
-                return Object.keys(BACnetEnumsUnits.ELECTRICAL);
+            case 'Electrical':
+                return Object.keys(BACnetEnumsUnits.Electrical);
+            case 'Energy':
+                return Object.keys(BACnetEnumsUnits.Energy);
+            case 'Enthalpy':
+                return Object.keys(BACnetEnumsUnits.Enthalpy);
+            case 'Entropy':
+                return Object.keys(BACnetEnumsUnits.Entropy);
+            case 'Force':
+                return Object.keys(BACnetEnumsUnits.Force);
+            case 'Frequency':
+                return Object.keys(BACnetEnumsUnits.Frequency);
+            case 'Humidity':
+                return Object.keys(BACnetEnumsUnits.Humidity);
+            case 'Length':
+                return Object.keys(BACnetEnumsUnits.Length);
+            case 'Light':
+                return Object.keys(BACnetEnumsUnits.Light);
+            case 'Mass':
+                return Object.keys(BACnetEnumsUnits.Mass);
+            case 'Flow':
+                return Object.keys(BACnetEnumsUnits.Flow);
+            case 'Power':
+                return Object.keys(BACnetEnumsUnits.Entropy);
+            case 'Pressure':
+                return Object.keys(BACnetEnumsUnits.Pressure);
+            case 'Temperature':
+                return Object.keys(BACnetEnumsUnits.Temperature);
+            case 'Time':
+                return Object.keys(BACnetEnumsUnits.Time);
+            case 'Torque':
+                return Object.keys(BACnetEnumsUnits.Torque);
+            case 'Velocity':
+                return Object.keys(BACnetEnumsUnits.Velocity);
+            case 'Volume':
+                return Object.keys(BACnetEnumsUnits.Volume);
+            case 'Volumetric Flow':
+                return Object.keys(BACnetEnumsUnits.VolumetricFlow);
+            case 'Other':
+                return Object.keys(BACnetEnumsUnits.Other);
         }
     }
 }
 exports.default = BACnetEnumsUnits;
-BACnetEnumsUnits.unitCategory = ['COMMON METRIC', 'COMMON IMPERIAL', 'TEMPERATURE', 'ELECTRICAL'].map(point => {
+BACnetEnumsUnits.unitCategory = ['Common Metric', 'Common Imperial', 'Electrical', 'Energy', 'Enthalpy', 'Entropy', 'Force', 'Frequency', 'Humidity', 'Length', 'Light', 'Mass', 'Flow', 'Power', 'Pressure', 'Temperature', 'Time', 'Torque', 'Velocity', 'Volume', 'Volumetric Flow', 'Other'].map(point => {
     return { value: point, text: point };
 });
 BACnetEnumsUnits.COMMON_METRIC = {
@@ -32,7 +68,7 @@ BACnetEnumsUnits.COMMON_IMPERIAL = {
     DEGREES_FAHRENHEIT: 64,
     POUNDS_FORCE_PER_SQUARE_INCH: 56,
 };
-BACnetEnumsUnits.ELECTRICAL = {
+BACnetEnumsUnits.Electrical = {
     MILLIAMPERES: 2,
     AMPERES: 3,
     AMPERES_PER_METER: 167,
@@ -69,58 +105,7 @@ BACnetEnumsUnits.ELECTRICAL = {
     POWER_FACTOR: 15,
     WEBERS: 178,
 };
-BACnetEnumsUnits.TEMPERATURE = {
-    DEGREES_CELSIUS: 62,
-    DEGREES_KELVIN: 63,
-    DEGREES_KELVIN_PER_HOUR: 181,
-    DEGREES_KELVIN_PER_MINUTE: 182,
-    DEGREES_FAHRENHEIT: 64,
-    DEGREE_DAYS_CELSIUS: 65,
-    DEGREE_DAYS_FAHRENHEIT: 66,
-    DELTA_DEGREES_FAHRENHEIT: 120,
-    DELTA_DEGREES_KELVIN: 121,
-};
-BACnetEnumsUnits.BACNET_ENGINEERING_UNITS = {
-    METERS_PER_SECOND_PER_SECOND: 166,
-    SQUARE_METERS: 0,
-    SQUARE_CENTIMETERS: 116,
-    SQUARE_FEET: 1,
-    SQUARE_INCHES: 115,
-    MILLIAMPERES: 2,
-    AMPERES: 3,
-    AMPERES_PER_METER: 167,
-    AMPERES_PER_SQUARE_METER: 168,
-    AMPERE_SQUARE_METERS: 169,
-    DECIBELS: 199,
-    DECIBELS_MILLIVOLT: 200,
-    DECIBELS_VOLT: 201,
-    FARADS: 170,
-    HENRYS: 171,
-    OHMS: 4,
-    OHM_METERS: 172,
-    MILLIOHMS: 145,
-    KILOHMS: 122,
-    MEGOHMS: 123,
-    MICROSIEMENS: 190,
-    MILLISIEMENS: 202,
-    SIEMENS: 173,
-    SIEMENS_PER_METER: 174,
-    TESLAS: 175,
-    VOLTS: 5,
-    MILLIVOLTS: 124,
-    KILOVOLTS: 6,
-    MEGAVOLTS: 7,
-    VOLT_AMPERES: 8,
-    KILOVOLT_AMPERES: 9,
-    MEGAVOLT_AMPERES: 10,
-    VOLT_AMPERES_REACTIVE: 11,
-    KILOVOLT_AMPERES_REACTIVE: 12,
-    MEGAVOLT_AMPERES_REACTIVE: 13,
-    VOLTS_PER_DEGREE_KELVIN: 176,
-    VOLTS_PER_METER: 177,
-    DEGREES_PHASE: 14,
-    POWER_FACTOR: 15,
-    WEBERS: 178,
+BACnetEnumsUnits.Energy = {
     JOULES: 16,
     KILOJOULES: 17,
     KILOJOULES_PER_KILOGRAM: 125,
@@ -136,24 +121,36 @@ BACnetEnumsUnits.BACNET_ENGINEERING_UNITS = {
     MEGA_BTUS: 148,
     THERMS: 21,
     TON_HOURS: 22,
+};
+BACnetEnumsUnits.Enthalpy = {
     JOULES_PER_KILOGRAM_DRY_AIR: 23,
     KILOJOULES_PER_KILOGRAM_DRY_AIR: 149,
     MEGAJOULES_PER_KILOGRAM_DRY_AIR: 150,
     BTUS_PER_POUND_DRY_AIR: 24,
     BTUS_PER_POUND: 117,
+};
+BACnetEnumsUnits.Entropy = {
     JOULES_PER_DEGREE_KELVIN: 127,
     KILOJOULES_PER_DEGREE_KELVIN: 151,
     MEGAJOULES_PER_DEGREE_KELVIN: 152,
     JOULES_PER_KILOGRAM_DEGREE_KELVIN: 128,
+};
+BACnetEnumsUnits.Force = {
     NEWTON: 153,
+};
+BACnetEnumsUnits.Frequency = {
     CYCLES_PER_HOUR: 25,
     CYCLES_PER_MINUTE: 26,
     HERTZ: 27,
     KILOHERTZ: 129,
     MEGAHERTZ: 130,
     PER_HOUR: 131,
+};
+BACnetEnumsUnits.Humidity = {
     GRAMS_OF_WATER_PER_KILOGRAM_DRY_AIR: 28,
     PERCENT_RELATIVE_HUMIDITY: 29,
+};
+BACnetEnumsUnits.Length = {
     MICROMETERS: 194,
     MILLIMETERS: 30,
     CENTIMETERS: 118,
@@ -161,6 +158,8 @@ BACnetEnumsUnits.BACNET_ENGINEERING_UNITS = {
     METERS: 31,
     INCHES: 32,
     FEET: 33,
+};
+BACnetEnumsUnits.Light = {
     CANDELAS: 179,
     CANDELAS_PER_SQUARE_METER: 180,
     WATTS_PER_SQUARE_FOOT: 34,
@@ -168,11 +167,15 @@ BACnetEnumsUnits.BACNET_ENGINEERING_UNITS = {
     LUMENS: 36,
     LUXES: 37,
     FOOT_CANDLES: 38,
+};
+BACnetEnumsUnits.Mass = {
     MILLIGRAMS: 196,
     GRAMS: 195,
     KILOGRAMS: 39,
     POUNDS_MASS: 40,
     TONS: 41,
+};
+BACnetEnumsUnits.Flow = {
     GRAMS_PER_SECOND: 154,
     GRAMS_PER_MINUTE: 155,
     KILOGRAMS_PER_SECOND: 42,
@@ -182,6 +185,8 @@ BACnetEnumsUnits.BACNET_ENGINEERING_UNITS = {
     POUNDS_MASS_PER_MINUTE: 45,
     POUNDS_MASS_PER_HOUR: 46,
     TONS_PER_HOUR: 156,
+};
+BACnetEnumsUnits.Power = {
     MILLIWATTS: 132,
     WATTS: 47,
     KILOWATTS: 48,
@@ -190,6 +195,8 @@ BACnetEnumsUnits.BACNET_ENGINEERING_UNITS = {
     KILO_BTUS_PER_HOUR: 157,
     HORSEPOWER: 51,
     TONS_REFRIGERATION: 52,
+};
+BACnetEnumsUnits.Pressure = {
     PASCALS: 53,
     HECTOPASCALS: 133,
     KILOPASCALS: 54,
@@ -202,6 +209,8 @@ BACnetEnumsUnits.BACNET_ENGINEERING_UNITS = {
     MILLIMETERS_OF_MERCURY: 59,
     CENTIMETERS_OF_MERCURY: 60,
     INCHES_OF_MERCURY: 61,
+};
+BACnetEnumsUnits.Temperature = {
     DEGREES_CELSIUS: 62,
     DEGREES_KELVIN: 63,
     DEGREES_KELVIN_PER_HOUR: 181,
@@ -211,6 +220,8 @@ BACnetEnumsUnits.BACNET_ENGINEERING_UNITS = {
     DEGREE_DAYS_FAHRENHEIT: 66,
     DELTA_DEGREES_FAHRENHEIT: 120,
     DELTA_DEGREES_KELVIN: 121,
+};
+BACnetEnumsUnits.Time = {
     YEARS: 67,
     MONTHS: 68,
     WEEKS: 69,
@@ -220,7 +231,11 @@ BACnetEnumsUnits.BACNET_ENGINEERING_UNITS = {
     SECONDS: 73,
     HUNDREDTHS_SECONDS: 158,
     MILLISECONDS: 159,
+};
+BACnetEnumsUnits.Torque = {
     NEWTON_METERS: 160,
+};
+BACnetEnumsUnits.Velocity = {
     MILLIMETERS_PER_SECOND: 161,
     MILLIMETERS_PER_MINUTE: 162,
     METERS_PER_SECOND: 74,
@@ -230,12 +245,16 @@ BACnetEnumsUnits.BACNET_ENGINEERING_UNITS = {
     FEET_PER_SECOND: 76,
     FEET_PER_MINUTE: 77,
     MILES_PER_HOUR: 78,
+};
+BACnetEnumsUnits.Volume = {
     CUBIC_FEET: 79,
     CUBIC_METERS: 80,
     IMPERIAL_GALLONS: 81,
     MILLILITERS: 197,
     LITERS: 82,
     US_GALLONS: 83,
+};
+BACnetEnumsUnits.VolumetricFlow = {
     CUBIC_FEET_PER_SECOND: 142,
     CUBIC_FEET_PER_MINUTE: 84,
     CUBIC_FEET_PER_HOUR: 191,
@@ -249,6 +268,8 @@ BACnetEnumsUnits.BACNET_ENGINEERING_UNITS = {
     LITERS_PER_HOUR: 136,
     US_GALLONS_PER_MINUTE: 89,
     US_GALLONS_PER_HOUR: 192,
+};
+BACnetEnumsUnits.Other = {
     DEGREES_ANGULAR: 90,
     DEGREES_CELSIUS_PER_HOUR: 91,
     DEGREES_CELSIUS_PER_MINUTE: 92,

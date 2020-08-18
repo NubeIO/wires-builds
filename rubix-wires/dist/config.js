@@ -13,10 +13,10 @@ const config = {
         nodeDistance: 60,
     },
     rubix: {
-        branch: 'master',
+        branch: '(HEAD',
         build: '',
-        hash: '882815a',
-        version: '1.3.5',
+        hash: '9bc6e06',
+        version: '1.3.5-hf.1',
     },
     bsa: {
         baseURL: '',
@@ -44,6 +44,12 @@ const config = {
     },
     pg: {
         baseURL: '',
+    },
+    influxDb: {
+        protocol: 'http',
+        host: 'localhost',
+        port: 8086,
+        databaseName: 'db',
         username: '',
         password: '',
     },
