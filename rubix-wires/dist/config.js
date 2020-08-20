@@ -15,8 +15,8 @@ const config = {
     rubix: {
         branch: '(HEAD',
         build: '',
-        hash: '9bc6e06',
-        version: '1.3.5-hf.1',
+        hash: '0a786cf',
+        version: '1.3.6',
     },
     bsa: {
         baseURL: '',
@@ -52,6 +52,11 @@ const config = {
         databaseName: 'db',
         username: '',
         password: '',
+    },
+    edge28: {
+        baseURL: '',
+        port: '',
+        apiVer: '',
     },
 };
 const footerPrefix = `-${config.rubix.hash}${config.rubix.build && `-${config.rubix.build}`}`;

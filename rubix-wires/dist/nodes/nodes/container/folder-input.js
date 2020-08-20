@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
-const folder_1 = require("./folder");
 class ContainerInputNode extends node_1.Node {
     constructor(container) {
         super(container);
@@ -15,7 +14,9 @@ class ContainerInputNode extends node_1.Node {
         if (!this.isPlacedInsideContainerNode())
             return;
         let containerNode = this.container.container_node;
-        this.properties['slot'] = containerNode.addInput(this.name, this.properties['type']);
+        const id = containerNode.addInput(this.name, this.properties['type'], undefined, this.properties['slot']);
+        this.properties['slot'] = id;
+        this.name = containerNode.inputs[id].name;
         if (this.container.db) {
             let serializedContainerNode = containerNode.serialize();
             this.container.db.updateNode(containerNode.id, containerNode.container.id, {
@@ -65,5 +66,5 @@ class ContainerInputNode extends node_1.Node {
         return !!this.container.container_node;
     }
 }
-container_1.Container.registerNodeType('container/folder-input', ContainerInputNode, folder_1.CONTAINER_NODE_TYPE);
+container_1.Container.registerNodeType('container/folder-input', ContainerInputNode, null, true, false, true);
 //# sourceMappingURL=folder-input.js.map

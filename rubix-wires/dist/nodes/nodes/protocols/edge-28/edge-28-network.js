@@ -18,6 +18,7 @@ const edge_utils_1 = require("./edge-utils");
 const time_utils_1 = require("../../../utils/time-utils");
 const edge_constant_1 = require("./edge-constant");
 const constants_1 = require("../../../constants");
+const node_colour_change_1 = require("../../../utils/nodes/node-colour-change");
 class Edge28ApiNode extends container_node_1.ContainerNode {
     constructor(container) {
         super(container);
@@ -53,11 +54,8 @@ class Edge28ApiNode extends container_node_1.ContainerNode {
                 `   \n `;
         this.addInputWithSettings('enable', node_1.Type.BOOLEAN, true, 'Enable');
         this.addInputWithSettings('interval', node_1.Type.NUMBER, 2, 'Polling Interval');
-        this.addInput('pollInputs', node_1.Type.BOOLEAN);
         this.addOutput('connected', node_1.Type.BOOLEAN);
         this.addOutput('error', node_1.Type.STRING);
-        this.addOutput('alarm', node_1.Type.BOOLEAN);
-        this.addOutput('output', node_1.Type.BOOLEAN);
         this.settings['time'] = {
             description: 'Polling Interval Time Setting',
             type: node_1.SettingType.DROPDOWN,
@@ -83,7 +81,6 @@ class Edge28ApiNode extends container_node_1.ContainerNode {
     }
     onCreated() {
         super.onCreated();
-        this.name = `id_${this.container.id.toString()}_${this.id.toString()}`;
     }
     onAdded() {
         const _super = Object.create(null, {
@@ -132,9 +129,15 @@ class Edge28ApiNode extends container_node_1.ContainerNode {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 this.edgeReadUI_Store = yield this.fetchPointValue(edge_constant_1.edgeIp, edge_constant_1.edgePort, edge_constant_1.edgeApiVer, this._ui);
+                this.setOutputData(0, true);
+                this.setOutputData(1, false);
+                node_colour_change_1.default.nodeColourChange(this, node_1.NodeState.DISABLED);
             }
             catch (err) {
                 this.debugInfo(`ERROR: getting edge point type: ${this._ui} ${err}`);
+                this.setOutputData(0, false);
+                this.setOutputData(1, true);
+                node_colour_change_1.default.nodeColourChange(this, node_1.NodeState.WARNING);
             }
         });
     }
@@ -142,9 +145,15 @@ class Edge28ApiNode extends container_node_1.ContainerNode {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 this.edgeReadDI_Store = yield this.fetchPointValue(edge_constant_1.edgeIp, edge_constant_1.edgePort, edge_constant_1.edgeApiVer, this._di);
+                this.setOutputData(0, true);
+                this.setOutputData(1, false);
+                node_colour_change_1.default.nodeColourChange(this, node_1.NodeState.DISABLED);
             }
             catch (err) {
                 this.debugInfo(`ERROR: getting edge point type: ${this._di} ${err}`);
+                this.setOutputData(0, false);
+                this.setOutputData(1, true);
+                node_colour_change_1.default.nodeColourChange(this, node_1.NodeState.WARNING);
             }
         });
     }
@@ -210,7 +219,6 @@ class Edge28ApiNode extends container_node_1.ContainerNode {
                 }
                 else if (!this.runState) {
                     this.runState = true;
-                    this.setOutputData(0, yield this.doPing(edge_constant_1.edgeIp, edge_constant_1.edgePort));
                     this.startInputPolling(interval);
                     return;
                 }
@@ -227,15 +235,6 @@ class Edge28ApiNode extends container_node_1.ContainerNode {
             if (this.side !== container_1.Side.server)
                 return;
             yield this.onInputUpdated();
-        });
-    }
-    doPing(host, port) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (this.side !== container_1.Side.server)
-                return;
-            const url = `${utils_1.default.buildUrl(host, port)}/`;
-            const pingVal = yield axios_1.default.get(url);
-            return Object.values(pingVal.data).includes('whats up');
         });
     }
 }

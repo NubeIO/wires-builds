@@ -106,7 +106,7 @@ class Edge28OutputPointNode extends HistoryBase_1.default {
                 ` to be added  \n `;
         this.addInput('input', node_1.Type.NUMBER);
         this.addOutput('output', node_1.Type.NUMBER);
-        this.addOutput('error', node_1.Type.STRING);
+        this.addOutput('output-json', node_1.Type.JSON);
         this.properties['pointVal'] = null;
         this.settings['pointEnable'] = {
             description: 'Point enable',
@@ -241,6 +241,18 @@ class Edge28OutputPointNode extends HistoryBase_1.default {
         const inputVal = this.getInputData(this.inInput);
         this.apiCall(inputVal);
     }
+    sendJson() {
+        const decimals = this.settings['decimals'].value;
+        const out = {
+            name: this.name,
+            pointValue: this.properties['pointVal'],
+            enable: this.settings['pointEnable'].value,
+            units: this.settings['units'].value,
+            pointNumber: this.settings['pointNumber'].value,
+            pointType: this.settings['pointType'].value,
+        };
+        return out;
+    }
     apiCall(inputVal) {
         if (this.side !== container_1.Side.server)
             return;
@@ -313,10 +325,14 @@ class Edge28OutputPointNode extends HistoryBase_1.default {
         const pointType = this.pointType(this.settings['pointType'].value);
         edge_utils_1.default.writePointValue(edge_constant_1.edgeIp, edge_constant_1.edgePort, edge_constant_1.edgeApiVer, pointType, pointNumber, outVal, 16)
             .then(e => {
+            this.properties['pointVal'] = nodeVal;
             this.setOutputData(0, nodeVal, true);
+            this.setOutputData(1, this.sendJson(), true);
             this.lastSendTime = new Date().valueOf();
         })
-            .catch(err => this.debugInfo(`ERROR: getting edge point type: ${pointType} ${err}`));
+            .catch(err => {
+            this.debugInfo(`ERROR: getting edge point type: ${pointType} ${err}`);
+        });
     }
 }
 container_1.Container.registerNodeType(constants_1.EDGE_28_OUTPUT, Edge28OutputPointNode, constants_1.EDGE_28_NETWORK);

@@ -8,13 +8,27 @@ class JsonFilterMultiple extends node_1.Node {
         super();
         this.filterKeys = [];
         this.title = 'Json Filter Multiple';
-        this.description = 'Filter a json object to multiple outputs';
+        this.description =
+            'Filter a json object to multiple outputs. There are two Output Update options for whether ' +
+                'you want to update all keys or not (ALL: update as `null` when the key value will not be on the JSON, FOUND: ' +
+                "don't update values and leave as is when key key value doesn't exist";
         this.addInput('input', node_1.Type.STRING);
         this.addOutput('error', node_1.Type.STRING);
         this.settings['filter'] = {
             description: 'Example: key1.innerKey1, key2, key2.innerKey2',
             value: '',
             type: node_1.SettingType.STRING,
+        };
+        this.settings['outputsUpdate'] = {
+            description: 'Outputs Update',
+            type: node_1.SettingType.DROPDOWN,
+            config: {
+                items: [
+                    { value: 'ALL', text: 'ALL' },
+                    { value: 'FOUND', text: 'FOUND' },
+                ],
+            },
+            value: 'ALL',
         };
     }
     init() {
@@ -33,10 +47,10 @@ class JsonFilterMultiple extends node_1.Node {
             input = JSON.parse(input);
             for (let i = 0; i < this.filterKeys.length; i++) {
                 let out = _.get(input, this.filterKeys[i]);
-                if (out != null) {
+                if (out !== undefined) {
                     this.setOutputData(i + this.dynamicOutputStartPosition(), out);
                 }
-                else {
+                else if (this.settings['outputsUpdate'].value === 'ALL') {
                     this.setOutputData(i + this.dynamicOutputStartPosition(), null);
                 }
             }
@@ -44,9 +58,6 @@ class JsonFilterMultiple extends node_1.Node {
         }
         catch (e) {
             this.setOutputData(0, e.toString());
-            for (let i = 0; i < this.filterKeys.length; i++) {
-                this.setOutputData(i + this.dynamicOutputStartPosition(), null);
-            }
         }
     }
     onAfterSettingsChange() {

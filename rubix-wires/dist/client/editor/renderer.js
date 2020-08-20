@@ -382,31 +382,34 @@ class Renderer extends events_1.EventEmitter {
             if (n) {
                 let skip_action = isCategoryPanelClicked;
                 if (!this.connecting_node && !n.flags.collapsed && !this.live_mode) {
-                    if (n.outputs)
+                    if (n.outputs) {
+                        let slotNumber = -1;
                         for (let o in n.outputs) {
+                            slotNumber++;
                             let output = n.outputs[o];
-                            let link_pos = this.getConnectionPos(n, false, +o);
+                            let link_pos = this.getConnectionPos(n, false, slotNumber);
                             if (utils_1.default.isInsideRectangle(e.canvasX, e.canvasY, link_pos[0] - 10, link_pos[1] - 5, 20, 10)) {
                                 this.connecting_node = n;
                                 this.connecting_output = output;
-                                this.connecting_pos = this.getConnectionPos(n, false, +o);
+                                this.connecting_pos = this.getConnectionPos(n, false, slotNumber);
                                 this.connecting_slot = +o;
                                 skip_action = true;
                                 break;
                             }
                         }
+                    }
                     if (n.inputs) {
-                        let slot = -1;
+                        let slotNumber = -1;
                         for (let i in n.inputs) {
+                            slotNumber++;
                             if (n.inputs[i].setting.hidden) {
                                 continue;
                             }
-                            slot++;
                             let input = n.inputs[i];
-                            let link_pos = this.getConnectionPos(n, true, slot, helper_1.convertToNumber(i));
+                            let link_pos = this.getConnectionPos(n, true, slotNumber, +i);
                             if (utils_1.default.isInsideRectangle(e.canvasX, e.canvasY, link_pos[0] - 10, link_pos[1] - 5, 20, 10)) {
                                 if (input.link) {
-                                    this.editor.socket.sendRemoveLink(input.link.target_node_id, input.link.target_slot, n.id, slot, helper_1.convertToNumber(i));
+                                    this.editor.socket.sendRemoveLink(input.link.target_node_id, input.link.target_slot, n.id, slotNumber, helper_1.convertToNumber(i));
                                     skip_action = true;
                                 }
                             }
@@ -536,7 +539,7 @@ class Renderer extends events_1.EventEmitter {
             }
             this.canvas.style.cursor = 'default';
             if (n) {
-                let { slot, index } = this.isOverNodeInput(n, e.canvasX, e.canvasY, [0, 0]);
+                let { slot } = this.isOverNodeInput(n, e.canvasX, e.canvasY, [0, 0]);
                 let o = this.isOverNodeOutput(n, e.canvasX, e.canvasY, [0, 0]);
                 if ((slot != -1 && this.connecting_node) || o != -1)
                     this.canvas.style.cursor = 'crosshair';
@@ -551,7 +554,7 @@ class Renderer extends events_1.EventEmitter {
                     n['onMouseMove'](e);
                 if (this.connecting_node) {
                     let pos = this._highlight_input_pos || [0, 0];
-                    let { slot, index } = this.isOverNodeInput(n, e.canvasX, e.canvasY, pos);
+                    let { slot } = this.isOverNodeInput(n, e.canvasX, e.canvasY, pos);
                     if (slot != -1 && n.inputs[slot]) {
                         this._highlight_input_pos = pos;
                         this._highlight_input = n.inputs[slot];
@@ -736,36 +739,37 @@ class Renderer extends events_1.EventEmitter {
         if (!node.inputs) {
             return { slot: -1, index: -1 };
         }
-        let slot = -1;
+        let slotNumber = -1;
         for (let i in node.inputs) {
             if (node.inputs[i].setting.hidden) {
                 continue;
             }
-            slot++;
-            let link_pos = this.getConnectionPos(node, true, slot, helper_1.convertToNumber(i));
+            slotNumber++;
+            let link_pos = this.getConnectionPos(node, true, slotNumber, +i);
             if (utils_1.default.isInsideRectangle(canvasx, canvasy, link_pos[0] - 10, link_pos[1] - 5, 20, 10)) {
                 if (slot_pos) {
                     slot_pos[0] = link_pos[0];
                     slot_pos[1] = link_pos[1];
                 }
-                return { slot: slot, index: parseInt(i) };
+                return { slot: slotNumber, index: parseInt(i) };
             }
         }
         return { slot: -1, index: -1 };
     }
     isOverNodeOutput(node, canvasx, canvasy, slot_pos) {
-        if (node.outputs)
+        if (node.outputs) {
+            let slotNumber = -1;
             for (let o in node.outputs) {
-                let output = node.outputs[o];
-                let link_pos = this.getConnectionPos(node, false, +o);
+                slotNumber++;
+                const link_pos = this.getConnectionPos(node, false, slotNumber);
                 if (utils_1.default.isInsideRectangle(canvasx, canvasy, link_pos[0] - 10, link_pos[1] - 5, 20, 10)) {
                     if (slot_pos) {
                         slot_pos[0] = link_pos[0];
                         slot_pos[1] = link_pos[1];
                     }
-                    return +o;
                 }
             }
+        }
         return -1;
     }
     processKey(e) {
@@ -1146,7 +1150,7 @@ class Renderer extends events_1.EventEmitter {
     }
     renderNodePanel(ctx, canvas) {
         ctx.save();
-        ctx.fillStyle = this.theme.CONTAINER_NODE_BGCOLOR;
+        ctx.fillStyle = this.theme.NODE_PALLETTE_COLOR;
         ctx.rect(0, 0, this.NODE_PANEL_WIDTH, canvas.height);
         ctx.fill();
         this.nodeCategoriesPanel.forEach(value => {
@@ -1398,9 +1402,11 @@ class Renderer extends events_1.EventEmitter {
         if (!node.outputs) {
             return;
         }
+        let slotNumber = -1;
         for (let o in node.outputs) {
+            slotNumber++;
             let slot = node.outputs[o];
-            let pos = this.getConnectionPos(node, false, +o);
+            let pos = this.getConnectionPos(node, false, slotNumber);
             pos[0] -= node.pos[0];
             pos[1] -= node.pos[1];
             ctx.fillStyle =
@@ -1436,8 +1442,9 @@ class Renderer extends events_1.EventEmitter {
         if (!node.inputs) {
             return;
         }
-        let index = 0;
+        let slotNumber = -1;
         for (let i in node.inputs) {
+            slotNumber++;
             let slot = node.inputs[i];
             if (slot.setting.hidden) {
                 continue;
@@ -1445,14 +1452,13 @@ class Renderer extends events_1.EventEmitter {
             ctx.globalAlpha = editor_alpha;
             ctx.fillStyle =
                 slot.link !== null ? this.theme.NODE_SLOT_COLOR : this.theme.DATATYPE_COLOR[Renderer.mapToColor(slot.type)];
-            let pos = this.getConnectionPos(node, true, index);
+            let pos = this.getConnectionPos(node, true, slotNumber);
             pos[0] -= node.pos[0];
             pos[1] -= node.pos[1];
             ctx.beginPath();
             if (1 || slot.round)
                 ctx.arc(pos[0], pos[1], 4, 0, Math.PI * 2);
             ctx.fill();
-            index++;
             if (render_text) {
                 const name = slot.name;
                 let nameWidth = 0;
@@ -1679,7 +1685,9 @@ class Renderer extends events_1.EventEmitter {
         for (let id in this.container._nodes) {
             let node = this.container._nodes[id];
             if (node.outputs) {
+                let slotNumber = -1;
                 for (let i in node.outputs) {
+                    slotNumber++;
                     let outputs = node.outputs[i];
                     if (!outputs || !outputs.links)
                         continue;
@@ -1696,10 +1704,19 @@ class Renderer extends events_1.EventEmitter {
                         let start_node_slotpos = null;
                         if (link.target_slot == -1)
                             start_node_slotpos = [start_node.pos[0] + 10, start_node.pos[1] + 10];
-                        else
-                            start_node_slotpos = this.getConnectionPos(start_node, true, link.target_slot);
+                        else {
+                            const targetNode = this.container._nodes[link.target_node_id];
+                            let targetSlotNumber = -1;
+                            for (let i in targetNode.inputs) {
+                                targetSlotNumber++;
+                                if (+i === link.target_slot) {
+                                    break;
+                                }
+                            }
+                            start_node_slotpos = this.getConnectionPos(start_node, true, targetSlotNumber);
+                        }
                         let color = this.theme.LINK_TYPE_COLORS[Renderer.mapToColor(node.outputs[i].type)];
-                        this.renderLink(ctx, this.getConnectionPos(node, false, +i), start_node_slotpos, color, node.id === start_node.id, node);
+                        this.renderLink(ctx, this.getConnectionPos(node, false, slotNumber), start_node_slotpos, color, node.id === start_node.id, node);
                     }
                 }
             }
@@ -2064,7 +2081,8 @@ class Renderer extends events_1.EventEmitter {
                     }
                 }
             }
-            else if (!parentContainersNodesTypes.length && nodeTypes[i].parentContainerNodeType) {
+            else if (!parentContainersNodesTypes.length &&
+                (nodeTypes[i].parentContainerNodeType || nodeTypes[i].onlyInsideContainer)) {
                 continue;
             }
             returnNodeTypes.push(nodeTypes[i]);
@@ -2320,20 +2338,26 @@ class Renderer extends events_1.EventEmitter {
         return false;
     }
     getSlotInPosition(node, x, y) {
-        if (node.inputs)
+        if (node.inputs) {
+            let slotNumber = -1;
             for (let i in node.inputs) {
+                slotNumber++;
                 let input = node.inputs[i];
-                let link_pos = this.getConnectionPos(node, true, +i);
+                let link_pos = this.getConnectionPos(node, true, slotNumber);
                 if (utils_1.default.isInsideRectangle(x, y, link_pos[0] - 10, link_pos[1] - 5, 20, 10))
                     return { input: input, slot: +i, link_pos: link_pos, locked: input.locked };
             }
-        if (node.outputs)
+        }
+        if (node.outputs) {
+            let slotNumber = -1;
             for (let o in node.outputs) {
+                slotNumber++;
                 let output = node.outputs[o];
-                let link_pos = this.getConnectionPos(node, false, +o);
+                let link_pos = this.getConnectionPos(node, false, slotNumber);
                 if (utils_1.default.isInsideRectangle(x, y, link_pos[0] - 10, link_pos[1] - 5, 20, 10))
                     return { output: output, slot: +o, link_pos: link_pos, locked: output.locked };
             }
+        }
         return null;
     }
     getNodeOnPos(x, y, nodes_list) {

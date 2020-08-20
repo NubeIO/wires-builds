@@ -154,9 +154,9 @@ class Edge28InputPointNode extends HistoryBase_1.default {
                 `### Tag Settings\n ` +
                 `   \n ` +
                 ` to be added  \n `;
-        this.addOutput('value', node_1.Type.NUMBER);
+        this.addOutput('output', node_1.Type.NUMBER);
+        this.addOutput('output-json', node_1.Type.STRING);
         this.addOutput('error', node_1.Type.STRING);
-        this.addOutput('message', node_1.Type.STRING);
         this.settings['pointEnable'] = {
             description: 'Point enable',
             value: false,
@@ -322,11 +322,11 @@ class Edge28InputPointNode extends HistoryBase_1.default {
             yield _super.onAfterSettingsChange.call(this);
             if (this.side !== container_1.Side.server)
                 return;
-            this.nodeColour();
             const unitsType = this.settings['unitsType'].value;
             this.settings['units'].config = {
                 items: BACnet_enums_units_1.default.unitType(unitsType),
             };
+            this.sendPointValue();
             this.broadcastSettingsToClients();
             setTimeout(() => {
                 this.settings['pointDebug'].value = false;
@@ -337,6 +337,19 @@ class Edge28InputPointNode extends HistoryBase_1.default {
         super.onRemoved();
         edge_utils_1.default.removePoint(this.getParentNode(), this);
     }
+    sendJson() {
+        const decimals = this.settings['decimals'].value;
+        const out = {
+            name: this.name,
+            pointValue: this.out,
+            enable: this.settings['pointEnable'].value,
+            units: this.settings['units'].value,
+            pointNumber: this.settings['pointNumber'].value,
+            pointType: this.settings['pointType'].value,
+            pointOffset: this.settings['offset'].value,
+        };
+        return out;
+    }
     nodeColour() {
         if (this.settings['pointEnable'].value === false) {
             this.setNodeState(node_1.NodeState.INFO);
@@ -344,16 +357,23 @@ class Edge28InputPointNode extends HistoryBase_1.default {
         else
             this.setNodeState(node_1.NodeState.NORMAL);
     }
-    sendPointValue(val) {
+    sendPointValue() {
         const debug = this.settings['pointDebug'].value;
         if (debug) {
-            this.setOutputData(0, val);
+            this.setOutputData(0, this.out);
+            this.setOutputData(1, this.sendJson());
         }
-        else
-            this.setOutputData(0, val, true);
+        else {
+            this.setOutputData(0, this.out, true);
+            this.setOutputData(1, this.sendJson(), true);
+        }
     }
     pointOffset(val) {
-        return parseFloat(val) + parseFloat(this.settings['offset'].value);
+        let offset = this.settings['offset'].value;
+        if (offset === null) {
+            offset = 0;
+        }
+        return parseFloat(val) + parseFloat(offset);
     }
     pointCalcs(val) {
         const mathFunc = this.settings['mathFunc'].value;
@@ -361,30 +381,29 @@ class Edge28InputPointNode extends HistoryBase_1.default {
         const decimals = this.settings['decimals'].value;
         const pointType = this.settings['pointType'].value;
         const isDigitalType = [POINT_TYPE.DIGITAL, POINT_TYPE.UI_DIGITAL];
-        let out;
         if (MathUtils_1.default.validateNumbers(val, mathValue)) {
             if (mathFunc !== MathUtils_1.MATH_FUNC_TYPE.NA) {
                 if (!isDigitalType.includes(pointType)) {
-                    out = MathUtils_1.default.mathSwitch(mathFunc, val, mathValue);
-                    out = MathUtils_1.default.decimals(out, decimals);
-                    out = this.pointOffset(out);
-                    this.sendPointValue(out);
+                    this.out = MathUtils_1.default.mathSwitch(mathFunc, val, mathValue);
+                    this.out = MathUtils_1.default.decimals(this.out, decimals);
+                    this.out = this.pointOffset(this.out);
+                    this.sendPointValue();
                 }
                 else {
-                    out = MathUtils_1.default.mathSwitch(mathFunc, val, mathValue);
-                    out = this.pointOffset(out);
-                    this.sendPointValue(out);
+                    this.out = MathUtils_1.default.mathSwitch(mathFunc, val, mathValue);
+                    this.out = this.pointOffset(this.out);
+                    this.sendPointValue();
                 }
             }
             else {
                 if (!isDigitalType.includes(pointType)) {
-                    out = MathUtils_1.default.decimals(val, decimals);
-                    out = this.pointOffset(out);
+                    this.out = MathUtils_1.default.decimals(val, decimals);
+                    this.out = this.pointOffset(this.out);
                 }
                 else {
-                    out = val;
+                    this.out = val;
                 }
-                this.sendPointValue(out);
+                this.sendPointValue();
             }
         }
     }

@@ -51,6 +51,11 @@ const config = {
     username: '$INFLUX_DB_USERNAME',
     password: '$INFLUX_DB_PASSWORD',
   },
+  edge28: {
+    baseURL: '$EDGE_28_BASEURL',
+    port: '$EDGE_28_PORT',
+    apiVer: '$EDGE_28_API_VER',
+  },
 };
 
 const footerPrefix = `-${config.rubix.hash}${config.rubix.build && `-${config.rubix.build}`}`;

@@ -43,6 +43,7 @@ var NodeState;
     NodeState["INFO"] = "info";
     NodeState["WARNING"] = "warning";
     NodeState["ERROR"] = "error";
+    NodeState["DISABLED"] = "disabled";
 })(NodeState = exports.NodeState || (exports.NodeState = {}));
 var SettingType;
 (function (SettingType) {
@@ -298,8 +299,8 @@ class Node {
             return null;
         return this.inputs[slot];
     }
-    addOutput(name, type, extra_info) {
-        let id = this.getFreeOutputId();
+    addOutput(name, type, id = undefined, extra_info) {
+        id = this.getFreeOutputId(id);
         name = name || 'out ' + (id + 1);
         let output = { name: name, type: type, links: null };
         if (extra_info)
@@ -313,9 +314,12 @@ class Node {
         this.size = this.computeSize();
         return id;
     }
-    getFreeOutputId() {
+    getFreeOutputId(id = undefined) {
         if (!this.outputs)
             return 0;
+        if (id !== undefined && !this.outputs[id]) {
+            return id;
+        }
         for (let i = 0; i < 1000; i++) {
             if (!this.outputs[i])
                 return i;
@@ -328,8 +332,9 @@ class Node {
         if (this['onOutputRemoved'])
             this['onOutputRemoved'](id);
     }
-    addInput(name, type, setting = { exist: false, nullable: false, hidden: false }, extra_info) {
-        let id = this.getFreeInputId();
+    addInput(name, type, setting = { exist: false, nullable: false, hidden: false }, id = undefined, extra_info) {
+        id = this.getFreeInputId(id);
+        name = name || 'in ' + (id + 1);
         let input = { name, type, setting };
         if (extra_info) {
             input = Object.assign(Object.assign({}, input), extra_info);
@@ -382,9 +387,12 @@ class Node {
             this['onInputAdded'](input);
         return position;
     }
-    getFreeInputId() {
+    getFreeInputId(id = undefined) {
         if (!this.inputs)
             return 0;
+        if (id !== undefined && !this.inputs[id]) {
+            return id;
+        }
         for (let i = 0; i < 1000; i++) {
             if (!this.inputs[i])
                 return i;

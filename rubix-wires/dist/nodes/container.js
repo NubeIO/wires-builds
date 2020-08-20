@@ -48,7 +48,7 @@ class Container {
         Container.containers = {};
         Container.last_container_id = -1;
     }
-    static registerNodeType(type, node_class, parentContainerNodeType = null, show_in_menu = true, recursive = false) {
+    static registerNodeType(type, node_class, parentContainerNodeType = null, show_in_menu = true, recursive = false, alwaysInsideContainer = false) {
         if (!(node_class.prototype instanceof node_1.Node))
             throw `Can't register node of type [${type}]. Class must inherit Node base class!`;
         let node = new node_class(this);
@@ -61,6 +61,7 @@ class Container {
         node_class.title = node.title || node.type;
         node_class.parentContainerNodeType = parentContainerNodeType;
         node_class.recursive = recursive;
+        node_class.onlyInsideContainer = alwaysInsideContainer;
         this.nodes_types[type] = node_class;
     }
     static createNode(type, container, position) {

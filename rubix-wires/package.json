@@ -1,6 +1,6 @@
 {
   "name": "rubix-wires",
-  "version": "1.3.5-hf.1",
+  "version": "1.3.6",
   "author": "zero, binod, marc, ap, hilly, ritesh, ig, dan <dev@nube-io.com>",
   "private": false,
   "scripts": {

@@ -35,6 +35,7 @@ class RendererTheme {
         this.MENU_BG_COLOR = '#353535';
         this.BG_IMAGE = '/images/node-editor/grid.png';
         this.NODE_IMAGES_PATH = '';
+        this.NODE_PALLETTE_COLOR = '#666B6F';
         this.RENDER_CONNECTION_ARROWS = true;
         this.CONNECTIONS_WIDTH = 4;
         this.CONNECTIONS_SHADOW = 4;
@@ -54,6 +55,7 @@ class RendererTheme {
             [node_1.NodeState.INFO]: '#ACA',
             [node_1.NodeState.WARNING]: '#FB8',
             [node_1.NodeState.ERROR]: '#A44',
+            [node_1.NodeState.DISABLED]: '#73B7E6',
         };
         this.NODE_COLORS = {
             red: { color: '#FAA', bgcolor: '#A44' },
@@ -79,6 +81,7 @@ theme0.CONTAINER_NODE_COLOR = '#464B4F';
 theme0.CONTAINER_NODE_BGCOLOR = '#666B6F';
 theme0.IO_NODE_COLOR = '#262B2F';
 theme0.IO_NODE_BGCOLOR = '#868B8F';
+theme0.NODE_PALLETTE_COLOR = '#666B6F';
 theme0.NODE_ACTIVE_BOXCOLOR = '#C9CAC4';
 theme0.NODE_DEFAULT_IO_COLOR = '#C9CAC4';
 theme0.NODE_OPTIONAL_IO_COLOR = '#999A94';
