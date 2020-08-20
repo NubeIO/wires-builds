@@ -1,6 +1,3 @@
-
-
-
 ## **How to install:**
 
 **Install requirements:**
@@ -9,26 +6,19 @@
 - install Node.js v8.4 or higher: [https://nodejs.org/en/download/](https://nodejs.org/en/download/)
 - reboot
 
-
-
 ## **How to run:**
 
-- npm start
+- `npm start`
 - open in browser: [http://localhost:1313](http://localhost:1313)
-
-## **How to test:**
-
-- `npm run test` (to run whole test files)
-- `npm run test ./src/nodes/nodes/schedule/schedule-checker.test.ts` (to run a particular test file)
 
 ## **Environmental variables customization**
 
-- `cp .env.example .env`
-- Edit .env file's variable as we want
+- `cp .env.example ${dataDir}/.env` (by default: `dataDir = /data/rubix-wires/` is for production and `dataDir = ~/db/`
+  is for local)
+- Edit `.env` file's variable as we want
 
-## **How to run for develop (watch mode):**
-
-- npm run watch
+_<b>Note:</b> If `.env` exist on both location, project directory `.env` gets first priority and then data directory
+`.env`_
 
 ## **Run on x86 bit of machine (BBB, RaspberryPi)**
 
@@ -39,40 +29,52 @@
 
 #### Summary
 
-- Currently we have RaspberryPi machine with `pi` user &
-- BBB machine with `debian` user
+- Currently we have RaspberryPi machine with `pi` user, `home/pi` home_path &
+- BBB machine with `debian` user, `home/debian` path
 
 We need the user for running commands.
 
+#### Create snapshot
 
+- `npm install`
+- `npm run build --prod --target=x86` (Create production `.zip` file for the deployment)
 
-#### Upload download snapshot
+#### Transfer snapshot
 
-- Upload `.zip` file (`./snapshot/rubix-wires-${project.version}.zip`) to https://github.com/NubeIO/wires-builds (Just a convention)
-- Download that `.zip` file into your x86 bit of machine and extract project where user have permission to `R/W/E`
-- Make sure you have directory with writable permission `/data` (`sudo mkdir /data && sudo chown -R pi:pi /data` for db store, `pi` is the user)
+- Transfer `.zip` file to edge device
+
+#### Scripts for `start | disable | enable | remove`
+
+- `bash script.bash start -u=pi -hp=/home/pi` (optional parameters: -l, -ug)
+- `bash script.bash start -u=pi -hp=/home/pi -l=false` --logging false
+- `bash script.bash disable -u=pi`
+- `bash script.bash enable -u=pi`
+- `bash script.bash remove -u=pi`
+- `bash script.bash -h` (for help)
+
+Here, `pi` is user and `/home/pi` is home_path for PM2 file creation.
+
+#### Individual run script
+
 - `npm run start:prod`
-- Other scripts:
-  - `npm run stop:prod`
-  - `npm run delete:prod`
-  - `npm run status:prod`
-- Change Environmental variables:
-  - We can have our own custom environment by editing `.env` file as in above
-  - `PORT=1415 DATA_DIR=./db SECRET_KEY=**SECRET_KEY** npm run start:prod` (we can also pass run time environment, not recommended)
+- `npm run stop:prod`
+- `npm run delete:prod`
+- `npm run status:prod`
+- `npm run save:prod` (It will save the info of the project for the `PM2`)
+- `sudo npm run startup:prod -- -u pi --hp /home/pi` (create Linux Service file, here `pi` is the user, and make sure you hit `sudo` at prefix)
+- `sudo systemctl enable pm2-pi.service` (`pm2-pi.service` is Linux Service created for user `pi`)
+- `sudo npm run unstartup:prod -- -u pi` (remove that Linux Service created from above command)
 
-#### Enabling automatically restart service on reboot with Linux Service
+#### Change Environmental variables
 
-- Make sure you have already started this App with `npm run start:prod`
-- Steps:
-  - `npm run save:prod` (It will save the info of the project for the `PM2`)
-  - `sudo npm run startup:prod -- -u pi --hp /home/pi` (here `pi` is the user, and make sure you hit `sudo` at prefix)
-  - `sudo systemctl enable pm2-pi.service` (`pm2-pi.service` is Linux Service created for user `pi`)
-  - `sudo npm run unstartup:prod -- -u pi` (remove that Linux Service created from above command)
-- Linux Service gets enable when we do above steps, but it runs through `Linux Service` after the system got restarted.
-  So after the restart `npm run stop:prod` like commands won't work and we should use `systemctl` commands as below:
-  - `sudo systemctl start pm2-pi.service`
-  - `sudo systemctl stop pm2-pi.service`
-  - `sudo systemctl restart pm2-pi.service`
+- We can have our own custom environment by editing `.env` file as in above
+- `PORT=1415 DATA_DIR=./db SECRET_KEY=**SECRET_KEY** npm run start:prod` (we can also pass run time environment, not recommended)
+
+#### Linux service
+
+- `sudo systemctl start pm2-pi.service`
+- `sudo systemctl stop pm2-pi.service`
+- `sudo systemctl restart pm2-pi.service`
 
 #### How to update with new change?
 
@@ -84,8 +86,10 @@ We need the user for running commands.
 ##### Steps:
 
 - `rm -r rubix-wires-${version}`
-- Download `.zip` file from server on the same location and extract
+- Export all nodes and store somewhere and delete nodes from `DB`
+ (`rm -r /data/rubix-wires/app.db /data/rubix-wires/dashboard.db /data/rubix-wires/history.db /data/rubix-wires/nodes.db /data/rubix-wires/schedule.db`)
 - `sudo systemctl restart pm2-pi.service`
+- Import all nodes
 
 ## **Issues:**
 
@@ -93,11 +97,14 @@ If you get "Can't find Python executable C:\Python36\python.exe, you can set the
 
 - npm install --global --production windows-build-tools
 
-#### Viewing Wires Logs
+## Viewing Wires Logs
 
 To monitor the logs of a program running via Linux Service. Use following commands:
 
-- `For monitoring logs: journalctl -f -u <service-name>`
-- `Displaying logs from starting on one page with scroll: journalctl -u <service-name>`
-- `Displaying all logs: journalctl -u <service-name> --no-pager`
-- `Displaying logs of last page: journalctl -u <service-name> --pager-end`
+cd rubix-wires/node_modules/pm2/bin
+- `npm run pm2 logs` # for last 15 lines
+- `npm run pm2 logs --lines 1000` # for last 1000 lines
+- `npm run pm2 logs --err` # only error
+- `npm run pm2 logs --out` # only shows standard output
+- `npm run pm2 logs --highlight mqtt` # grep mqtt log
+- `npm run pm2 logs 0` # for app 0, last 15 lines
