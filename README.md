@@ -36,7 +36,20 @@ Here, `pi` is user and `/home/pi` is home_path for PM2 file creation.
 - `sudo systemctl stop pm2-pi.service`
 - `sudo systemctl restart pm2-pi.service`
 
-## How to update with new change?
+#### How to update with new change?
+
+##### Prerequisites:
+
+- Make sure you haven't changed existing Node's name otherwise we need to migrate the `DB`
+- Started with the Linux Service
+
+##### Steps:
+
+- Export all nodes and store somewhere
+- Delete nodes from `DB` (`rm -r /data/rubix-wires/app.db /data/rubix-wires/dashboard.db /data/rubix-wires/history.db /data/rubix-wires/nodes.db /data/rubix-wires/schedule.db`)
+- `git pull`
+- `sudo systemctl restart pm2-pi.service`
+- Import all nodes
 
 
 ## **How to run (one off):**
@@ -47,8 +60,9 @@ Here, `pi` is user and `/home/pi` is home_path for PM2 file creation.
 ## **Environmental variables customization**
 
 - `PORT=1415 DATA_DIR=./db SECRET_KEY=**SECRET_KEY** npm run start:prod` (we can also pass run time environment, not recommended)
-  
-or
+
+OR
+
 - `cp .env.example ${dataDir}/.env` (by default: `dataDir = /data/rubix-wires/` is for production and `dataDir = ~/db/`
   is for local)
 - Edit `.env` file's variable as we want
