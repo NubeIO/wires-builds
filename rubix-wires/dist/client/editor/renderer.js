@@ -751,7 +751,7 @@ class Renderer extends events_1.EventEmitter {
                     slot_pos[0] = link_pos[0];
                     slot_pos[1] = link_pos[1];
                 }
-                return { slot: slotNumber, index: parseInt(i) };
+                return { slot: slotNumber, index: +i };
             }
         }
         return { slot: -1, index: -1 };
@@ -1432,7 +1432,7 @@ class Renderer extends events_1.EventEmitter {
                 if (this.editor.showNodesIOValues && label !== undefined) {
                     ctx.textAlign = 'right';
                     ctx.fillStyle = this.theme.NODE_DEFAULT_IO_COLOR;
-                    const truncated = Renderer.truncateToSize(ctx, label || 'null', size[0] - nameWidth - 40);
+                    const truncated = Renderer.truncateToSize(ctx, (label !== null && label !== void 0 ? label : 'null'), size[0] - nameWidth - 40);
                     ctx.fillText(truncated, node.size[0] - 8, pos[1] + 5);
                 }
             }
@@ -1473,7 +1473,7 @@ class Renderer extends events_1.EventEmitter {
                 if (this.editor.showNodesIOValues && label !== undefined) {
                     ctx.textAlign = 'right';
                     ctx.fillStyle = this.theme.NODE_DEFAULT_IO_COLOR;
-                    const truncated = Renderer.truncateToSize(ctx, label || 'null', size[0] - nameWidth - 40);
+                    const truncated = Renderer.truncateToSize(ctx, (label !== null && label !== void 0 ? label : 'null'), size[0] - nameWidth - 40);
                     ctx.fillText(truncated, node.size[0] - 8, pos[1] + 5);
                 }
             }
@@ -1680,6 +1680,7 @@ class Renderer extends events_1.EventEmitter {
         }
     }
     drawConnections(ctx) {
+        var _a;
         ctx.lineWidth = this.connections_width;
         ctx.globalAlpha = this.editor_alpha;
         for (let id in this.container._nodes) {
@@ -1702,14 +1703,15 @@ class Renderer extends events_1.EventEmitter {
                             continue;
                         }
                         let start_node_slotpos = null;
-                        if (link.target_slot == -1)
+                        const actualSlot = (_a = link.target_input_id, (_a !== null && _a !== void 0 ? _a : link.target_slot));
+                        if (actualSlot == -1)
                             start_node_slotpos = [start_node.pos[0] + 10, start_node.pos[1] + 10];
                         else {
                             const targetNode = this.container._nodes[link.target_node_id];
                             let targetSlotNumber = -1;
                             for (let i in targetNode.inputs) {
                                 targetSlotNumber++;
-                                if (+i === link.target_slot) {
+                                if (+i === actualSlot) {
                                     break;
                                 }
                             }

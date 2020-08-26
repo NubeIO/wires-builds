@@ -67,11 +67,6 @@ PointValueCreator.normalizePriorityArray = (priorityArray) => {
     }
     return pa;
 };
-var HistoryMode;
-(function (HistoryMode) {
-    HistoryMode[HistoryMode["COV"] = 0] = "COV";
-    HistoryMode[HistoryMode["TRIGGERED"] = 1] = "TRIGGERED";
-})(HistoryMode = exports.HistoryMode || (exports.HistoryMode = {}));
 class DefaultPointValue {
     isResetState() {
         return helper_1.isNull(this.presentValue) && helper_1.isNull(this.priority);
@@ -103,10 +98,8 @@ class DefaultPointValue {
         }
         let arr = {};
         for (const priority in this.priorityArray) {
-            arr[priority] =
-                helper_1.isNull(this.priorityArray[priority]) && helper_1.isNotNull(prev.priorityArray[priority])
-                    ? prev.priorityArray[priority]
-                    : this.priorityArray[priority];
+            arr[priority] = helper_1.isNull(this.priorityArray[priority]) && helper_1.isNotNull(prev.priorityArray[priority])
+                ? prev.priorityArray[priority] : this.priorityArray[priority];
         }
         return PointValueCreator.create(this.presentValue, this.priority, arr);
     }

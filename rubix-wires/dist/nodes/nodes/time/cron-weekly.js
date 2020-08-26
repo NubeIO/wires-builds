@@ -12,9 +12,9 @@ class CronWeeklyNode extends node_1.Node {
         this.jobCronExp = '';
         this.title = 'Cron Weekly';
         this.description =
-            "This node allows the user to set a String output 'message' which is delivered at a configured time on each selected day. Days and Times are set in settings. 'info' will show information about the status of the node. 'cronExpression' represents the configured scheduled timings in Cron notation. 'cronDescription' represents the configured scheduled timings in plain english. 'nextExecution' is a String output representing the datetime that the next 'message' will be sent from 'output'. For more information on Cron Expressions see: (https://www.freeformatter.com/cron-expression-generator-quartz.html)";
+            "This node triggers 'output' to transition from 'false' to 'true' for 500 milliseconds at a configured time on each selected day. Days and Times are set in settings. 'info' will show information about the status of the node. 'cronExpression' represents the configured scheduled timings in Cron notation. 'cronDescription' represents the configured scheduled timings in plain english. 'nextExecution' is a String output representing the datetime that the next 'message' will be sent from 'output'. For more information on Cron Expressions see: (https://www.freeformatter.com/cron-expression-generator-quartz.html)";
         this.addInputWithSettings('enable', node_1.Type.BOOLEAN, false, 'Enable', false);
-        this.addOutput('output', node_1.Type.STRING);
+        this.addOutput('output', node_1.Type.BOOLEAN);
         this.addOutput('info', node_1.Type.STRING);
         this.addOutput('cronExpression', node_1.Type.STRING);
         this.addOutput('cronDescription', node_1.Type.STRING);
@@ -119,7 +119,8 @@ class CronWeeklyNode extends node_1.Node {
             else
                 this.setOutputData(1, 'CRON job stopped');
             try {
-                this.job.stop();
+                if (this.job)
+                    this.job.stop();
             }
             catch (err) {
                 this.setOutputData(1, err);

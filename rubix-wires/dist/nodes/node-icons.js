@@ -11,6 +11,7 @@ let greyTime = '#262B2F';
 class Icons {
 }
 exports.default = Icons;
+Icons.frog = '/images/logos/iot-lora-alliance-logo.svg.png';
 Icons.aiIcon = '/images/node-editor/icons/points/ai.svg';
 Icons.aiColour = purpleNum;
 Icons.uiMainIcon = '/images/node-editor/icons/logic-bool/and2.svg';
@@ -26,4 +27,5 @@ Icons.mathAddIcon = '/images/node-editor/icons/math-arithmetic/plus-solid.svg';
 Icons.mathSubIcon = '/images/node-editor/icons/math-arithmetic/minus-solid.svg';
 Icons.mathDivideIcon = '/images/node-editor/icons/math-arithmetic/divide-solid.svg';
 Icons.mathTimesIcon = '/images/node-editor/icons/math-arithmetic/times-solid.svg';
+Icons.edgeNetwork = '/images/node-editor/icons/logic-bool/not.svg';
 //# sourceMappingURL=node-icons.js.map

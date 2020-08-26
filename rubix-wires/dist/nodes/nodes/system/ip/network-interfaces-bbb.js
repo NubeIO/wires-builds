@@ -5,6 +5,8 @@ const container_1 = require("../../../container");
 const utils_1 = require("../../../utils");
 const ip_address_utils_1 = require("../../../utils/ip-address-utils");
 const child_process_1 = require("child_process");
+const os_utils_1 = require("../../../utils/os-utils");
+const node_colour_change_1 = require("../../../utils/nodes/node-colour-change");
 class UpdateIPEdge28 extends node_1.Node {
     constructor() {
         super();
@@ -138,44 +140,53 @@ class UpdateIPEdge28 extends node_1.Node {
                 this.execCommand(`sudo reboot`);
             }, 10000);
         }
-        if (checkIpSettingsEth0 && writeChanges) {
-            if (interfaceTypeEth0 == 0) {
-                this.title = 'Adapter' + +' ' + '(DHCP)';
-                ip_address_utils_1.default.bbbGetInterfaceDetails()
-                    .then(e => {
-                    this.msgOut(this.messageOutput, `'MSG: get interface ID' ${e}`);
-                    ip_address_utils_1.default.bbbSetIPDHCP(e)
-                        .then(e => {
-                        this.msgOut(this.messageOutput, `'MSG: set ip to DHCP' ${e}`);
-                    })
-                        .catch(err => {
-                        this.msgOut(this.messageOutput, `'ERROR: setting to DHCP' ${err}`);
-                    });
-                })
-                    .catch(err => {
-                    this.msgOut(this.messageOutput, `'ERROR: setting to DHCP' ${err}`);
-                });
+        os_utils_1.default.systemInfo()
+            .then(e => {
+            if (e.system.model === "GENERIC AM33XX (FLATTENED DEVICE TREE)") {
+                if (checkIpSettingsEth0 && writeChanges) {
+                    if (interfaceTypeEth0 == 0) {
+                        this.title = 'Adapter' + +' ' + '(DHCP)';
+                        ip_address_utils_1.default.bbbGetInterfaceDetails()
+                            .then(e => {
+                            this.msgOut(this.messageOutput, `'MSG: get interface ID' ${e}`);
+                            ip_address_utils_1.default.bbbSetIPDHCP(e)
+                                .then(e => {
+                                this.msgOut(this.messageOutput, `'MSG: set ip to DHCP' ${e}`);
+                            })
+                                .catch(err => {
+                                this.msgOut(this.messageOutput, `'ERROR: setting to DHCP' ${err}`);
+                            });
+                        })
+                            .catch(err => {
+                            this.msgOut(this.messageOutput, `'ERROR: setting to DHCP' ${err}`);
+                        });
+                    }
+                    else if (interfaceTypeEth0 == 1) {
+                        this.title = 'Adapter' + ' ' + '(Static)';
+                        ip_address_utils_1.default.bbbGetInterfaceDetails()
+                            .then(iface => {
+                            ip_address_utils_1.default.bbbSetIPFixed(iface, newIpEth0, netNetmaskEth0, newGatewayEth0)
+                                .then(e => {
+                                this.msgOut(this.messageOutput, `'MSG: set ip to fixed IP' ${e}`);
+                            })
+                                .catch(err => {
+                                this.msgOut(this.messageOutput, `'ERROR: setting to fixed IP' ${err}`);
+                            });
+                        })
+                            .catch(err => {
+                            this.msgOut(this.messageOutput, `'ERROR: setting to fixed IP' ${err}`);
+                        });
+                    }
+                }
+                else {
+                    this.msgOut(this.messageOutput, 'invalid ip settings');
+                }
             }
-            else if (interfaceTypeEth0 == 1) {
-                this.title = 'Adapter' + ' ' + '(Static)';
-                ip_address_utils_1.default.bbbGetInterfaceDetails()
-                    .then(iface => {
-                    console.log(iface);
-                    ip_address_utils_1.default.bbbSetIPFixed(iface, newIpEth0, netNetmaskEth0, newGatewayEth0)
-                        .then(e => {
-                        this.msgOut(this.messageOutput, `'MSG: set ip to fixed IP' ${e}`);
-                    })
-                        .catch(err => {
-                        this.msgOut(this.messageOutput, `'ERROR: setting to fixed IP' ${err}`);
-                    });
-                })
-                    .catch(err => {
-                    this.msgOut(this.messageOutput, `'ERROR: setting to fixed IP' ${err}`);
-                });
+            else {
+                node_colour_change_1.default.nodeColourChange(this, node_1.NodeState.ERROR);
+                this.msgOut(this.messageOutput, `'ERROR: incorrect device type`);
             }
-        }
-        else
-            this.msgOut(this.messageOutput, 'invalid ip settings');
+        }).catch(err => this.msgOut(this.messageOutput, `'ERROR: incorrect device type' ${err}`));
         if (!writeChanges) {
             this.msgOut(this.messageOutput, 'nothing saved' + ' ' + this.timeStamp);
             this.msgOut(this.errorOutput, true);

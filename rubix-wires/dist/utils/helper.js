@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.isNull = (value) => value === undefined || value === null;
 exports.isNotNull = (value) => !exports.isNull(value);
 exports.isJSON = (value) => exports.isNotNull(value) && (typeof value === 'object' || Array.isArray(value));
-exports.isBlank = (value) => {
+exports.isEmpty = (value) => {
     if (exports.isNull(value)) {
         return true;
     }
@@ -16,7 +16,7 @@ exports.isBlank = (value) => {
     if (value instanceof String) {
         return value.trim() === '';
     }
-    return false;
+    return value.toString().trim() === '';
 };
 exports.toLowerSnakeCase = (label) => {
     return exports.isNull(label) ? null : label.toString().toLowerCase().replace(/-+\s+/g, '_');

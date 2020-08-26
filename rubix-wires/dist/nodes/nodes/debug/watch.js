@@ -9,7 +9,7 @@ class WatchNode extends node_1.Node {
         this.UPDATE_INTERVAL = 300;
         this.title = 'Watch';
         this.description = 'Show value of input';
-        this.addInput('', null);
+        this.addInput('input', node_1.Type.ANY);
     }
     onAdded() {
         if (this.side == container_1.Side.server)
@@ -17,7 +17,7 @@ class WatchNode extends node_1.Node {
     }
     startSending() {
         let that = this;
-        setInterval(function () {
+        this.timer = setInterval(function () {
             if (that.dataUpdated) {
                 that.dataUpdated = false;
                 that.sendMessageToEditorSide({ value: that.lastData });
@@ -27,10 +27,12 @@ class WatchNode extends node_1.Node {
     onInputUpdated() {
         this.lastData = this.getInputData(0);
         this.dataUpdated = true;
-        this.isRecentlyActive = true;
+    }
+    onRemoved() {
+        if (this.timer)
+            clearInterval(this.timer);
     }
     onGetMessageToEditorSide(data) {
-        super.onGetMessageToEditorSide(data);
         this.lastData = data.value;
         this.showValueOnInput(data.value);
     }

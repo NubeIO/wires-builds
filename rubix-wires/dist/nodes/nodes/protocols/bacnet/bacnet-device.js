@@ -74,7 +74,6 @@ class BACnetDevice extends container_node_1.ContainerNode {
         });
         return __awaiter(this, void 0, void 0, function* () {
             _super.onAdded.call(this);
-            this.name = `BACnet Device: cid_${this.container.id.toString()}_sid_${this.sub_container.id.toString()}_id${this.id.toString()}`;
             yield utils_1.default.sleep(1000);
             this.setBacnetClient();
             this.setPayloadsToPointNodes();

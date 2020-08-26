@@ -8,18 +8,34 @@ class NumbersSumNode extends node_1.Node {
         this.val = 0;
         this.title = 'Stream Sum';
         this.description =
-            "output' is the sum of all received Numeric 'input' value.  'output' is reset to 0 when 'reset' transitions from 'false' to 'true'.";
+            `## Description\n ` +
+                ` output' is the sum of all received Numeric 'input' value.  'output' is reset to 0 when 'reset' transitions from 'false' to 'true'. \n ` +
+                ` ## Reset to null\n ` +
+                `***Reset to null*** if set to option true and a true value on the node ***reset*** this will reset the node ***output*** to a value of null, If set to false it will keep the last node ***output*** value \n `;
         this.addInput('input', node_1.Type.NUMBER);
         this.addInput('reset', node_1.Type.BOOLEAN);
         this.addOutput('output', node_1.Type.NUMBER);
+        this.settings['null'] = {
+            description: 'Reset to null',
+            value: false,
+            type: node_1.SettingType.BOOLEAN,
+        };
         this.lastReset = false;
     }
     onInputUpdated() {
         const reset = this.getInputData(1);
+        const resetToNull = this.settings['null'].value;
         if (reset && !this.lastReset) {
-            this.val = 0;
-            this.setOutputData(0, 0);
-            this.lastReset = reset;
+            if (resetToNull) {
+                this.setOutputData(0, null);
+                this.val = null;
+                this.lastReset = reset;
+            }
+            else {
+                this.setOutputData(0, this.val);
+                this.val = 0;
+                this.lastReset = reset;
+            }
             return;
         }
         else if (!reset && this.lastReset) {

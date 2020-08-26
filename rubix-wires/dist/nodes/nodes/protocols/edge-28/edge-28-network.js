@@ -18,7 +18,9 @@ const edge_utils_1 = require("./edge-utils");
 const time_utils_1 = require("../../../utils/time-utils");
 const edge_constant_1 = require("./edge-constant");
 const constants_1 = require("../../../constants");
-const node_colour_change_1 = require("../../../utils/nodes/node-colour-change");
+const edge_28_1 = require("../../../utils/help/protocols/edge-28");
+const node_icons_1 = require("../../../node-icons");
+const icon = node_icons_1.default.frog;
 class Edge28ApiNode extends container_node_1.ContainerNode {
     constructor(container) {
         super(container);
@@ -35,27 +37,13 @@ class Edge28ApiNode extends container_node_1.ContainerNode {
         this._ui = 'ui';
         this._di = 'di';
         this.title = 'Edge 28 Network';
-        this.description =
-            `## Description\n ` +
-                ` The is node is used for reading and writing values to the edge-io-28. This node uses an internal rest-api to talk to the edge-io-28. No details need to be set\n ` +
-                `   \n ` +
-                `### Enable\n ` +
-                `   \n ` +
-                ` The point enable will disable any new value being sent to the node **output**  \n ` +
-                `   \n ` +
-                `### Polling Interval\n ` +
-                `   \n ` +
-                ` This will change the poll rate of the edge-io-28 inputs. A normal setting is 1 second\n ` +
-                ` The faster the polling rate is the higher the memory usage is\n ` +
-                `   \n ` +
-                `### Polling Interval Time Setting\n ` +
-                `   \n ` +
-                `Used in conjugation with the **Polling Interval**. Make the selection for the time units for **Seconds**, **Minutes**, **Hours** \n ` +
-                `   \n `;
+        this.description = edge_28_1.default.NetworkDesc;
         this.addInputWithSettings('enable', node_1.Type.BOOLEAN, true, 'Enable');
         this.addInputWithSettings('interval', node_1.Type.NUMBER, 2, 'Polling Interval');
         this.addOutput('connected', node_1.Type.BOOLEAN);
         this.addOutput('error', node_1.Type.STRING);
+        this.iconImageUrl = icon;
+        this.headerColor = '#184840';
         this.settings['time'] = {
             description: 'Polling Interval Time Setting',
             type: node_1.SettingType.DROPDOWN,
@@ -131,13 +119,11 @@ class Edge28ApiNode extends container_node_1.ContainerNode {
                 this.edgeReadUI_Store = yield this.fetchPointValue(edge_constant_1.edgeIp, edge_constant_1.edgePort, edge_constant_1.edgeApiVer, this._ui);
                 this.setOutputData(0, true);
                 this.setOutputData(1, false);
-                node_colour_change_1.default.nodeColourChange(this, node_1.NodeState.DISABLED);
             }
             catch (err) {
                 this.debugInfo(`ERROR: getting edge point type: ${this._ui} ${err}`);
                 this.setOutputData(0, false);
                 this.setOutputData(1, true);
-                node_colour_change_1.default.nodeColourChange(this, node_1.NodeState.WARNING);
             }
         });
     }
@@ -147,13 +133,11 @@ class Edge28ApiNode extends container_node_1.ContainerNode {
                 this.edgeReadDI_Store = yield this.fetchPointValue(edge_constant_1.edgeIp, edge_constant_1.edgePort, edge_constant_1.edgeApiVer, this._di);
                 this.setOutputData(0, true);
                 this.setOutputData(1, false);
-                node_colour_change_1.default.nodeColourChange(this, node_1.NodeState.DISABLED);
             }
             catch (err) {
                 this.debugInfo(`ERROR: getting edge point type: ${this._di} ${err}`);
                 this.setOutputData(0, false);
                 this.setOutputData(1, true);
-                node_colour_change_1.default.nodeColourChange(this, node_1.NodeState.WARNING);
             }
         });
     }

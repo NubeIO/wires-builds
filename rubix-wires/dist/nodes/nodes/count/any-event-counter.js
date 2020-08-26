@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const helper_1 = require("../../../utils/helper");
 class EventCounterNode extends node_1.Node {
     constructor() {
         super();
@@ -14,19 +15,32 @@ class EventCounterNode extends node_1.Node {
         this.addOutput('toggle', node_1.Type.NUMBER);
         this.setOutputData(0, 0);
         this.setOutputData(1, false);
-        this.properties['pointVal'] = 0;
+        this.settings['null'] = {
+            description: 'Stop count if input is null',
+            value: false,
+            type: node_1.SettingType.BOOLEAN,
+        };
+        this.properties['count'] = 0;
     }
     onInputUpdated() {
-        if (this.inputs[1].updated && this.inputs[1].data == true)
-            this.properties['pointVal'] = 0;
-        else if (this.inputs[0].updated) {
-            this.properties['pointVal']++;
+        const inputUpdated = this.inputs[0].updated;
+        const inputData = this.inputs[0].data;
+        const reset = this.inputs[1].data;
+        if (reset && reset == true)
+            this.properties['count'] = 0;
+        if (this.settings['null'].value && this.isNull(inputData))
+            return;
+        if (inputUpdated) {
+            this.properties['count']++;
             this.setOutputData(1, !this.outputs[1].data);
         }
-        if (this.properties['pointVal'] !== this.outputs[0].data) {
-            this.setOutputData(0, this.properties['pointVal']);
+        if (this.properties['count'] !== inputData) {
+            this.setOutputData(0, this.properties['count']);
             this.persistProperties(false, true);
         }
+    }
+    isNull(message) {
+        return helper_1.isNull(message);
     }
 }
 container_1.Container.registerNodeType('count/any-event-counter', EventCounterNode);

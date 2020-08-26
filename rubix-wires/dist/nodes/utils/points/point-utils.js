@@ -1,27 +1,56 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const MathUtils_1 = require("../../utils/MathUtils");
 class PointUtils {
-    static configItemsString(arr) {
-        const configItems = [];
-        Array(arr.length)
-            .fill(null)
-            .map((_, i) => configItems.push({ value: arr[i], text: arr[i] }));
-        return configItems;
+    static sendPointValue(self, pointDebugSet, outNum, outPayload, JSONNum, JSONPayload) {
+        const debug = pointDebugSet;
+        if (debug) {
+            self.setOutputData(outNum, outPayload);
+            self.setOutputData(JSONNum, JSONPayload);
+        }
+        else {
+            self.setOutputData(outNum, outPayload, true);
+            self.setOutputData(JSONNum, JSONPayload, true);
+        }
     }
-    static configItemsStrValNum(arr) {
-        const configItems = [];
-        Array(arr.length)
-            .fill(null)
-            .map((_, i) => configItems.push({ value: i, text: arr[i] }));
-        return configItems;
+    static pointOffset(val, offsetSet) {
+        if (!this.validateNumbers(val, offsetSet))
+            return;
+        let offset = offsetSet;
+        if (offset === null) {
+            offset = 0;
+        }
+        return parseFloat(val) + parseFloat(offset);
     }
-    static configItemsNum(num) {
-        const configItems = [];
-        Array(num)
-            .fill(null)
-            .map((_, i) => configItems.push({ value: i + 1, text: (i + 1).toString() }));
-        return configItems;
+    static pointLimit(val, min, max) {
+        if (!this.validateNumbers(val, min, max))
+            return;
+        let out;
+        if (val >= max) {
+            out = max;
+        }
+        else if (val <= min) {
+            out = min;
+        }
+        else {
+            out = val;
+        }
+        ;
+        return out;
     }
+    ;
+    static validateNumbers(...values) {
+        return MathUtils_1.default.validateNumbers(values);
+    }
+    static decimals(val, decimals) {
+        if (!this.validateNumbers(val, decimals))
+            return;
+        return MathUtils_1.default.decimals(val, decimals);
+    }
+    ;
 }
 exports.default = PointUtils;
+PointUtils.pointScale = (pinValue, minOutput, maxOutput, minInput = 0, maxInput = 1) => {
+    return ((maxOutput - minOutput) * (pinValue - minInput)) / (maxInput - minInput) + minOutput;
+};
 //# sourceMappingURL=point-utils.js.map

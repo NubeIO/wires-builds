@@ -5,6 +5,8 @@ const container_1 = require("../../../container");
 const utils_1 = require("../../../utils");
 const ip_address_utils_1 = require("../../../utils/ip-address-utils");
 const child_process_1 = require("child_process");
+const os_utils_1 = require("../../../utils/os-utils");
+const node_colour_change_1 = require("../../../utils/nodes/node-colour-change");
 const set_ip_address = require('set-ip-address');
 const ip = require('ip');
 class UpdateIP extends node_1.Node {
@@ -215,55 +217,64 @@ class UpdateIP extends node_1.Node {
                 this.execCommand(`sudo reboot`);
             }, 10000);
         }
-        if (checkIpSettingsEth0 && checkIpSettingsEth1 && writeChanges) {
-            let interfacesArray = [];
-            if (interfaceTypeEth0 == 0) {
-                this.title = 'Adapter' + +' ' + '(DHCP)';
-                let eth0 = {
-                    interface: this.interfaceEth0,
-                    dhcp: true,
-                };
-                interfacesArray.push(eth0);
+        os_utils_1.default.systemInfo()
+            .then(e => {
+            if (e.system.model === "GENERIC AM33XX (FLATTENED DEVICE TREE)") {
+                if (checkIpSettingsEth0 && checkIpSettingsEth1 && writeChanges) {
+                    let interfacesArray = [];
+                    if (interfaceTypeEth0 == 0) {
+                        this.title = 'Adapter' + +' ' + '(DHCP)';
+                        let eth0 = {
+                            interface: this.interfaceEth0,
+                            dhcp: true,
+                        };
+                        interfacesArray.push(eth0);
+                    }
+                    if (interfaceTypeEth0 == 1) {
+                        this.title = 'Adapter' + ' ' + '(Static)';
+                        let subnetMaskLength = ip.subnet(newIpEth0, netNetmaskEth0);
+                        let eth0 = {
+                            interface: this.interfaceEth0,
+                            ip_address: newIpEth0,
+                            prefix: subnetMaskLength.subnetMaskLength,
+                            gateway: newGatewayEth0,
+                            nameservers: [newNameServerEth0],
+                        };
+                        interfacesArray.push(eth0);
+                    }
+                    if (interfaceTypeEth1 == 0) {
+                        this.title = 'Adapter' + +' ' + '(DHCP)';
+                        let eth1 = {
+                            interface: this.interfaceEth1,
+                            dhcp: true,
+                        };
+                        interfacesArray.push(eth1);
+                    }
+                    if (interfaceTypeEth1 == 1) {
+                        this.title = 'Adapter' + ' ' + '(Static)';
+                        let subnetMaskLength = ip.subnet(newIpEth1, netNetmaskEth1);
+                        let eth1 = {
+                            interface: this.interfaceEth1,
+                            ip_address: newIpEth1,
+                            prefix: subnetMaskLength.subnetMaskLength,
+                            gateway: newGatewayEth1,
+                            nameservers: [newNameServerEth1],
+                        };
+                        interfacesArray.push(eth1);
+                    }
+                    set_ip_address.configure(interfacesArray).then(() => {
+                        this.msgOut(this.messageOutput, 'updated' + ' ' + this.timeStamp);
+                        this.msgOut(this.errorOutput, false);
+                    });
+                }
+                else
+                    this.msgOut(this.messageOutput, 'invalid ip settings');
             }
-            if (interfaceTypeEth0 == 1) {
-                this.title = 'Adapter' + ' ' + '(Static)';
-                let subnetMaskLength = ip.subnet(newIpEth0, netNetmaskEth0);
-                let eth0 = {
-                    interface: this.interfaceEth0,
-                    ip_address: newIpEth0,
-                    prefix: subnetMaskLength.subnetMaskLength,
-                    gateway: newGatewayEth0,
-                    nameserver: [newNameServerEth0],
-                };
-                interfacesArray.push(eth0);
+            else {
+                node_colour_change_1.default.nodeColourChange(this, node_1.NodeState.ERROR);
+                this.msgOut(this.messageOutput, `'ERROR: incorrect device type`);
             }
-            if (interfaceTypeEth1 == 0) {
-                this.title = 'Adapter' + +' ' + '(DHCP)';
-                let eth1 = {
-                    interface: this.interfaceEth1,
-                    dhcp: true,
-                };
-                interfacesArray.push(eth1);
-            }
-            if (interfaceTypeEth1 == 1) {
-                this.title = 'Adapter' + ' ' + '(Static)';
-                let subnetMaskLength = ip.subnet(newIpEth1, netNetmaskEth1);
-                let eth1 = {
-                    interface: this.interfaceEth1,
-                    ip_address: newIpEth1,
-                    prefix: subnetMaskLength.subnetMaskLength,
-                    gateway: newGatewayEth1,
-                    nameserver: [newNameServerEth1],
-                };
-                interfacesArray.push(eth1);
-            }
-            set_ip_address.configure(interfacesArray).then(() => {
-                this.msgOut(this.messageOutput, 'updated' + ' ' + this.timeStamp);
-                this.msgOut(this.errorOutput, false);
-            });
-        }
-        else
-            this.msgOut(this.messageOutput, 'invalid ip settings');
+        }).catch(err => this.msgOut(this.messageOutput, `'ERROR: incorrect device type' ${err}`));
         if (!writeChanges) {
             this.msgOut(this.messageOutput, 'nothing saved' + ' ' + this.timeStamp);
             this.msgOut(this.errorOutput, true);

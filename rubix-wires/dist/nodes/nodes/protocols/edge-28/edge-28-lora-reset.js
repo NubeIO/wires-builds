@@ -10,21 +10,26 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../../node");
-const container_node_1 = require("../../../container-node");
 const container_1 = require("../../../container");
 const utils_1 = require("../../../utils");
 const axios_1 = require("axios");
 const time_utils_1 = require("../../../utils/time-utils");
 const edge_utils_1 = require("./edge-utils");
 const edge_constant_1 = require("./edge-constant");
-class Edge28LORAResetNode extends container_node_1.ContainerNode {
-    constructor(container) {
-        super(container);
+class Edge28LORAResetNode extends node_1.Node {
+    constructor() {
+        super();
         this.title = 'Edge IO 28 LORA Connect Reset';
         this.description =
             `## Description\n ` +
-                ` The is node is used in conjunction with the edge-io-28. This node uses an internal rest-api to rest a LORA Connect gateway connected to an edge-io-28 controller\n `;
-        this.addInputWithSettings('enableInterval', node_1.Type.BOOLEAN, false, 'Enable Interval Reset');
+                ` The is node is used in conjunction with the ***edge-io-28*** when using the ***lora-connect***. This node uses an internal rest-api to rest a ***LORA Connect gateway*** connected to an ***edge-io-28*** controller\n ` +
+                `   \n ` +
+                `## Description\n ` +
+                `   \n ` +
+                ` The reason for this nodes is to give the user more control over the nube hardware\n ` +
+                ` When a ***trigger*** is activated on the node input or the ***interval*** timer is triggered the lora-modules will be reset\n ` +
+                ` The reboot of the module only takes ***1000ms*** to restart\n ` +
+                this.addInputWithSettings('enableInterval', node_1.Type.BOOLEAN, false, 'Enable Interval Reset');
         this.addInputWithSettings('interval', node_1.Type.NUMBER, 15, 'Interval');
         this.addInput('trigger', node_1.Type.BOOLEAN);
         this.addOutput('lastReset');
@@ -52,11 +57,7 @@ class Edge28LORAResetNode extends container_node_1.ContainerNode {
             return pointValue.data;
         });
     }
-    onCreated() {
-        super.onCreated();
-    }
     onAdded() {
-        super.onAdded();
         this.inputs[1]['name'] = `[interval] (${this.settings['time'].value})`;
         if (this.side !== container_1.Side.server)
             return;
@@ -98,18 +99,15 @@ class Edge28LORAResetNode extends container_node_1.ContainerNode {
                 this.writePointValue(edge_constant_1.edgeIp, edge_constant_1.edgePort, edge_constant_1.edgeApiVer, pointType, pointNumber, 1, 16);
             }, 2000);
         })
-            .catch(err => this.debugInfo(`ERROR: ${err}`));
+            .catch(err => this.debugInfo(`ERROR: LoRa Edge-28 Reset - ${err}`));
     }
-    onRemoved() {
-        super.onRemoved();
-    }
-    onAfterSettingsChange(oldSettings) {
-        super.onAfterSettingsChange(oldSettings);
+    onAfterSettingsChange() {
         this.inputs[1]['name'] = `[interval] (${this.settings['time'].value})`;
         if (this.side !== container_1.Side.server)
             return;
         this.onInputUpdated();
     }
 }
+exports.Edge28LORAResetNode = Edge28LORAResetNode;
 container_1.Container.registerNodeType('protocols/nube/edge-28-lora-reset', Edge28LORAResetNode);
 //# sourceMappingURL=edge-28-lora-reset.js.map

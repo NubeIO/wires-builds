@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const string_json_compare_utils_1 = require("../../utils/string-json-compare-utils");
 class JsonFilter extends node_1.Node {
     constructor() {
         super();
@@ -9,7 +10,7 @@ class JsonFilter extends node_1.Node {
         this.description = 'Filter a json object Example: msg.myKey';
         this.addInput('input', node_1.Type.STRING);
         this.addOutput('output', node_1.Type.STRING);
-        this.addOutput('error', node_1.Type.STRING);
+        this.addOutput('output-key', node_1.Type.STRING);
         this.settings['filter'] = {
             description: 'Example: msg.myKey',
             value: 'myKey',
@@ -23,30 +24,16 @@ class JsonFilter extends node_1.Node {
             this.setOutputData(1, null);
             return;
         }
-        function findVal(object, key) {
-            let value = null;
-            Object.keys(object).some(function (k) {
-                if (k === key) {
-                    value = object[k];
-                    return true;
-                }
-                if (object[k] && typeof object[k] === 'object') {
-                    value = findVal(object[k], key);
-                    return value !== undefined;
-                }
-            });
-            return value;
-        }
         try {
-            input = JSON.parse(input);
+            const jsonCheck = JSON.parse(input);
             const filter = this.settings['filter'].value;
-            let out = findVal(input, filter);
-            this.setOutputData(0, out);
-            this.setOutputData(1, null);
+            let out = string_json_compare_utils_1.default.findVal(jsonCheck, filter);
+            this.setOutputData(0, out.value);
+            this.setOutputData(1, out.valueWithKey);
         }
         catch (e) {
             this.setOutputData(0, null);
-            this.setOutputData(1, e);
+            this.setOutputData(1, null);
         }
     }
     onAfterSettingsChange() {

@@ -56,6 +56,8 @@ class RendererTheme {
             [node_1.NodeState.WARNING]: '#FB8',
             [node_1.NodeState.ERROR]: '#A44',
             [node_1.NodeState.DISABLED]: '#73B7E6',
+            [node_1.NodeState.OFFLINE]: '#ACA',
+            [node_1.NodeState.ONLINE]: '#73B7E6',
         };
         this.NODE_COLORS = {
             red: { color: '#FAA', bgcolor: '#A44' },
@@ -91,8 +93,8 @@ theme0.MENU_TEXT_COLOR = '#CCC';
 theme0.MENU_BG_COLOR = '#262B2F';
 theme0.BG_IMAGE = '/images/node-editor/gridA1.png';
 theme0.INNER_TEXT_FONT = 'normal 12px Arial';
-theme0.SELECTION_COLOR = '#FFF';
-theme0.SELECTION_WIDTH = 4;
+theme0.SELECTION_COLOR = '#3B8754';
+theme0.SELECTION_WIDTH = 15;
 theme0.RENDER_CONNECTION_ARROWS = false;
 theme0.CONNECTIONS_WIDTH = 3;
 theme0.CONNECTIONS_SHADOW = 1;

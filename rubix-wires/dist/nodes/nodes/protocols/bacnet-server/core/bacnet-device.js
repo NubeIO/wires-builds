@@ -2,21 +2,20 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const assert = require('assert');
 const bacnet = require('node-bacnet');
-const logger = require('logplease').create('bacnet', { color: 6 });
+const logger = require('logplease').create('bacnet', { color: 4 });
 const BE = bacnet && bacnet.enum;
 const PI = BE && BE.PropertyIdentifier;
 const BACnetObject = require('./bacnet-object');
 const BACnetObjectProperty = require('./bacnet-object-property');
 const Util = require('./util');
 class BACnetDevice extends BACnetObject {
-    constructor(deviceInfo, hostInfo = {}, nodeId = null, onListenPointChange) {
+    constructor(deviceInfo, hostInfo = {}, covListener) {
         super(null, deviceInfo.deviceId, BE.ObjectType.DEVICE, deviceInfo.name);
         this.dev = this;
         this.deviceInfo = deviceInfo;
         this.hostInfo = hostInfo;
         this.client = null;
-        this.nodeId = nodeId;
-        this.onListenObjectChange = onListenPointChange;
+        this.covListener = covListener;
     }
     getProperty(propertyId) {
         switch (propertyId) {
@@ -69,7 +68,6 @@ class BACnetDevice extends BACnetObject {
         if (!property) {
             return this.client.errorResponse(data.header.sender, data.service, data.invokeId, BE.ErrorClass.PROPERTY, BE.ErrorCode.UNKNOWN_PROPERTY);
         }
-        logger.debug(data.payload.value.property.index);
         if (data.payload.value.property.index === 0xffffffff) {
             let pri = data.payload.value.priority;
             let val = data.payload.value.value[0].value;
@@ -106,7 +104,13 @@ class BACnetDevice extends BACnetObject {
             const inpPresentValue23 = object.addProperty(PI.PRESENT_VALUE, BE.ApplicationTags.REAL);
             inpPresentValue23.value = priorityValue;
             this.client.simpleAckResponse(data.header.sender, data.service, data.invokeId);
-            this.onListenObjectChange(this.nodeId, data.payload.objectId.type, data.payload.objectId.instance, priorityValue, priorityNum, arr);
+            this.covListener({
+                objectType: data.payload.objectId.type,
+                objectId: data.payload.objectId.instance,
+                presentValue: priorityValue,
+                priority: priorityNum,
+                priorityArray: arr,
+            });
         }
         else {
             let slot = data.payload.value.property.index;
@@ -451,27 +455,43 @@ class BACnetDevice extends BACnetObject {
     }
     addPoint(bacnetPoint) {
         if (!bacnetPoint) {
-            return;
+            return null;
         }
+        logger.info(`Adding BACnet point ${bacnetPoint.objectType.label}:${bacnetPoint.objectInstance}...`);
+        logger.info(`Adding BACnet point ${bacnetPoint.objectType.label}:${bacnetPoint.objectInstance}...`);
+        assert(Number.isInteger(bacnetPoint.objectType.value), 'Object type must be a BE.ObjectType value.');
         assert(Number.isInteger(bacnetPoint.objectInstance), 'Instance ID must be an integer.');
-        assert(Number.isInteger(bacnetPoint.objectType), 'Object type must be a BE.ObjectType value.');
-        if (!this.objects[bacnetPoint.objectType])
-            this.objects[bacnetPoint.objectType] = {};
-        let object = new BACnetObject(this, bacnetPoint.objectInstance, bacnetPoint.objectType, bacnetPoint.objectName);
-        return (this.objects[bacnetPoint.objectType][bacnetPoint.objectInstance] = this.updateValue(object, bacnetPoint.pointValue));
+        if (!this.objects[bacnetPoint.objectType.value])
+            this.objects[bacnetPoint.objectType.value] = {};
+        let object = new BACnetObject(this, bacnetPoint.objectInstance, bacnetPoint.objectType.value, bacnetPoint.objectName);
+        return (this.objects[bacnetPoint.objectType.value][bacnetPoint.objectInstance] = object);
     }
-    updatePointValue(bacnetPoint) {
-        let object = this.getObject(bacnetPoint.objectInstance, bacnetPoint.objectType);
+    updatePoint(bacnetPoint) {
+        if (!bacnetPoint) {
+            return null;
+        }
+        let object = this.getObject(bacnetPoint.objectInstance, bacnetPoint.objectType.value);
+        logger.info(`Updating BACNet point properties ${bacnetPoint.objectType.label}:${bacnetPoint.objectInstance}...`);
         if (!object) {
             return this.addPoint(bacnetPoint);
         }
-        return (this.objects[bacnetPoint.objectType][bacnetPoint.objectInstance] = this.updateValue(object, bacnetPoint.pointValue));
+        object.addProperty(bacnet.enum.PropertyIdentifier.OBJECT_NAME).value = bacnetPoint.objectName;
+        return (this.objects[bacnetPoint.objectType.value][bacnetPoint.objectInstance] = object);
     }
-    updateValue(object, pointValue) {
-        object.addProperty(PI.PRESENT_VALUE, BE.ApplicationTags.REAL).value = pointValue.presentValue;
-        object.addProperty(PI.PRIORITY, BE.ApplicationTags.SIGNED_INTEGER).value = pointValue.priority;
-        object.addProperty(PI.PRIORITY_ARRAY, BE.ApplicationTags.REAL).value = Object.values(pointValue.priorityArray);
-        return object;
+    updateValue(bacnetPoint) {
+        if (!bacnetPoint) {
+            return null;
+        }
+        logger.info(`Pushing BACNet point Value ${bacnetPoint.objectType.label}:${bacnetPoint.objectInstance}...`);
+        let object = this.getObject(bacnetPoint.objectInstance, bacnetPoint.objectType.value);
+        if (!object) {
+            return null;
+        }
+        let pv = bacnetPoint.pointValue;
+        object.addProperty(PI.PRESENT_VALUE, BE.ApplicationTags.REAL).value = pv.presentValue;
+        object.addProperty(PI.PRIORITY, BE.ApplicationTags.SIGNED_INTEGER).value = pv.priority;
+        object.addProperty(PI.PRIORITY_ARRAY, BE.ApplicationTags.REAL).value = Object.values(pv.priorityArray);
+        return pv;
     }
     delObject(instance, objectTypeId) {
         assert(Number.isInteger(instance), 'Instance ID must be an integer.');

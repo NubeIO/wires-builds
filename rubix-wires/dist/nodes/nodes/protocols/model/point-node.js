@@ -6,12 +6,40 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const logplease_1 = require("logplease");
 const point_model_1 = require("../../../../backend/models/point-model");
 const decorators_1 = require("../../../../utils/decorators");
 const helper_1 = require("../../../../utils/helper");
+const container_1 = require("../../../container");
 const node_1 = require("../../../node");
-const registry_1 = require("../../../registry");
 const point_node_utils_1 = require("./point-node-utils");
+const logger = logplease_1.create('observer', { color: logplease_1.Colors.Yellow });
+class PointOutputObserver {
+    constructor(node, outputSlots) {
+        this.node = node;
+        this.outputSlots = outputSlots;
+    }
+    update(data) {
+        var _a, _b, _c, _d, _e, _f;
+        logger.debug(`Node ${this.node.getReadableId()} receives point: ${data.point.identifier()} - ${data.connStatus.status.label}`);
+        this.node.setOutputData(this.outputSlots.output, (_b = (_a = data.point) === null || _a === void 0 ? void 0 : _a.pointValue) === null || _b === void 0 ? void 0 : _b.presentValue);
+        this.node.setOutputData(this.outputSlots.priority, (_d = (_c = data.point) === null || _c === void 0 ? void 0 : _c.pointValue) === null || _d === void 0 ? void 0 : _d.priority);
+        this.node.setOutputData(this.outputSlots.priorityArray, (_f = (_e = data.point) === null || _e === void 0 ? void 0 : _e.pointValue) === null || _f === void 0 ? void 0 : _f.priorityArray);
+    }
+}
+exports.PointOutputObserver = PointOutputObserver;
+class CentralizedPointOutputObserver {
+    constructor(node, outputSlot) {
+        this.node = node;
+        this.outputSlot = outputSlot;
+    }
+    update(data) {
+        var _a, _b;
+        logger.debug(`Node ${this.node.getReadableId()} receives point: ${data.point.identifier()} - ${data.connStatus.status.label}`);
+        this.node.setOutputData(this.outputSlot, Object.assign(Object.assign({}, (_b = (_a = this.node.outputs[this.outputSlot]) === null || _a === void 0 ? void 0 : _a.data, (_b !== null && _b !== void 0 ? _b : {}))), this.convert(data)));
+    }
+}
+exports.CentralizedPointOutputObserver = CentralizedPointOutputObserver;
 function PointNodeMixin(Base) {
     class PointNodeMixinBase extends Base {
         constructor() {
@@ -23,23 +51,36 @@ function PointNodeMixin(Base) {
             this._sInputGroup = 'inputGroup';
             this._sInputMethod = 'inputMethod';
             this._sDecimal = 'decimals';
+            this._oOut = 'out';
+            this._oPriority = 'priority';
+            this._oPriorityArray = 'priority-array';
         }
         onAdded() {
-            this.updatePointValueOutput(this.handler().handleOnUpdate(this.handler().initializePointBySettingObject()));
+            if (this.side !== container_1.Side.server) {
+                return;
+            }
+            let current = this.flowHandler().initializePointBySettingObject();
+            this.flowHandler().notifyOutput(this.flowHandler().handleOnUpdate(current), this.pointObservers());
             this.updateTitle();
         }
         onAfterSettingsChange(oldSettings, oldName) {
+            if (this.side !== container_1.Side.server) {
+                return;
+            }
             this.handleDynamicInput(oldSettings);
-            let prev = this.handler().initializePointBySettingObject(oldSettings);
-            let current = (this.settings[this.modelSettingKey()].value = this.handler().initializePointBySettingInput());
-            this.updatePointValueOutput(this.handler().handleOnUpdate(current, prev));
+            let prev = this.flowHandler().initializePointBySettingObject(oldSettings);
+            let current = this.flowHandler().initializePointBySettingInput();
+            this.flowHandler().notifyOutput(this.flowHandler().handleOnUpdate(current, prev), this.pointObservers());
             this.updateTitle();
         }
         onInputUpdated() {
-            let prev = this.handler().initializePointBySettingObject();
+            if (this.side !== container_1.Side.server) {
+                return;
+            }
+            let prev = this.flowHandler().initializePointBySettingObject();
             this.reEvaluateSettingByInput(this.inputs, this.settings);
-            let current = (this.settings[this.modelSettingKey()].value = this.handler().initializePointBySettingInput());
-            this.updatePointValueOutput(this.handler().handleOnUpdate(current, prev));
+            let current = this.flowHandler().initializePointBySettingInput();
+            this.flowHandler().notifyOutput(this.flowHandler().handleOnUpdate(current, prev), this.pointObservers());
             this.updateTitle();
         }
         reEvaluateSettingByInput(inputs, settings) {
@@ -69,18 +110,12 @@ function PointNodeMixin(Base) {
                 this.settings[this._iPriorityArrayJson].value = pv.priorityArray;
             }
         }
-        updatePointValueOutput(pv, nodeId) {
-            var _a;
-            let self = (nodeId ? registry_1.default._nodes[nodeId] : this);
-            if (!self || !pv) {
-                return null;
-            }
-            let npv = pv.merge((_a = self.settings[self.modelSettingKey()]) === null || _a === void 0 ? void 0 : _a.value.pointValue);
-            self.setOutputData(this.valueOutputIdx(), npv.presentValue);
-            self.setOutputData(this.priorityOutputIdx(), npv.priority);
-            self.setOutputData(this.priorityArrayOutputIdx(), npv.priorityArray);
-            self.settings[self.modelSettingKey()].value.pointValue = npv;
-            return npv;
+        pointObservers() {
+            return [new PointOutputObserver(this, {
+                    output: this.valueOutputIdx(),
+                    priority: this.priorityOutputIdx(),
+                    priorityArray: this.priorityArrayOutputIdx(),
+                })];
         }
         priorityInputIdx() {
             return this.valueInputIdx() + 1;
@@ -95,9 +130,9 @@ function PointNodeMixin(Base) {
             return this.priorityOutputIdx() + 1;
         }
         mixinPointValueInputOutput() {
-            this.addOutput('out', node_1.Type.NUMBER);
-            this.addOutput('priority', node_1.Type.NUMBER);
-            this.addOutput('priority-array', node_1.Type.JSON);
+            this.addOutput(this._oOut, node_1.Type.NUMBER);
+            this.addOutput(this._oPriority, node_1.Type.NUMBER);
+            this.addOutput(this._oPriorityArray, node_1.Type.JSON);
             this.settings[this.modelSettingKey()] = { description: '', value: null };
             this.settings[this._iPriorityArrayLot] = { description: '', value: null };
             this.settings[this._sInputGroup] = { description: 'Input Settings', value: '', type: node_1.SettingType.GROUP };

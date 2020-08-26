@@ -78,11 +78,15 @@ class DefaultLinkHandler {
         let targetNode = this.node.container.getNodeById(link.target_node_id);
         if (!targetNode)
             return false;
-        let output = targetNode.outputs[_a = link.target_input_id, (_a !== null && _a !== void 0 ? _a : link.target_slot)];
-        if (!output || !output.links)
+        const actualSlot = (_a = link.target_input_id, (_a !== null && _a !== void 0 ? _a : link.target_slot));
+        let output = targetNode.outputs[actualSlot];
+        if (!(output && output.links))
             return false;
-        let number = output.links.findIndex(l => l.target_node_id === this.node.id &&
-            ((l.target_input_id && index && l.target_input_id === index) || l.target_slot === inputId));
+        let number = output.links.findIndex(l => {
+            var _a;
+            const sameNode = l.target_node_id === this.node.id;
+            return sameNode && (_a = (l.target_input_id && l.target_input_id), (_a !== null && _a !== void 0 ? _a : l.target_slot)) === inputId;
+        });
         if (number !== -1) {
             output.links.splice(number, 1);
         }
@@ -105,13 +109,14 @@ class DefaultLinkHandler {
         return true;
     }
     disconnectOutput(slot, index) {
-        var _a;
-        if (!this.node.outputs || !this.node.outputs[slot]) {
-            logger.error(`Can't disconnect, output slot: ${slot} not found on node: ${this.node.id}`);
+        var _a, _b;
+        let outputId = (index !== null && index !== void 0 ? index : slot);
+        if (!this.node.outputs || !this.node.outputs[outputId]) {
+            logger.error(`Can't disconnect, output slot: ${outputId} not found on node: ${this.node.id}`);
             return false;
         }
-        const output = this.node.outputs[slot];
-        if (!output.links)
+        const output = this.node.outputs[outputId];
+        if (!(output && output.links))
             return false;
         let i = output.links.length;
         while (i--) {
@@ -120,13 +125,11 @@ class DefaultLinkHandler {
             if (!targetNode) {
                 logger.error(`Node: ${link.target_node_id} is not available`);
             }
-            if (targetNode &&
-                targetNode.inputs &&
-                targetNode.inputs[link.target_slot] &&
-                targetNode.inputs[link.target_slot].link) {
-                delete targetNode.inputs[link.target_slot].link;
-                targetNode.inputs[link.target_slot].data = undefined;
-                targetNode.inputs[link.target_slot].updated = true;
+            const actualSlot = (_a = link.target_input_id, (_a !== null && _a !== void 0 ? _a : link.target_slot));
+            if (targetNode && targetNode.inputs && targetNode.inputs[actualSlot] && targetNode.inputs[actualSlot].link) {
+                delete targetNode.inputs[actualSlot].link;
+                targetNode.inputs[actualSlot].data = undefined;
+                targetNode.inputs[actualSlot].updated = true;
                 targetNode.isUpdated = true;
                 if (this.node.container.db) {
                     let s_t_node = targetNode.serialize();
@@ -136,10 +139,10 @@ class DefaultLinkHandler {
                 }
             }
             else {
-                logger.error(`Tried to delete input link on: ${targetNode} of slot: ${link.target_slot}`);
+                logger.error(`Tried to delete input link on: ${targetNode} of slot: ${actualSlot}`);
             }
             output.links.splice(i, 1);
-            logger.debug(`Disconnected from ${(_a = targetNode) === null || _a === void 0 ? void 0 : _a.getReadableId()}`);
+            logger.debug(`Disconnected from ${(_b = targetNode) === null || _b === void 0 ? void 0 : _b.getReadableId()}`);
         }
         delete output.links;
         if (this.node.container.db) {

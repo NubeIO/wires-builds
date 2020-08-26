@@ -25,6 +25,7 @@ class ContainerUtils {
         createdNodes.forEach(node => {
             node.inputs &&
                 Object.keys(node.inputs).forEach(key => {
+                    var _a;
                     let isChanged = false;
                     let nodeWithLink = nodesWithLinks.find(n => n.id === node.id && n.cid === node.cid);
                     if (nodeWithLink.inputs && nodeWithLink.inputs[key] && nodeWithLink.inputs[key].link) {
@@ -32,7 +33,7 @@ class ContainerUtils {
                         const connectedNode = createdNodes.find(n => n.id === link.target_node_id && n.cid === nodeWithLink.cid);
                         if (connectedNode &&
                             connectedNode.outputs &&
-                            connectedNode.outputs[link.target_slot]) {
+                            connectedNode.outputs[_a = link.target_input_id, (_a !== null && _a !== void 0 ? _a : link.target_slot)]) {
                             node.inputs[key].link = nodeWithLink.inputs[key].link;
                             isChanged = true;
                         }
@@ -52,10 +53,11 @@ class ContainerUtils {
                     if (nodeWithLink && nodeWithLink.outputs && nodeWithLink.outputs[key] && nodeWithLink.outputs[key].links) {
                         const links = nodeWithLink.outputs[key].links;
                         links.forEach(link => {
+                            var _a;
                             const connectedNode = createdNodes.find(n => n.id === link.target_node_id && n.cid === nodeWithLink.cid);
                             if (connectedNode &&
                                 connectedNode.inputs &&
-                                connectedNode.inputs[link.target_slot]) {
+                                connectedNode.inputs[_a = link.target_input_id, (_a !== null && _a !== void 0 ? _a : link.target_slot)]) {
                                 if (!node.outputs[key].links) {
                                     node.outputs[key].links = [];
                                 }

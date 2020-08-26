@@ -1,22 +1,37 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const enumify_1 = require("enumify");
 const point_model_1 = require("../../../../../backend/models/point-model");
 const helper_1 = require("../../../../../utils/helper");
-var PointKind;
-(function (PointKind) {
-    PointKind["ANALOG_INPUT"] = "0";
-    PointKind["ANALOG_OUTPUT"] = "1";
-    PointKind["ANALOG_VALUE"] = "2";
-    PointKind["BINARY_INPUT"] = "3";
-    PointKind["BINARY_OUTPUT"] = "4";
-    PointKind["BINARY_VALUE"] = "5";
-    PointKind["MULTI_STATE_INPUT"] = "13";
-    PointKind["MULTI_STATE_OUTPUT"] = "14";
-    PointKind["MULTI_STATE_VALUE"] = "19";
-})(PointKind = exports.PointKind || (exports.PointKind = {}));
-exports.PointKindOpts = Object.entries(PointKind).map(kv => {
-    return { text: kv[0].toLowerCase().replace('_', '-'), value: parseInt(kv[1]) };
-});
+class PointKind extends enumify_1.Enumify {
+    constructor(value, label) {
+        super();
+        this.value = value;
+        this.label = label;
+    }
+    static items() {
+        return PointKind.enumKeys.map(k => {
+            return { value: k, text: PointKind.enumValueOf(k).label };
+        });
+    }
+    static lookupByValue(objectType) {
+        return PointKind.enumValues.map(pk => pk).find(pk => pk.value === objectType);
+    }
+    static lookupByLabel(objectType) {
+        return PointKind.enumValues.map(pk => pk).find(pk => pk.label === objectType);
+    }
+}
+exports.PointKind = PointKind;
+PointKind.ANALOG_INPUT = new PointKind(0, 'analog-input');
+PointKind.ANALOG_OUTPUT = new PointKind(1, 'analog-output');
+PointKind.ANALOG_VALUE = new PointKind(2, 'analog-value');
+PointKind.BINARY_INPUT = new PointKind(3, 'binary-input');
+PointKind.BINARY_OUTPUT = new PointKind(4, 'binary-output');
+PointKind.BINARY_VALUE = new PointKind(5, 'binary-value');
+PointKind.MULTI_STATE_INPUT = new PointKind(13, 'multi-state-input');
+PointKind.MULTI_STATE_OUTPUT = new PointKind(14, 'multi-state-output');
+PointKind.MULTI_STATE_VALUE = new PointKind(19, 'multi-state-value');
+PointKind._ = PointKind.closeEnum();
 class BacnetPointCreator {
     constructor() {
     }
@@ -45,7 +60,7 @@ class DefaultBacnetPoint {
         this.pointValue = pointValue;
     }
     identifier() {
-        return `${this.objectType}:${this.objectInstance}`;
+        return `${this.objectType.enumKey}:${this.objectInstance}`;
     }
     mightOnlyValueChanged(bp) {
         var _a, _b, _c, _d;

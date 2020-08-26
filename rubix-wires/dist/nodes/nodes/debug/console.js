@@ -10,7 +10,7 @@ class ConsoleNode extends node_1.Node {
         this.messagesPerSec = 0;
         this.title = 'Console';
         this.description = 'Show value inside the console';
-        this.addInput('input');
+        this.addInput('input', node_1.Type.ANY);
     }
     onAdded() {
         if (this.side == container_1.Side.server)
@@ -18,7 +18,7 @@ class ConsoleNode extends node_1.Node {
     }
     updateMessPerSec() {
         let that = this;
-        setInterval(function () {
+        this.timer = setInterval(function () {
             if (that.messagesPerSec > that.MAX_MESS_PER_SEC) {
                 let dropped = that.messagesPerSec - that.MAX_MESS_PER_SEC;
                 log.info('CONSOLE NODE [' +
@@ -44,8 +44,11 @@ class ConsoleNode extends node_1.Node {
             this.sendMessageToEditorSide({ value: val });
         }
     }
+    onRemoved() {
+        if (this.timer)
+            clearInterval(this.timer);
+    }
     onGetMessageToEditorSide(data) {
-        super.onGetMessageToEditorSide(data);
         if (data.value != null)
             log.info('CONSOLE NODE [' + this.container.id + '/' + this.id + ']: ' + data.value);
         if (data.dropped)

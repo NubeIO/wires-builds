@@ -43,32 +43,30 @@ class OneShotNode extends node_1.Node {
     }
     onCreated() {
         this.setOutputData(0, false);
+        this.timeUnits = 'seconds';
     }
     onAdded() {
         this.inputs[2]['name'] = `[interval] (${this.settings['time'].value})`;
+        this.outputs[1]['name'] = `[remaining] (${this.settings['time'].value})`;
         this.setOutputData(0, false);
         this.setOutputData(1, 0);
         this.onInputUpdated();
     }
-    onExecute() {
-        let interval = this.getInputData(2);
-        interval = time_utils_1.default.timeConvert(interval, this.settings['time'].value);
-        const elapsed = Date.now() - this.startTime;
-        if (this.enabled) {
-            const remaining = interval - elapsed;
-            this.setOutputData(1, remaining, true);
-        }
-        if (elapsed >= interval) {
-            this.setOutputData(0, false, true);
-            this.setOutputData(1, 0, true);
-            this.enabled = false;
-        }
+    onAfterSettingsChange() {
+        this.timeUnits = this.settings['time'].value;
+        this.inputs[2]['name'] = `[interval] (${this.settings['time'].value})`;
+        this.outputs[1]['name'] = `[remaining] (${this.timeUnits})`;
+        this.onInputUpdated();
     }
     onInputUpdated() {
+        const delay = this.getInputData(2);
+        const delayMilli = time_utils_1.default.timeConvert(delay, this.timeUnits);
         let reset = this.getInputData(1);
         if (reset == null)
             reset = false;
         if (reset == true && reset != this.lastResetValue) {
+            clearTimeout(this.timeoutFunc);
+            clearTimeout(this.remainingFunc);
             this.setOutputData(0, false);
             this.setOutputData(1, 0);
             this.enabled = false;
@@ -80,18 +78,42 @@ class OneShotNode extends node_1.Node {
         if (fire == true && fire != this.lastFireValue) {
             const retrigger = this.settings['retrigger'].value;
             if (retrigger || this.enabled === false) {
-                this.startTime = Date.now();
+                clearTimeout(this.timeoutFunc);
+                clearTimeout(this.remainingFunc);
                 this.setOutputData(0, true);
-                this.setOutputData(1, this.getInputData(1));
+                this.setOutputData(1, delay);
                 this.enabled = true;
+                this.timeoutFunc = setTimeout(() => {
+                    this.enabled = false;
+                    this.setOutputData(0, false);
+                    this.setOutputData(1, 0);
+                    clearTimeout(this.remainingFunc);
+                }, delayMilli);
+                switch (this.timeUnits) {
+                    case 'milliseconds':
+                        this.remainingUpdateMillis = 500;
+                        this.remainingUpdateSize = 500;
+                        break;
+                    case 'seconds':
+                        this.remainingUpdateMillis = 1000;
+                        this.remainingUpdateSize = 1;
+                        break;
+                    case 'minutes':
+                        this.remainingUpdateMillis = 6000;
+                        this.remainingUpdateSize = 0.1;
+                        break;
+                    case 'hours':
+                        this.remainingUpdateMillis = 360000;
+                        this.remainingUpdateSize = 0.1;
+                        break;
+                }
+                this.remainingFunc = setInterval(() => {
+                    const remaining = this.outputs[1].data - this.remainingUpdateSize;
+                    this.setOutputData(1, remaining);
+                }, this.remainingUpdateMillis);
             }
         }
         this.lastFireValue = fire;
-        this.onExecute();
-    }
-    onAfterSettingsChange() {
-        this.inputs[2]['name'] = `[interval] (${this.settings['time'].value})`;
-        this.onInputUpdated();
     }
 }
 container_1.Container.registerNodeType('boolean/one-shot', OneShotNode);

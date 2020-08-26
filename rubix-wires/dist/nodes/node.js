@@ -44,6 +44,8 @@ var NodeState;
     NodeState["WARNING"] = "warning";
     NodeState["ERROR"] = "error";
     NodeState["DISABLED"] = "disabled";
+    NodeState["ONLINE"] = "online";
+    NodeState["OFFLINE"] = "offline";
 })(NodeState = exports.NodeState || (exports.NodeState = {}));
 var SettingType;
 (function (SettingType) {
@@ -315,8 +317,9 @@ class Node {
         return id;
     }
     getFreeOutputId(id = undefined) {
-        if (!this.outputs)
-            return 0;
+        if (!this.outputs) {
+            this.outputs = {};
+        }
         if (id !== undefined && !this.outputs[id]) {
             return id;
         }
@@ -388,8 +391,9 @@ class Node {
         return position;
     }
     getFreeInputId(id = undefined) {
-        if (!this.inputs)
-            return 0;
+        if (!this.inputs) {
+            this.inputs = {};
+        }
         if (id !== undefined && !this.inputs[id]) {
             return id;
         }
@@ -494,6 +498,7 @@ class Node {
         return rows * 15 + 6;
     }
     computeSize(changeWidth = false) {
+        var _a, _b, _c, _d;
         let size = [0, 0];
         size[1] = this.computeHeight();
         if (!changeWidth && this.size != undefined) {
@@ -507,8 +512,8 @@ class Node {
         if (this.inputs) {
             for (let i in this.inputs) {
                 let input = this.inputs[i];
-                let label = input.label || '';
-                let name = input.name || '';
+                let label = (_a = input.label, (_a !== null && _a !== void 0 ? _a : ''));
+                let name = (_b = input.name, (_b !== null && _b !== void 0 ? _b : ''));
                 let labelWidth = compute_text_size(label);
                 let nameWidth = compute_text_size(name);
                 if (maxLabelWidth < labelWidth)
@@ -520,8 +525,8 @@ class Node {
         if (this.outputs) {
             for (let o in this.outputs) {
                 let output = this.outputs[o];
-                let label = output.label || '';
-                let name = output.name || '';
+                let label = (_c = output.label, (_c !== null && _c !== void 0 ? _c : ''));
+                let name = (_d = output.name, (_d !== null && _d !== void 0 ? _d : ''));
                 let labelWidth = compute_text_size(label);
                 let nameWidth = compute_text_size(name);
                 if (maxLabelWidth < labelWidth)

@@ -11,7 +11,7 @@ class StringJoinNode extends flexible_node_1.FlexibleNode {
         this.title = 'String Join';
         this.description =
             "This node takes String inputs and concatenates/joins them to produce a String 'output'.   The number of inputs can be modified from settings.";
-        this.addOutput('out', node_1.Type.STRING);
+        this.addOutput('output', node_1.Type.STRING);
         this.setOutputData(0, null);
     }
     onAdded() {

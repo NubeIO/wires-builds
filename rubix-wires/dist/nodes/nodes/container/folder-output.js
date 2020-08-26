@@ -2,11 +2,14 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_icons_1 = require("../../node-icons");
+const icon = node_icons_1.default.aiIcon;
 class ContainerOutputNode extends node_1.Node {
     constructor(container) {
         super(container);
         this.title = 'Folder Output';
         this.description = 'Output of the container';
+        this.iconImageUrl = icon;
         this.addInput('output', null);
         this.properties = { type: null };
     }

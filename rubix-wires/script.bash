@@ -12,6 +12,7 @@ USER=""
 USER_GROUP=""
 HOME_PATH=""
 LOG=true
+SERVICE_NAME="nubeio-rubix-wires"
 
 createDirIfNotExist() {
     # Create directory and change ownership if not exist
@@ -53,9 +54,9 @@ start() {
         echo -e "${GREEN}Saving PM2 configuration${DEFAULT}"
         npm run save:prod
         echo -e "${GREEN}Creating Linux Service${DEFAULT}"
-        sudo npm run startup:prod -- -u ${USER} --hp ${HOME_PATH}
+        sudo npm run startup:prod -- -u ${USER} --hp ${HOME_PATH} --service-name ${SERVICE_NAME}
         echo -e "${GREEN}Enabling Linux Service${DEFAULT}"
-        sudo systemctl enable pm2-${USER}.service
+        sudo systemctl enable ${SERVICE_NAME}.service
         createLogger
         echo -e "${GREEN}Service is installed, please reboot your system...${DEFAULT}"
     else
@@ -64,29 +65,19 @@ start() {
 }
 
 disable() {
-    if [[ ${USER} != "" ]]
-    then
-        echo -e "${GREEN}Stopping Linux Service${DEFAULT}"
-        sudo systemctl stop pm2-${USER}.service
-        echo -e "${GREEN}Disabling Linux Service${DEFAULT}"
-        sudo systemctl disable pm2-${USER}.service
-        echo -e "${GREEN}Service is disabled...${DEFAULT}"
-    else
-        echo -e "${RED}-u=<user> this parameters should be on you input (-h, --help for help)${DEFAULT}"
-    fi
+    echo -e "${GREEN}Stopping Linux Service${DEFAULT}"
+    sudo systemctl stop ${SERVICE_NAME}.service
+    echo -e "${GREEN}Disabling Linux Service${DEFAULT}"
+    sudo systemctl disable ${SERVICE_NAME}.service
+    echo -e "${GREEN}Service is disabled...${DEFAULT}"
 }
 
 enable() {
-    if [[ ${USER} != "" ]]
-    then
-        echo -e "${GREEN}Enabling Linux Service${DEFAULT}"
-        sudo systemctl enable pm2-${USER}.service
-        echo -e "${GREEN}Starting Linux Service${DEFAULT}"
-        sudo systemctl start pm2-${USER}.service
-        echo -e "${GREEN}Service is enabled...${DEFAULT}"
-    else
-        echo -e "${RED}-u=<user> this parameters should be on you input (-h, --help for help)${DEFAULT}"
-    fi
+    echo -e "${GREEN}Enabling Linux Service${DEFAULT}"
+    sudo systemctl enable ${SERVICE_NAME}.service
+    echo -e "${GREEN}Starting Linux Service${DEFAULT}"
+    sudo systemctl start ${SERVICE_NAME}.service
+    echo -e "${GREEN}Service is enabled...${DEFAULT}"
 }
 
 delete() {
@@ -95,7 +86,7 @@ delete() {
         echo -e "${GREEN}Deleting PM2 running app, if exist${DEFAULT}"
         npm run delete:prod
         echo -e "${GREEN}Removing Linux Service${DEFAULT}"
-        sudo npm run unstartup:prod -- -u ${USER}
+        sudo npm run unstartup:prod -- -u ${USER} --service-name ${SERVICE_NAME}
         echo -e "${GREEN}Service is deleted...${DEFAULT}"
     else
         echo -e "${RED}-u=<user> this parameters should be on you input (-h, --help for help)${DEFAULT}"
@@ -105,8 +96,8 @@ delete() {
 help() {
     echo "Service commands:"
     echo -e "   ${GREEN}start -u=<user> -hp=<home_path>${DEFAULT}           Start the service (optional parameters: -l, -ug)"
-    echo -e "   ${GREEN}disable -u=<user>${DEFAULT}                         Stop the service"
-    echo -e "   ${GREEN}enable -u=<user>${DEFAULT}                          Restart the stopped service"
+    echo -e "   ${GREEN}disable${DEFAULT}                                   Stop the service"
+    echo -e "   ${GREEN}enable${DEFAULT}                                    Restart the stopped service"
     echo -e "   ${GREEN}delete -u=<user>${DEFAULT}                          Delete the service"
     echo
     echo "Service parameters:"

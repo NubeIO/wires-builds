@@ -9,7 +9,8 @@ class JsonConstantNode extends node_1.Node {
         this.description = `Outputs a JSON value set from settings. Can also output null by leaving the settings field blank. Example {"name":"John Hill", "age":31} or [1,2,3,4]`;
         this.settings['value'] = { description: 'Value', value: '', type: node_1.SettingType.STRING };
         this.addOutput('output', node_1.Type.JSON);
-        this.addOutput('error', node_1.Type.STRING);
+        this.addOutput('valid', node_1.Type.BOOLEAN);
+        this.addOutput('msg', node_1.Type.STRING);
     }
     onAdded() {
         this.onAfterSettingsChange();
@@ -31,14 +32,20 @@ class JsonConstantNode extends node_1.Node {
         const val = this.settings['value'].value;
         try {
             if (this.isJson(val)) {
-                this.setOutputData(1, `valid json :)`);
                 this.setOutputData(0, val);
+                this.setOutputData(1, true);
+                this.setOutputData(2, 'valid JSON');
             }
-            else
-                this.setOutputData(1, `isn't valid json :(`);
+            else {
+                this.setOutputData(0, val);
+                this.setOutputData(1, false);
+                this.setOutputData(2, 'invalid JSON');
+            }
         }
         catch (err) {
-            this.setOutputData(1, err);
+            this.setOutputData(0, val);
+            this.setOutputData(1, false);
+            this.setOutputData(2, err);
         }
     }
 }

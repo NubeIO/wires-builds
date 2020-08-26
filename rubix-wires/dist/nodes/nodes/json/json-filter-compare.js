@@ -2,33 +2,57 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const string_json_compare_utils_1 = require("../../utils/string-json-compare-utils");
+var compareType;
+(function (compareType) {
+    compareType["Equals"] = "Equals";
+    compareType["NotEquals"] = "Not Equal";
+    compareType["GreaterThanEqual"] = "Greater Than Equal";
+    compareType["GreaterThan"] = "Greater Than";
+    compareType["LessThanEqual"] = "Less Than Equal";
+    compareType["LessThan"] = "Less Than";
+    compareType["Includes"] = "Includes";
+    compareType["startsWith"] = "Starts With";
+    compareType["endsWith"] = "Ends With";
+})(compareType || (compareType = {}));
 class JsonFilterCompare extends node_1.Node {
     constructor() {
         super();
-        this.title = 'Json Filter Comparison';
-        this.description = 'Filter a json object Example: msg.myKey';
+        this.title = 'Json Filter';
+        this.description =
+            "This node provides several functions to compare a JSON object input, with a Boolean 'output'.  Available comparison functions are: Equals, Includes, Starts With, and Ends With.  The comparison function is selected from settings.";
         this.addInput('input', node_1.Type.STRING);
+        this.addInputWithSettings('comparison-to', node_1.Type.STRING, '', 'Comparison Value');
         this.addOutput('output', node_1.Type.STRING);
+        this.addOutput('output-key', node_1.Type.STRING);
         this.addOutput('match', node_1.Type.BOOLEAN);
-        this.addOutput('error', node_1.Type.STRING);
         this.settings['filter'] = {
             description: 'Example: msg.myKey',
             value: 'myKey',
             type: node_1.SettingType.STRING,
         };
-        this.addInputWithSettings('string2', node_1.Type.STRING, '', 'Comparison Value');
         this.settings['function'] = {
             description: 'Comparison Type',
             type: node_1.SettingType.DROPDOWN,
             config: {
                 items: [
-                    { value: 'equals', text: 'Equals' },
-                    { value: 'includes', text: 'Includes' },
-                    { value: 'startsWith', text: 'Starts With' },
-                    { value: 'endsWith', text: 'Ends With' },
+                    { value: compareType.Equals, text: compareType.Equals },
+                    { value: compareType.NotEquals, text: compareType.NotEquals },
+                    { value: compareType.GreaterThanEqual, text: compareType.GreaterThanEqual },
+                    { value: compareType.GreaterThan, text: compareType.GreaterThan },
+                    { value: compareType.LessThanEqual, text: compareType.LessThanEqual },
+                    { value: compareType.LessThan, text: compareType.LessThan },
+                    { value: compareType.Includes, text: compareType.Includes },
+                    { value: compareType.startsWith, text: compareType.startsWith },
+                    { value: compareType.endsWith, text: compareType.endsWith },
                 ],
             },
-            value: 'equals',
+            value: compareType.Equals,
+        };
+        this.settings['isNumber'] = {
+            description: 'Comparison value is a number',
+            value: false,
+            type: node_1.SettingType.BOOLEAN,
         };
         this.settings['passNull'] = {
             description: 'Send null if not a match',
@@ -37,94 +61,46 @@ class JsonFilterCompare extends node_1.Node {
         };
     }
     onAdded() {
-        this.setTitleAndConversionFunction();
-        this.onInputUpdated();
+        this.onAfterSettingsChange();
     }
     onInputUpdated() {
-        let input = this.getInputData(0);
-        if (input === null) {
+        const input = this.getInputData(0);
+        if (input === null || input === undefined) {
             this.setOutputData(0, null);
             this.setOutputData(1, null);
             this.setOutputData(2, null);
             return;
         }
-        function findVal(object, key) {
-            let value = null;
-            Object.keys(object).some(function (k) {
-                if (k === key) {
-                    value = object[k];
-                    return true;
-                }
-                if (object[k] && typeof object[k] === 'object') {
-                    value = findVal(object[k], key);
-                    return value !== undefined;
-                }
-            });
-            return value;
-        }
         try {
-            input = JSON.parse(input);
+            const jsonCheck = JSON.parse(input);
             const filter = this.settings['filter'].value;
-            let out = findVal(input, filter);
+            let out = string_json_compare_utils_1.default.findVal(jsonCheck, filter);
             const string2 = this.getInputData(1);
-            if (!this.conversionFunction) {
-                return;
-            }
-            if (this.conversionFunction(out, string2)) {
-                this.setOutputData(0, input);
-                this.setOutputData(1, true);
+            if (string_json_compare_utils_1.default.compare(this, out.value, string2)) {
+                this.setOutputData(0, out.value);
+                this.setOutputData(1, out.valueWithKey);
+                this.setOutputData(2, true);
             }
             else if (this.settings['passNull'].value === true) {
                 this.setOutputData(0, null);
-                this.setOutputData(1, false);
-                this.setOutputData(2, null);
+                this.setOutputData(1, null);
+                this.setOutputData(2, false);
             }
             else
-                this.setOutputData(1, false);
+                this.setOutputData(2, false);
         }
         catch (e) {
             this.setOutputData(0, null);
             this.setOutputData(1, null);
-            this.setOutputData(2, e);
+            this.setOutputData(2, true);
         }
     }
     onAfterSettingsChange() {
-        this.setTitleAndConversionFunction();
         this.onInputUpdated();
-    }
-    setTitleAndConversionFunction() {
         const inputType = this.settings['function'].value;
-        switch (inputType) {
-            case 'equals':
-                this.title = 'Json Compare (Equals)';
-                this.conversionFunction = (s1, s2) => {
-                    return s1 === s2;
-                };
-                break;
-            case 'includes':
-                this.title = 'Json Compare (Includes)';
-                this.conversionFunction = (s1, s2) => {
-                    return s1.includes(s2);
-                };
-                break;
-            case 'startsWith':
-                this.title = 'Json Compare (Starts With)';
-                this.conversionFunction = (s1, s2) => {
-                    return s1.startsWith(s2);
-                };
-                break;
-            case 'endsWith':
-                this.title = 'Json Compare (Ends With)';
-                this.conversionFunction = (s1, s2) => {
-                    return s1.endsWith(s2);
-                };
-                break;
-            default:
-                this.title = 'Json Compare (Equals)';
-                this.conversionFunction = (s1, s2) => {
-                    return s1 === s2;
-                };
-        }
+        const title = "Json Comparison";
+        this.title = `${title} Compare (${inputType})`;
+        this.broadcastTitleToClients();
     }
 }
 container_1.Container.registerNodeType('json/json-filter-compare', JsonFilterCompare);

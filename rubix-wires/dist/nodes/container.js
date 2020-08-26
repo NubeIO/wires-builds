@@ -230,6 +230,8 @@ class Container {
                     }
                     let target_id = (_a = link.target_input_id, (_a !== null && _a !== void 0 ? _a : link.target_slot));
                     let target_input = target_node.inputs[target_id];
+                    if (!target_input)
+                        return;
                     target_input.data = utils_1.default.parseValue(output.data, target_input.type);
                     target_node.isUpdated = true;
                     target_input.updated = true;

@@ -144,7 +144,6 @@ class ModbusSerialDeviceNode extends container_node_1.ContainerNode {
     }
     onAdded() {
         super.onAdded();
-        this.name = `id_${this.container.id.toString()}_${this.id.toString()}`;
         this.broadcastNameToClients();
         if (this.side !== container_1.Side.server)
             return;

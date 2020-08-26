@@ -61,13 +61,11 @@ function replaceInfluxDbConfig() {
   shell.sed('-i', /\$INFLUX_DB_PASSWORD/g, process.env.INFLUX_DB_PASSWORD || '', 'src/config.ts');
 }
 
-
 function replaceEdge28Config() {
   shell.sed('-i', /\$EDGE_28_BASEURL/g, process.env.EDGE_28_BASEURL || '', 'src/config.ts');
-  shell.sed('-i', /\$EDGE_28_PORT/g, process.env.EDGE_28_PORT || '', 'src/config.ts');
+  shell.sed('-i', /'\$EDGE_28_PORT'/g, process.env.EDGE_28_PORT || 5000, 'src/config.ts');
   shell.sed('-i', /\$EDGE_28_API_VER/g, process.env.EDGE_28_API_VER || '', 'src/config.ts');
 }
-
 
 const updateEnv = () => {
   let dataDir = process.env.DATA_DIR || (process.env.NODE_ENV === 'production' ? '/data/rubix-wires' : './db');

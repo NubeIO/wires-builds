@@ -9,7 +9,7 @@ class BoolPriorityNode extends flexible_node_1.FlexibleNode {
         this.dynamicInputsType = node_1.Type.BOOLEAN;
         this.title = 'Boolean Writable (Priority)';
         this.description =
-            "Outputs the highest priority, non-null, Boolean input.  Highest priority is 'in 1' then 'in 2' and so on.  Input values can also be wired in, or set from settings. The number of inputs can be modified from settings.";
+            "Outputs the highest priority, non-null, Boolean input. Highest priority is 'in 1' then 'in 2' and so on. Input values can also be wired in, or set from settings. The number of inputs can be modified from settings.";
         this.addOutput('out', node_1.Type.BOOLEAN);
     }
     onAdded() {

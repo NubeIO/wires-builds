@@ -15,8 +15,8 @@ const config = {
     rubix: {
         branch: '(HEAD',
         build: '',
-        hash: '0a786cf',
-        version: '1.3.6',
+        hash: 'c39581a',
+        version: '1.3.7',
     },
     bsa: {
         baseURL: '',
@@ -55,7 +55,7 @@ const config = {
     },
     edge28: {
         baseURL: '',
-        port: '',
+        port: 5000,
         apiVer: '',
     },
 };

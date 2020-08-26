@@ -1,19 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../../node");
-const container_node_1 = require("../../../container-node");
 const container_1 = require("../../../container");
 const check_types_1 = require("../../../utils/check-types");
 const constants_1 = require("../../../constants");
-const unitsJson_1 = require("../../../utils/data-types/src/valueFormats/unitsJson");
+const BACnet_enums_units_1 = require("../../../utils/points/BACnet-enums-units");
 const utils_1 = require("../../../utils");
 const MathUtils_1 = require("../../../utils/MathUtils");
-class ModbusPointNode extends container_node_1.ContainerNode {
-    constructor(container) {
-        super(container);
-        this.units = unitsJson_1.unitRefs.map(e => {
-            return { value: e.value, text: e.text };
-        });
+class ModbusPointNode extends node_1.Node {
+    constructor() {
+        super();
         this.dynamicInputsExist = false;
         this.dynamicSettingsExist = false;
         this.dynamicInputStartPosition = 0;
@@ -93,7 +89,7 @@ class ModbusPointNode extends container_node_1.ContainerNode {
             type: node_1.SettingType.BOOLEAN,
         };
         this.settings['value_group'] = {
-            description: 'point settings',
+            description: 'Point settings',
             value: '',
             type: node_1.SettingType.GROUP,
         };
@@ -112,16 +108,24 @@ class ModbusPointNode extends container_node_1.ContainerNode {
             value: 0,
             type: node_1.SettingType.NUMBER,
         };
-        this.settings['units'] = {
+        this.settings['units_group'] = {
+            description: 'Units (Save to get units)',
+            type: node_1.SettingType.GROUP,
+        };
+        this.settings['unitsType'] = {
             description: 'Units',
-            value: this.units[0].value,
             type: node_1.SettingType.DROPDOWN,
             config: {
-                items: this.units,
+                items: BACnet_enums_units_1.default.unitCategory,
             },
         };
+        this.settings['units'] = {
+            description: 'Units',
+            value: BACnet_enums_units_1.default.COMMON_METRIC.NO_UNITS,
+            type: node_1.SettingType.DROPDOWN,
+        };
         this.settings['math_group'] = {
-            description: 'math settings',
+            description: 'Math settings',
             value: '',
             type: node_1.SettingType.GROUP,
         };
@@ -148,7 +152,7 @@ class ModbusPointNode extends container_node_1.ContainerNode {
             type: node_1.SettingType.NUMBER,
         };
         this.settings['modbus_group'] = {
-            description: 'modbus point settings',
+            description: 'Modbus point settings',
             value: '',
             type: node_1.SettingType.GROUP,
         };
@@ -237,12 +241,9 @@ class ModbusPointNode extends container_node_1.ContainerNode {
         });
     }
     onCreated() {
-        super.onCreated();
         this.updateNodeInputs(false);
-        this.name = `id_${this.container.id.toString()}_${this.id.toString()}`;
     }
     onAdded() {
-        super.onAdded();
         if (this.side !== container_1.Side.server)
             return;
         this.onInputUpdated();
@@ -276,8 +277,7 @@ class ModbusPointNode extends container_node_1.ContainerNode {
         this.title = `MB Pnt (FC: ${this.settings['pointType'].value}, AD: ${this.settings['address'].value}, ID: ${this.container.id}_${this.id})`;
         this.broadcastSettingsToClients();
     }
-    onAfterSettingsChange(oldSettings) {
-        super.onAfterSettingsChange(oldSettings);
+    onAfterSettingsChange() {
         this.updateNodeInputs(true);
         this.onInputUpdated();
     }
@@ -339,5 +339,6 @@ class ModbusPointNode extends container_node_1.ContainerNode {
         this.setOutputData(this.outMessageJson, e, true);
     }
 }
+exports.ModbusPointNode = ModbusPointNode;
 container_1.Container.registerNodeType(constants_1.MODBUS_RTU_POINT, ModbusPointNode, constants_1.MODBUS_RTU_DEVICE);
 //# sourceMappingURL=modbus-rtu-point.js.map

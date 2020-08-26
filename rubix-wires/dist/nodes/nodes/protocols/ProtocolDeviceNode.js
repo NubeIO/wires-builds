@@ -6,84 +6,22 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const enumify_1 = require("enumify");
 const decorators_1 = require("../../../utils/decorators");
-const helper_1 = require("../../../utils/helper");
+const enums_1 = require("../../../utils/enums");
+const pattern_1 = require("../../../utils/pattern");
 const container_1 = require("../../container");
 const container_node_1 = require("../../container-node");
-const node_1 = require("../../node");
-const node_mixin_1 = require("../node-mixin");
-class ConnectionStatus extends enumify_1.Enumify {
-    constructor(label) {
-        super();
-        this.label = label;
-    }
-    isConnected() {
-        return this === ConnectionStatus.CONNECTED;
-    }
-    isError() {
-        return this === ConnectionStatus.ERROR;
-    }
-    isDisconnected() {
-        return this === ConnectionStatus.DISCONNECTED;
-    }
-    isUnconnected() {
-        return this === ConnectionStatus.UNCONNECTED;
-    }
-}
-exports.ConnectionStatus = ConnectionStatus;
-ConnectionStatus.CONNECTED = new ConnectionStatus('CONNECTED');
-ConnectionStatus.DISCONNECTED = new ConnectionStatus('DISCONNECTED');
-ConnectionStatus.ERROR = new ConnectionStatus('ERROR');
-ConnectionStatus.UNCONNECTED = new ConnectionStatus('UNCONNECTED');
-ConnectionStatus._ = ConnectionStatus.closeEnum();
-function ExternalConnectionNodeMixin(Base) {
-    class ExternalConnectionNodeMixinBase extends node_mixin_1.AbleEnableNode(Base) {
-        constructor() {
-            super(...arguments);
-            this.connectionStatus = ConnectionStatus.UNCONNECTED;
-        }
-        static setOutputStatus(node, status, errMsg) {
-            node.connectionStatus = status;
-            node.setOutputData(node.statusOutputIdx(), node.getConnectionStatus().label);
-            node.setOutputData(node.errorOutputIdx(), (errMsg !== null && errMsg !== void 0 ? errMsg : ''));
-        }
-        errorOutputIdx() {
-            return this.statusOutputIdx() + 1;
-        }
-        getConnectionStatus() {
-            if (!this.isEnabled()) {
-                return (this.connectionStatus = ConnectionStatus.UNCONNECTED);
-            }
-            if (this.connectionStatus.isError()) {
-                return this.connectionStatus;
-            }
-            this.connectionStatus = this.connectedCondition() ? ConnectionStatus.CONNECTED : ConnectionStatus.DISCONNECTED;
-            return this.connectionStatus;
-        }
-        mixinConnectionStatusOutput() {
-            this.addOutput('status', node_1.Type.STRING);
-            this.addOutput('error', node_1.Type.STRING);
-            this.setOutputData(this.statusOutputIdx(), this.getConnectionStatus().label);
-            return {};
-        }
-    }
-    return ExternalConnectionNodeMixinBase;
-}
-exports.ExternalConnectionNodeMixin = ExternalConnectionNodeMixin;
-class ProtocolDeviceNode extends ExternalConnectionNodeMixin(container_node_1.ContainerNode) {
+const registry_1 = require("../../registry");
+const connection_node_mixin_1 = require("./connection-node-mixin");
+class ProtocolDeviceNode extends connection_node_mixin_1.ExternalConnectionNodeMixin(container_node_1.ContainerNode) {
     constructor(container, title, description) {
         super(container);
         this._title = title;
         this.description = description;
         this.mixinConnectionStatusOutput();
     }
-    statusOutputIdx() {
-        return 0;
-    }
     onCreated() {
         super.onCreated();
-        this.name = `${this._title} cid_${this.container.id}_id${this.id}`;
     }
     onAdded() {
         this.startOrStop();
@@ -104,8 +42,12 @@ class ProtocolDeviceNode extends ExternalConnectionNodeMixin(container_node_1.Co
     applyTitle() {
         super.applyTitle();
     }
-    emit(connectionStatus, dependants) {
-        dependants.filter(d => helper_1.isNotNull(d)).forEach(dependant => dependant.watch(connectionStatus));
+    statusObservable(observers) {
+        observers.push(this.statusObserver());
+        return new pattern_1.DefaultObservable(observers);
+    }
+    statusOutputIdx() {
+        return 0;
     }
     enableDescription() {
         return `Enable ${this._title}`;
@@ -114,65 +56,27 @@ class ProtocolDeviceNode extends ExternalConnectionNodeMixin(container_node_1.Co
         if (this.side !== container_1.Side.server)
             return;
         this.stop();
-        ProtocolDeviceNode.setOutputStatus(this, ConnectionStatus.UNCONNECTED);
+        this.connectionStatus = enums_1.ConnectionStatus.UNCONNECTED;
         if (this.isEnabled()) {
             this.kickoff(this);
         }
-        this.emit(this.getConnectionStatus(), this.dependantsConnectionNode());
+        this.notifyConnStatusOutput();
     }
     kickoff(node) {
         node.createThenStart();
-        ProtocolDeviceNode.setOutputStatus(node, ConnectionStatus.CONNECTED);
+        this.notifyConnStatusOutput(enums_1.ConnectionStatus.CONNECTED);
     }
-    handleErrorInKickOff(err, node) {
-        var _a;
-        ProtocolDeviceNode.setOutputStatus(node, ConnectionStatus.ERROR, (_a = err) === null || _a === void 0 ? void 0 : _a.message);
+    handleErrorInKickOff(err) {
+        this.notifyConnStatusOutput(enums_1.ConnectionStatus.ERROR, err.message);
+    }
+    notifyConnStatusOutput(status, errMsg) {
+        this.connectionStatus = (status !== null && status !== void 0 ? status : this.connectionStatus);
+        let nodeId = registry_1.default.getId(this.cid, this.id);
+        this.statusObservable(this.connObserverNodes()).notify(new connection_node_mixin_1.ConnectionOutput(this.getConnectionStatus(), errMsg), nodeId);
     }
 }
 __decorate([
-    decorators_1.ErrorCallbackHandler((err, node) => node.handleErrorInKickOff(err, node))
+    decorators_1.ErrorCallbackHandler((err, node) => node.handleErrorInKickOff(err))
 ], ProtocolDeviceNode.prototype, "kickoff", null);
 exports.ProtocolDeviceNode = ProtocolDeviceNode;
-function DependantConnectionNodeMixin(Base) {
-    class DependantConnectionNodeMixinBase extends ExternalConnectionNodeMixin(Base) {
-        onAdded() {
-            this.executeFunction('onAdded');
-        }
-        onAfterSettingsChange(oldSettings, oldName) {
-            this.executeFunction('onAfterSettingsChange', oldSettings, oldName);
-        }
-        onInputUpdated() {
-            this.executeFunction('onInputUpdated');
-        }
-        watch(connectionStatus) {
-            DependantConnectionNodeMixinBase.setOutputStatus(this, connectionStatus);
-        }
-        connectedCondition() {
-            let parentNode = this.getParentNode();
-            if (parentNode && helper_1.isFunction(parentNode['getConnectionStatus'])) {
-                return parentNode['getConnectionStatus']().isConnected();
-            }
-            return true;
-        }
-        handleError(err, func) {
-            var _a;
-            this.debug(`Error when executing function ${func} in node ${this.getReadableId()}`);
-            DependantConnectionNodeMixinBase.setOutputStatus(this, ConnectionStatus.ERROR, (_a = err) === null || _a === void 0 ? void 0 : _a.message);
-        }
-        executeFunction(func, ...args) {
-            try {
-                this.connectionStatus = ConnectionStatus.UNCONNECTED;
-                if (super[func] && helper_1.isFunction(super[func])) {
-                    super[func](...args);
-                }
-                DependantConnectionNodeMixinBase.setOutputStatus(this, this.getConnectionStatus());
-            }
-            catch (err) {
-                this.handleError(err, func);
-            }
-        }
-    }
-    return DependantConnectionNodeMixinBase;
-}
-exports.DependantConnectionNodeMixin = DependantConnectionNodeMixin;
 //# sourceMappingURL=ProtocolDeviceNode.js.map

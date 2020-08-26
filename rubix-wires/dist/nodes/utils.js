@@ -52,8 +52,19 @@ class Utils {
         else if (type === 'boolean' && typeofVal !== 'boolean') {
             if (val === '')
                 return null;
-            else
-                return val === 1 || val === 'true';
+            if (val === null)
+                return null;
+            if (val === undefined)
+                return null;
+            else if (val === 1 || val === '1' || val === 'true' || val === true) {
+                val = true;
+            }
+            else if (val === 0 || val === '0' || val === 'false' || val === false) {
+                val = false;
+            }
+            else {
+                val = false;
+            }
         }
         else if (type === 'json') {
             const originalVal = val;
@@ -356,10 +367,7 @@ Utils.pSBC = (percentageChange, fromColor, toColor = undefined, useLinear = fals
             ([r, g, b, a] = d = d.split(',')), (n = d.length);
             if (n < 3 || n > 4)
                 return null;
-            (x.r = i(r[3] == 'a' ? r.slice(5) : r.slice(4))),
-                (x.g = i(g)),
-                (x.b = i(b)),
-                (x.a = a ? parseFloat(a) : -1);
+            (x.r = i(r[3] == 'a' ? r.slice(5) : r.slice(4))), (x.g = i(g)), (x.b = i(b)), (x.a = a ? parseFloat(a) : -1);
         }
         else {
             if (n == 8 || n == 6 || n < 4)
@@ -368,10 +376,7 @@ Utils.pSBC = (percentageChange, fromColor, toColor = undefined, useLinear = fals
                 d = '#' + d[1] + d[1] + d[2] + d[2] + d[3] + d[3] + (n > 4 ? d[4] + d[4] : '');
             d = i(d.slice(1), 16);
             if (n == 9 || n == 5)
-                (x.r = (d >> 24) & 255),
-                    (x.g = (d >> 16) & 255),
-                    (x.b = (d >> 8) & 255),
-                    (x.a = m((d & 255) / 0.255) / 1000);
+                (x.r = (d >> 24) & 255), (x.g = (d >> 16) & 255), (x.b = (d >> 8) & 255), (x.a = m((d & 255) / 0.255) / 1000);
             else
                 (x.r = d >> 16), (x.g = (d >> 8) & 255), (x.b = d & 255), (x.a = -1);
         }
@@ -399,27 +404,15 @@ Utils.pSBC = (percentageChange, fromColor, toColor = undefined, useLinear = fals
         (r = m(Math.pow((P * Math.pow(f.r, 2) + percentageChange * Math.pow(t.r, 2)), 0.5))),
             (g = m(Math.pow((P * Math.pow(f.g, 2) + percentageChange * Math.pow(t.g, 2)), 0.5))),
             (b = m(Math.pow((P * Math.pow(f.b, 2) + percentageChange * Math.pow(t.b, 2)), 0.5)));
-    (a = f.a),
-        (t = t.a),
-        (f = a >= 0 || t >= 0),
-        (a = f ? (a < 0 ? t : t < 0 ? a : a * P + t * percentageChange) : 0);
+    (a = f.a), (t = t.a), (f = a >= 0 || t >= 0), (a = f ? (a < 0 ? t : t < 0 ? a : a * P + t * percentageChange) : 0);
     if (h)
-        return ('rgb' + (f ? 'a(' : '(') + r + ',' + g + ',' + b + (f ? ',' + m(a * 1000) / 1000 : '') + ')');
+        return 'rgb' + (f ? 'a(' : '(') + r + ',' + g + ',' + b + (f ? ',' + m(a * 1000) / 1000 : '') + ')';
     else
         return ('#' +
             (4294967296 + r * 16777216 + g * 65536 + b * 256 + (f ? m(a * 255) : 0))
                 .toString(16)
                 .slice(1, f ? undefined : -2));
 };
-Utils.WEEKDAYS = [
-    null,
-    'monday',
-    'tuesday',
-    'wednesday',
-    'thursday',
-    'friday',
-    'saturday',
-    'sunday',
-];
+Utils.WEEKDAYS = [null, 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 Utils.sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 //# sourceMappingURL=utils.js.map

@@ -2,38 +2,77 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
-class ConnectionLocalReceiverSingleNode extends node_1.Node {
+const node_icons_1 = require("../../node-icons");
+const icon = node_icons_1.default.aiIcon;
+class ConnectionLocalReceiverNode extends node_1.Node {
     constructor() {
         super();
-        this.title = 'Link Receiver';
+        this.topicList = [];
+        this.title = 'Link Receiver Topic';
         this.description =
-            "This node works in conjunction with link-transmitter node and provides a connection of nodes without the graphical wires.  'out #' outputs will match the corresponding 'in #' input from link-transmitter nodes with matching 'Topic ID' settings.";
-        this.properties['val'] = null;
-        this.properties['topic'] = null;
-        this.properties['topic_setting'] = null;
-        this.addInputWithSettings('topic', node_1.Type.STRING, 'ID', 'Topic ID', false);
-        this.addOutput('val', node_1.Type.ANY);
-        this.addOutput('topic', node_1.Type.ANY);
+            "This node works in conjunction with link-transmitter node and provides a connection of nodes without the graphical wires. 'out #' outputs will match the corresponding 'in #' input from link-transmitter nodes with matching 'Channel Number' settings.  The number of outputs is configurable from settings.";
+        this.iconImageUrl = icon;
+        this.addInputWithSettings('enable', node_1.Type.BOOLEAN, true, 'Enable');
+        this.addOutput('output', node_1.Type.ANY);
+        this.addOutput('topic-id', node_1.Type.STRING);
+        this.settings['channel'] = {
+            description: 'Topic Name',
+            config: { items: [] },
+            value: '',
+            type: node_1.SettingType.DROPDOWN,
+        };
+        this.settings['blockNull'] = {
+            description: 'Block Null',
+            value: false,
+            type: node_1.SettingType.BOOLEAN,
+        };
+    }
+    init() {
+        if (!this.properties['val']) {
+            this.properties['val'] = null;
+        }
     }
     onAdded() {
+        this.onAfterSettingsChange();
         this.setOutputData(0, this.properties['val']);
-        this.setOutputData(1, this.properties['topic']);
-        this.onInputUpdated();
-    }
-    onInputUpdated() {
-        const topicIn = this.getInputData(0);
-        this.properties['topic'] = topicIn;
-        let name = 'Link Receiver Single [' + this.settings['topic'].value + ']';
-        this.updateTitle(name);
-        this.setOutputData(0, this.properties['val']);
-        this.setOutputData(1, this.properties['topic']);
     }
     onAfterSettingsChange() {
-        this.onInputUpdated();
+        this.updateTitle();
+        this.updateChannel();
     }
-    updateTitle(name) {
-        this.title = name;
+    pushSettings() {
+        const unitCategory = this.topicList.map((point) => {
+            return { value: point, text: point };
+        });
+        this.settings['channel'].config = {
+            items: unitCategory,
+        };
+        this.updateTitle();
+        this.updateChannel();
+        this.broadcastSettingsToClients();
+        this.broadcastTitleToClients();
+        this.broadcastOutputsToClients();
+    }
+    transmitterTopic() {
+        const transmitters = container_1.Container.containers[0].getNodesByType('connection/link-transmitter-single', true);
+        this.topicList = [];
+        transmitters.forEach(transmitter => {
+            this.topicList.push(transmitter.getInputData(1));
+        });
+        this.pushSettings();
+    }
+    updateTitle() {
+        this.title = 'Link Receiver Single [' + this.settings['channel'].value + ']';
+    }
+    updateChannel() {
+        this.setOutputData(1, this.settings['channel'].value, true);
+    }
+    triggerTransmitterTopicUpdate() {
+        if (this.side !== container_1.Side.server)
+            return;
+        this.transmitterTopic();
     }
 }
-container_1.Container.registerNodeType('connection/link-receiver-single', ConnectionLocalReceiverSingleNode);
+exports.ConnectionLocalReceiverNode = ConnectionLocalReceiverNode;
+container_1.Container.registerNodeType('connection/link-receiver-single', ConnectionLocalReceiverNode);
 //# sourceMappingURL=local-receiver-single.js.map

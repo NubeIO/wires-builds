@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const mqtt_1 = require("mqtt");
-const logger = require('logplease').create('mqtt', { color: 6 });
+const logger = require('logplease').create('mqtt', { color: 4 });
 class DefaultMqttClient {
     constructor(options, callbackWhenConnected, callbackWhenOffline, callbackIncomingMessage) {
         this.connected = false;
@@ -108,7 +108,9 @@ class DefaultMqttClient {
             return;
         }
         logger.info(`MQTT Client '${this.clientId}' unsubscribe topic '${topic}'...`);
-        this.client.unsubscribe(topic, cb);
+        if (topic) {
+            this.client.unsubscribe(topic, cb);
+        }
     }
 }
 exports.DefaultMqttClient = DefaultMqttClient;
