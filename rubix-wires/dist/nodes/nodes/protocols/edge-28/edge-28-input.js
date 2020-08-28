@@ -230,8 +230,7 @@ class Edge28InputPointNode extends HistoryBase_1.default {
         edge_utils_1.default.removePoint(this.getParentNode(), this);
     }
     sendJson() {
-        const decimals = this.settings['decimals'].value;
-        const out = {
+        return {
             name: this.name,
             pointValue: this.out,
             enable: this.settings['pointEnable'].value,
@@ -240,7 +239,6 @@ class Edge28InputPointNode extends HistoryBase_1.default {
             pointType: this.settings['pointType'].value,
             pointOffset: this.settings['offset'].value,
         };
-        return out;
     }
     nodeColour() {
         if (this.settings['pointEnable'].value === false) {

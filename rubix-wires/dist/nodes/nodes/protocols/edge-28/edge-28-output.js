@@ -198,8 +198,7 @@ class Edge28OutputPointNode extends HistoryBase_1.default {
         this.broadcastTitleToClients();
     }
     sendJson() {
-        const decimals = this.settings['decimals'].value;
-        const out = {
+        return {
             name: this.name,
             pointValue: this.properties['pointVal'],
             enable: this.settings['pointEnable'].value,
@@ -207,7 +206,6 @@ class Edge28OutputPointNode extends HistoryBase_1.default {
             pointNumber: this.settings['pointNumber'].value,
             pointType: this.settings['pointType'].value,
         };
-        return out;
     }
     apiCall(inputVal) {
         if (this.side !== container_1.Side.server)
@@ -222,19 +220,16 @@ class Edge28OutputPointNode extends HistoryBase_1.default {
         if (this.settings['pointType'].value === OUTPUT_POINT_TYPE.DO) {
             if (typeof inputVal === 'boolean') {
                 outVal = inputVal ? 1 : 0;
-                console.log("boolean");
             }
             else if (typeof inputVal === 'string') {
                 if (inputVal === '1' || inputVal === 'true') {
                     outVal = 1;
-                    console.log("string");
                 }
                 else if (inputVal === '0' || inputVal === 'false') {
                     outVal = 0;
                 }
             }
             else if (typeof inputVal === 'number') {
-                console.log("number");
                 if (inputVal >= 1) {
                     outVal = 1;
                 }

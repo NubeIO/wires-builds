@@ -132,6 +132,9 @@ class MqttPointNode extends connection_node_mixin_1.DependantConnectionNodeMixin
     valueOutputIdx() {
         return 2;
     }
+    presentValueType() {
+        return node_1.Type.ANY;
+    }
     computeTitle() {
         return `MQTT Point (Topic: ${this.settings[this._iTopic].value})`;
     }

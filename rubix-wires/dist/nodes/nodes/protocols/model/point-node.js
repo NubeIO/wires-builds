@@ -64,10 +64,10 @@ function PointNodeMixin(Base) {
             this.updateTitle();
         }
         onAfterSettingsChange(oldSettings, oldName) {
+            this.handleDynamicInput(oldSettings);
             if (this.side !== container_1.Side.server) {
                 return;
             }
-            this.handleDynamicInput(oldSettings);
             let prev = this.flowHandler().initializePointBySettingObject(oldSettings);
             let current = this.flowHandler().initializePointBySettingInput();
             this.flowHandler().notifyOutput(this.flowHandler().handleOnUpdate(current, prev), this.pointObservers());
@@ -129,6 +129,9 @@ function PointNodeMixin(Base) {
         priorityArrayOutputIdx() {
             return this.priorityOutputIdx() + 1;
         }
+        presentValueType() {
+            return node_1.Type.NUMBER;
+        }
         mixinPointValueInputOutput() {
             this.addOutput(this._oOut, node_1.Type.NUMBER);
             this.addOutput(this._oPriority, node_1.Type.NUMBER);
@@ -143,7 +146,7 @@ function PointNodeMixin(Base) {
                 config: { items: point_node_utils_1.InputMethod.items() },
                 value: point_node_utils_1.InputMethod.VALUE_PRIORITY.enumKey,
             };
-            this.addInputWithSettings(this._iPresentValue, node_1.Type.NUMBER, null, 'Present Value');
+            this.addInputWithSettings(this._iPresentValue, this.presentValueType(), null, 'Present Value');
             this.addInputWithSettings(this._iPriority, node_1.Type.NUMBER, 16, 'Point Priority');
             this.addInputWithSettings(this._iPriorityArrayJson, node_1.Type.JSON, null, 'Priority Array in JSON or Array');
             this.inputs[this.priorityArrayInputIdx()].setting.hidden = true;
@@ -190,7 +193,6 @@ function PointNodeMixin(Base) {
             if (newInputMethod === point_node_utils_1.InputMethod.VALUE_PRIORITY) {
                 this.hideInput(false, ...helper_1.range(this.priorityArrayInputIdx(), this.priorityArrayInputIdx() + 16));
                 this.showInput(false, this.valueInputIdx(), this.priorityInputIdx());
-                return;
             }
             if (newInputMethod === point_node_utils_1.InputMethod.PRIORITY_ARRAY_LOT) {
                 let hidden = [this.valueInputIdx(), this.priorityInputIdx(), this.priorityArrayInputIdx()];
@@ -200,13 +202,12 @@ function PointNodeMixin(Base) {
                 }
                 this.hideInput(false, ...hidden);
                 this.showInput(false, ...show);
-                return;
             }
             if (newInputMethod === point_node_utils_1.InputMethod.PRIORITY_ARRAY_JSON) {
                 this.hideInput(false, this.valueInputIdx(), this.priorityInputIdx(), ...helper_1.range(this.priorityArrayInputIdx() + 1, this.priorityArrayInputIdx() + 16));
                 this.showInput(false, this.priorityArrayInputIdx());
-                return;
             }
+            this.linkHandler.recomputeInputLinks();
         }
     }
     __decorate([

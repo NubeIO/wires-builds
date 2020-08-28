@@ -67,9 +67,6 @@ class Edge28ApiNode extends container_node_1.ContainerNode {
             return pointValue.data;
         });
     }
-    onCreated() {
-        super.onCreated();
-    }
     onAdded() {
         const _super = Object.create(null, {
             onAdded: { get: () => super.onAdded }

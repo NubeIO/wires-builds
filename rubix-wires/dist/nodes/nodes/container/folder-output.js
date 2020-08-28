@@ -1,8 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const node_1 = require("../../node");
+const helper_1 = require("../../../utils/helper");
 const container_1 = require("../../container");
+const node_1 = require("../../node");
 const node_icons_1 = require("../../node-icons");
+const registry_1 = require("../../registry");
 const icon = node_icons_1.default.aiIcon;
 class ContainerOutputNode extends node_1.Node {
     constructor(container) {
@@ -14,39 +16,29 @@ class ContainerOutputNode extends node_1.Node {
         this.properties = { type: null };
     }
     onCreated() {
-        if (!this.isPlacedInsideContainerNode())
+        if (helper_1.isNull(this.container.container_node))
             return;
         let containerNode = this.container.container_node;
         const id = containerNode.addOutput(this.name, this.properties['type'], this.properties['slot']);
         this.properties['slot'] = id;
         this.name = containerNode.outputs[id].name;
-        if (this.container.db) {
-            let serializedContainerNode = containerNode.serialize();
-            this.container.db.updateNode(containerNode.id, containerNode.container.id, {
-                $set: { outputs: serializedContainerNode.outputs },
-            });
-        }
+        this.linkHandler.recomputeOutputLinks(registry_1.default.getId(this.container.container_node.cid, this.container.container_node.id));
     }
     onRemoved() {
-        if (!this.isPlacedInsideContainerNode())
+        if (helper_1.isNull(this.container.container_node))
             return;
         let cont_node = this.container.container_node;
-        cont_node.disconnectOutputLinks(this.properties['slot']);
         cont_node.removeOutput(this.properties['slot']);
-        cont_node.setDirtyCanvas(true, true);
         this.properties['slot'] = -1;
+        this.linkHandler.recomputeOutputLinks(registry_1.default.getId(this.container.container_node.cid, this.container.container_node.id));
         if (this.container.db) {
-            let s_cont_node = cont_node.serialize();
-            this.container.db.updateNode(cont_node.id, cont_node.container.id, {
-                $set: { outputs: s_cont_node.outputs },
-            });
             this.container.db.updateNode(cont_node.id, cont_node.container.id, {
                 $set: { size: cont_node.size },
             });
         }
     }
     onInputUpdated() {
-        if (!this.isPlacedInsideContainerNode())
+        if (helper_1.isNull(this.container.container_node))
             return;
         let val = this.getInputData(0);
         let cont_node = this.container.container_node;
@@ -55,7 +47,7 @@ class ContainerOutputNode extends node_1.Node {
         cont_node.setOutputData(slot, val);
     }
     onAfterSettingsChange() {
-        if (!this.isPlacedInsideContainerNode())
+        if (helper_1.isNull(this.container.container_node))
             return;
         const containerNode = this.container.container_node;
         containerNode.outputs[this.properties['slot']].name = this.name;
@@ -65,9 +57,6 @@ class ContainerOutputNode extends node_1.Node {
                 $set: { outputs: serializedContainerNode.outputs },
             });
         }
-    }
-    isPlacedInsideContainerNode() {
-        return !!this.container.container_node;
     }
 }
 container_1.Container.registerNodeType('container/folder-output', ContainerOutputNode, null, true, false, true);

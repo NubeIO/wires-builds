@@ -31,7 +31,7 @@ PointValueCreator.create = (presentValue, priority, priorityArray) => {
     let highestValue = (_a = Object.entries(pv.priorityArray).find(pa => pa[1]), (_a !== null && _a !== void 0 ? _a : [16, null]));
     pv.priorityArray[pv.priority] = pv.presentValue;
     if (highestValue && helper_1.convertToNumber(highestValue[0]) === pv.priority && pv.presentValue === null) {
-        highestValue = Object.entries(pv.priorityArray).find(pa => pa[1]);
+        highestValue = Object.entries(pv.priorityArray).find(([_, v]) => helper_1.isNotNull(v));
     }
     if (highestValue && (pv.priority > helper_1.convertToNumber(highestValue[0]) || pv.presentValue === null)) {
         pv.priority = helper_1.convertToNumber(highestValue[0]);

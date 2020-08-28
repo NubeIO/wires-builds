@@ -15,9 +15,6 @@ exports.NodeOutput = NodeOutput;
 class NodeInput {
 }
 exports.NodeInput = NodeInput;
-class Link {
-}
-exports.Link = Link;
 var BROADCAST;
 (function (BROADCAST) {
     BROADCAST[BROADCAST["UPDATE_SETTINGS"] = 0] = "UPDATE_SETTINGS";
@@ -491,10 +488,7 @@ class Node {
         return this.outputs ? Object.values(this.outputs).length : 0;
     }
     computeHeight() {
-        let i_slots = this.getLastInputIndex();
-        let o_slots = this.getLastOutputIndex();
-        let rows = (this.inputs ? i_slots : 0) + (this.outputs ? o_slots : 0);
-        rows = Math.max(rows, 1);
+        let rows = Math.max(this.getLastInputIndex() + this.getLastOutputIndex(), 1);
         return rows * 15 + 6;
     }
     computeSize(changeWidth = false) {

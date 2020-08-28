@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const helper_1 = require("../../../utils/helper");
 class FiltersPreventNullNode extends node_1.Node {
     constructor() {
         super();
@@ -12,7 +13,7 @@ class FiltersPreventNullNode extends node_1.Node {
     }
     onInputUpdated() {
         let val = this.getInputData(0);
-        if (val != null) {
+        if (helper_1.isNotNull(val) && val !== '') {
             this.setOutputData(0, val);
         }
     }

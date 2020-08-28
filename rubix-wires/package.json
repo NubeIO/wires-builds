@@ -1,6 +1,6 @@
 {
   "name": "rubix-wires",
-  "version": "1.3.8",
+  "version": "1.3.9",
   "author": "zero, binod, marc, ap, hilly, ritesh, ig, dan <dev@nube-io.com>",
   "private": false,
   "scripts": {
@@ -26,7 +26,8 @@
     "unstartup:prod": "pm2 unstartup",
     "pm2": "pm2",
     "updateEnv": "node buildSrc/updateEnv.js && tsc",
-    "updateEnv:prod": "node buildSrc/updateEnv.js --prod"
+    "updateEnvProd": "node buildSrc/updateEnv.js",
+    "updateEnv:prod": "npm run updateEnvProd --prod"
   },
   "dependencies": {
     "@hapi/joi": "^17.1.0",
