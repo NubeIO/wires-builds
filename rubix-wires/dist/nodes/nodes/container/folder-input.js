@@ -46,11 +46,12 @@ class ContainerInputNode extends node_1.Node {
         }
     }
     onExecute() {
+        var _a, _b;
         if (!this.isPlacedInsideContainerNode())
             return;
         let containerNode = this.container.container_node;
-        let input = containerNode.inputs[this.properties['slot']];
-        if (input.updated)
+        let input = (_a = containerNode) === null || _a === void 0 ? void 0 : _a.inputs[this.properties['slot']];
+        if ((_b = input) === null || _b === void 0 ? void 0 : _b.updated)
             this.setOutputData(0, input.data);
     }
     onAfterSettingsChange() {

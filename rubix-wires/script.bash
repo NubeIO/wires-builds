@@ -12,6 +12,7 @@ USER=""
 USER_GROUP=""
 HOME_PATH=""
 LOG=true
+CREATE_LOG=false
 SERVICE_NAME="nubeio-rubix-wires"
 
 createDirIfNotExist() {
@@ -26,8 +27,11 @@ createDirIfNotExist() {
 createLogger() {
     if ${LOG}
     then
-        echo -e "${GREEN}Installing pm2-logrotate${DEFAULT}"
-        npm run install:pm2-logrotate
+        if ${CREATE_LOG}
+        then
+            echo -e "${GREEN}Installing pm2-logrotate${DEFAULT}"
+            npm run install:pm2-logrotate
+        fi
         echo -e "${GREEN}Setting log rotate size of 50M${DEFAULT}"
         npm run pm2 set pm2-logrotate:max_size 50M
         echo -e "${GREEN}Setting max date logs is of 10 days${DEFAULT}"
@@ -95,7 +99,7 @@ delete() {
 
 help() {
     echo "Service commands:"
-    echo -e "   ${GREEN}start -u=<user> -hp=<home_path>${DEFAULT}           Start the service (optional parameters: -l, -ug)"
+    echo -e "   ${GREEN}start -u=<user> -hp=<home_path>${DEFAULT}           Start the service (optional parameters: -l, -ug, -ilr)"
     echo -e "   ${GREEN}disable${DEFAULT}                                   Stop the service"
     echo -e "   ${GREEN}enable${DEFAULT}                                    Restart the stopped service"
     echo -e "   ${GREEN}delete -u=<user>${DEFAULT}                          Delete the service"
@@ -106,6 +110,8 @@ help() {
     echo -e "   ${GREEN}-ug --user-group=<user_group>${DEFAULT}             Data is associated with which <user_group>, DEFAULT <user>"
     echo -e "   ${GREEN}-hp --home-path=<home_path>:${DEFAULT}              Which <home_path> for storing PM2 files"
     echo -e "   ${GREEN}-l --log=<boolean>:${DEFAULT}                       by default true, for logging"
+    echo -e "   ${GREEN}-ilr --install-log-rotate=<boolean>:${DEFAULT}      by default false, if logging was stopped and \
+if you want to start logging again you need this command (it installs 'pm2-logrotate' which is removed out when we disable logging)"
 }
 
 parseCommand() {
@@ -128,11 +134,15 @@ parseCommand() {
     -l=*|--log=*)
         LOG="${i#*=}"
         ;;
+    -ilr=*|--install-log-rotate=*)
+        CREATE_LOG="${i#*=}"
+        ;;
     start|disable|enable|delete)
         COMMAND=${i}
         ;;
     *)
         echo -e "${RED}Unknown option (-h, --help for help)${DEFAULT}"
+        exit 1
         ;;
     esac
     done
@@ -157,3 +167,4 @@ runCommand() {
 
 parseCommand "$@"
 runCommand
+exit 0

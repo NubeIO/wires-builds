@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isNull = (value) => value === undefined || value === null;
+exports.isNull = (value) => value == null;
 exports.isNotNull = (value) => !exports.isNull(value);
 exports.isJSON = (value) => exports.isNotNull(value) && (typeof value === 'object' || Array.isArray(value));
 exports.isEmpty = (value) => {
@@ -19,7 +19,12 @@ exports.isEmpty = (value) => {
     return value.toString().trim() === '';
 };
 exports.toLowerSnakeCase = (label) => {
-    return exports.isNull(label) ? null : label.toString().toLowerCase().replace(/-+\s+/g, '_');
+    return exports.isNull(label)
+        ? null
+        : label
+            .toString()
+            .toLowerCase()
+            .replace(/-+\s+/g, '_');
 };
 exports.isFunction = (func) => func && {}.toString.call(func) === '[object Function]';
 exports.isNumeric = (n) => !isNaN(parseFloat(n)) && isFinite(n);

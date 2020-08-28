@@ -10,6 +10,7 @@ const editor_server_socket_1 = require("./editor-server-socket");
 const dashboard_server_socket_1 = require("./dashboard-server-socket");
 const config_1 = require("../config");
 const middleware_1 = require("./middleware");
+const wire_name_server_socket_1 = require("./wire-name-server-socket");
 const expressValidator = require('express-validator');
 const log = require('logplease').create('server', { color: 3 });
 const isDev = process.env.NODE_ENV !== 'production';
@@ -68,6 +69,7 @@ class Server {
         this.express.use('/api/dashboard', middleware_1.authMiddleware(), require('./routes/api-dashboard'));
         this.express.use('/editor', middleware_1.authMiddleware(), require('./routes/editor'));
         this.express.use('/api/editor', middleware_1.authMiddleware(), require('./routes/api-editor'));
+        this.express.use('/api/wire-name', middleware_1.authMiddleware(), require('./routes/api-wire-name'));
         this.express.use('/api/auth', require('./routes/auth'));
     }
     handleErrors() {
@@ -125,6 +127,7 @@ class Server {
         const io_root = socket(this.server);
         this.editorSocket = new editor_server_socket_1.EditorServerSocket(io_root);
         this.dashboardSocket = new dashboard_server_socket_1.DashboardServerSocket(io_root);
+        this.wireNameSocket = new wire_name_server_socket_1.WireNameServerSocket(io_root);
     }
 }
 exports.Server = Server;

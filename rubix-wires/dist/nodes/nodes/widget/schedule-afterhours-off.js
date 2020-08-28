@@ -22,6 +22,10 @@ class ScheduleAfterhoursOffWidgetNode extends node_1.Node {
         this.addOutput('remainingRuntime (ms)', node_1.Type.NUMBER);
         this.AHRuntime = time_utils_1.default.timeConvert(120, 'minutes');
     }
+    onCreated() {
+        this.currentMode = 'OFF';
+        this.onInputUpdated();
+    }
     onAdded() {
         this.currentMode = 'OFF';
         this.onInputUpdated();
@@ -54,7 +58,8 @@ class ScheduleAfterhoursOffWidgetNode extends node_1.Node {
             if (this.getInputData(1))
                 this.startSchedule();
             else {
-                clearInterval(this.timeoutFunc);
+                if (this.timeoutFunc)
+                    clearInterval(this.timeoutFunc);
                 this.setOutputData(1, false);
                 this.setOutputData(2, 0);
             }
@@ -63,14 +68,18 @@ class ScheduleAfterhoursOffWidgetNode extends node_1.Node {
             this.startAfterhours();
         }
         if (this.currentMode === 'SCHEDULE') {
+            const schedInput = this.getInputData(1);
+            if (!schedInput)
+                this.setOutputData(2, 0);
             if (this.inputs[1].updated) {
-                if (this.getInputData(1)) {
+                if (schedInput) {
                     this.setOutputData(1, true);
                     this.startSchedule();
                 }
                 else {
                     this.setOutputData(1, false, true);
-                    clearInterval(this.timeoutFunc);
+                    if (this.timeoutFunc)
+                        clearInterval(this.timeoutFunc);
                     this.setOutputData(2, 0);
                 }
             }
@@ -88,7 +97,8 @@ class ScheduleAfterhoursOffWidgetNode extends node_1.Node {
         }
     }
     startSchedule() {
-        clearInterval(this.timeoutFunc);
+        if (this.timeoutFunc)
+            clearInterval(this.timeoutFunc);
         const nextStop = this.getInputData(2);
         if (nextStop) {
             this.remainingRuntime = nextStop - Date.now();
@@ -117,6 +127,7 @@ class ScheduleAfterhoursOffWidgetNode extends node_1.Node {
                 this.setOutputData(1, false);
                 this.setOutputData(2, 0);
                 this.currentMode = 'SCHEDULE';
+                this.setOutputData(0, 'SCHEDULE');
                 clearInterval(this.timeoutFunc);
                 if (this.getInputData(1))
                     this.startSchedule();

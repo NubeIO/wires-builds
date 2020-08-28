@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const helper_1 = require("../utils/helper");
 class Utils {
     static getTimeStamp() {
         const now = new Date();
@@ -50,21 +51,7 @@ class Utils {
             return JSON.stringify(val);
         }
         else if (type === 'boolean' && typeofVal !== 'boolean') {
-            if (val === '')
-                return null;
-            if (val === null)
-                return null;
-            if (val === undefined)
-                return null;
-            else if (val === 1 || val === '1' || val === 'true' || val === true) {
-                val = true;
-            }
-            else if (val === 0 || val === '0' || val === 'false' || val === false) {
-                val = false;
-            }
-            else {
-                val = false;
-            }
+            return helper_1.isNull(val) || val === '' ? null : /true|1/gi.test(val);
         }
         else if (type === 'json') {
             const originalVal = val;

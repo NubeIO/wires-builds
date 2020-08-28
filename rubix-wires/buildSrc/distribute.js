@@ -18,7 +18,7 @@ const copyProductionFiles = () => {
   shell.cp('-Rf', './dist', workingFolder);
   shell.cp('-Rf', './node_modules', workingFolder);
   shell.cp('-Rf', './static-files', workingFolder);
-  shell.cp('-Rf', './app.config.ts', workingFolder);
+  shell.cp('-Rf', './app.config.js', workingFolder);
   shell.cp('-Rf', './config.json', workingFolder);
   shell.cp('-Rf', './package.json', workingFolder);
   shell.cp('-Rf', './tsconfig.json', workingFolder);

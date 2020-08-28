@@ -21,29 +21,25 @@ class DelayOnNode extends node_1.Node {
             type: node_1.SettingType.DROPDOWN,
             config: {
                 items: [
-                    { value: 'milliseconds', text: 'Milliseconds' },
-                    { value: 'seconds', text: 'Seconds' },
-                    { value: 'minutes', text: 'Minutes' },
-                    { value: 'hours', text: 'Hours' },
+                    { value: time_utils_1.TIME_TYPE.MILLISECONDS, text: 'Milliseconds' },
+                    { value: time_utils_1.TIME_TYPE.SECONDS, text: 'Seconds' },
+                    { value: time_utils_1.TIME_TYPE.MINUTES, text: 'Minutes' },
+                    { value: time_utils_1.TIME_TYPE.HOURS, text: 'Hours' },
                 ],
             },
-            value: 'seconds',
+            value: time_utils_1.TIME_TYPE.SECONDS,
         };
         this.setSettingsConfig({
             groups: [{ delay: { weight: 2 }, time: {} }],
         });
+    }
+    onCreated() {
         this.setOutputData(0, false);
         this.setOutputData(1, false);
         this.setOutputData(2, 0);
     }
-    onCreated() {
-        this.setOutputData(0, false);
-        this.timeUnits = 'seconds';
-    }
     onAdded() {
-        this.inputs[1]['name'] = `[delay] (${this.settings['time'].value})`;
-        this.outputs[2]['name'] = `[remaining] (${this.settings['time'].value})`;
-        this.onInputUpdated();
+        this.onAfterSettingsChange();
     }
     onAfterSettingsChange() {
         this.timeUnits = this.settings['time'].value;
@@ -54,56 +50,43 @@ class DelayOnNode extends node_1.Node {
     onInputUpdated() {
         const delay = this.getInputData(1);
         const delayMilli = time_utils_1.default.timeConvert(delay, this.timeUnits);
-        const input = this.getInputData(0);
-        if (input == null) {
-            clearTimeout(this.timeoutFunc);
-            clearTimeout(this.remainingFunc);
-            this.setOutputData(0, false);
-            this.setOutputData(1, false);
-            this.setOutputData(2, 0);
-            this.enabled = false;
-            return;
-        }
+        let input = this.getInputData(0);
+        if (input !== true)
+            input = false;
         const reset = this.getInputData(2);
         if (reset && this.inputs[2].updated && this.enabled) {
-            clearTimeout(this.timeoutFunc);
-            clearTimeout(this.remainingFunc);
+            this.clearTimers();
             this.setOutputData(0, input);
             this.setOutputData(1, false);
             this.setOutputData(2, 0);
             this.enabled = false;
         }
         if (input && this.inputs[0].updated) {
-            if (this.outputs[0].data == null) {
-                this.setOutputData(0, true);
-                this.setOutputData(1, false);
-                this.setOutputData(2, 0);
-                return;
-            }
             this.setOutputData(1, true);
             this.setOutputData(2, delay);
             this.enabled = true;
+            this.clearTimers();
             this.timeoutFunc = setTimeout(() => {
                 this.enabled = false;
                 this.setOutputData(0, true);
                 this.setOutputData(1, false);
                 this.setOutputData(2, 0);
-                clearTimeout(this.remainingFunc);
+                clearInterval(this.remainingFunc);
             }, delayMilli);
             switch (this.timeUnits) {
-                case 'milliseconds':
+                case time_utils_1.TIME_TYPE.MILLISECONDS:
                     this.remainingUpdateMillis = 500;
                     this.remainingUpdateSize = 500;
                     break;
-                case 'seconds':
+                case time_utils_1.TIME_TYPE.SECONDS:
                     this.remainingUpdateMillis = 1000;
                     this.remainingUpdateSize = 1;
                     break;
-                case 'minutes':
+                case time_utils_1.TIME_TYPE.MINUTES:
                     this.remainingUpdateMillis = 6000;
                     this.remainingUpdateSize = 0.1;
                     break;
-                case 'hours':
+                case time_utils_1.TIME_TYPE.HOURS:
                     this.remainingUpdateMillis = 360000;
                     this.remainingUpdateSize = 0.1;
                     break;
@@ -118,11 +101,16 @@ class DelayOnNode extends node_1.Node {
             this.setOutputData(1, false, true);
             this.setOutputData(2, 0, true);
             if (this.inputs[0].updated && this.enabled) {
-                clearTimeout(this.timeoutFunc);
-                clearTimeout(this.remainingFunc);
+                this.clearTimers();
                 this.enabled = false;
             }
         }
+    }
+    clearTimers() {
+        if (this.timeoutFunc)
+            clearTimeout(this.timeoutFunc);
+        if (this.remainingFunc)
+            clearInterval(this.remainingFunc);
     }
 }
 container_1.Container.registerNodeType('boolean/on-delay', DelayOnNode);

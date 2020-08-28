@@ -19,13 +19,13 @@ class OneShotNode extends node_1.Node {
             type: node_1.SettingType.DROPDOWN,
             config: {
                 items: [
-                    { value: 'milliseconds', text: 'Milliseconds' },
-                    { value: 'seconds', text: 'Seconds' },
-                    { value: 'minutes', text: 'Minutes' },
-                    { value: 'hours', text: 'Hours' },
+                    { value: time_utils_1.TIME_TYPE.MILLISECONDS, text: 'Milliseconds' },
+                    { value: time_utils_1.TIME_TYPE.SECONDS, text: 'Seconds' },
+                    { value: time_utils_1.TIME_TYPE.MINUTES, text: 'Minutes' },
+                    { value: time_utils_1.TIME_TYPE.HOURS, text: 'Hours' },
                 ],
             },
-            value: 'seconds',
+            value: time_utils_1.TIME_TYPE.SECONDS,
         };
         this.setSettingsConfig({
             groups: [{ interval: { weight: 2 }, time: {} }],
@@ -35,22 +35,16 @@ class OneShotNode extends node_1.Node {
             value: true,
             type: node_1.SettingType.BOOLEAN,
         };
+    }
+    onCreated() {
         this.setOutputData(0, false);
         this.setOutputData(1, 0);
         this.lastFireValue = false;
         this.lastResetValue = false;
         this.enabled = false;
     }
-    onCreated() {
-        this.setOutputData(0, false);
-        this.timeUnits = 'seconds';
-    }
     onAdded() {
-        this.inputs[2]['name'] = `[interval] (${this.settings['time'].value})`;
-        this.outputs[1]['name'] = `[remaining] (${this.settings['time'].value})`;
-        this.setOutputData(0, false);
-        this.setOutputData(1, 0);
-        this.onInputUpdated();
+        this.onAfterSettingsChange();
     }
     onAfterSettingsChange() {
         this.timeUnits = this.settings['time'].value;
@@ -59,14 +53,11 @@ class OneShotNode extends node_1.Node {
         this.onInputUpdated();
     }
     onInputUpdated() {
-        const delay = this.getInputData(2);
-        const delayMilli = time_utils_1.default.timeConvert(delay, this.timeUnits);
         let reset = this.getInputData(1);
         if (reset == null)
             reset = false;
         if (reset == true && reset != this.lastResetValue) {
-            clearTimeout(this.timeoutFunc);
-            clearTimeout(this.remainingFunc);
+            this.clearTimers();
             this.setOutputData(0, false);
             this.setOutputData(1, 0);
             this.enabled = false;
@@ -78,8 +69,9 @@ class OneShotNode extends node_1.Node {
         if (fire == true && fire != this.lastFireValue) {
             const retrigger = this.settings['retrigger'].value;
             if (retrigger || this.enabled === false) {
-                clearTimeout(this.timeoutFunc);
-                clearTimeout(this.remainingFunc);
+                const delay = this.getInputData(2);
+                const delayMilli = time_utils_1.default.timeConvert(delay, this.timeUnits);
+                this.clearTimers();
                 this.setOutputData(0, true);
                 this.setOutputData(1, delay);
                 this.enabled = true;
@@ -87,22 +79,22 @@ class OneShotNode extends node_1.Node {
                     this.enabled = false;
                     this.setOutputData(0, false);
                     this.setOutputData(1, 0);
-                    clearTimeout(this.remainingFunc);
+                    clearInterval(this.remainingFunc);
                 }, delayMilli);
                 switch (this.timeUnits) {
-                    case 'milliseconds':
+                    case time_utils_1.TIME_TYPE.MILLISECONDS:
                         this.remainingUpdateMillis = 500;
                         this.remainingUpdateSize = 500;
                         break;
-                    case 'seconds':
+                    case time_utils_1.TIME_TYPE.SECONDS:
                         this.remainingUpdateMillis = 1000;
                         this.remainingUpdateSize = 1;
                         break;
-                    case 'minutes':
+                    case time_utils_1.TIME_TYPE.MINUTES:
                         this.remainingUpdateMillis = 6000;
                         this.remainingUpdateSize = 0.1;
                         break;
-                    case 'hours':
+                    case time_utils_1.TIME_TYPE.HOURS:
                         this.remainingUpdateMillis = 360000;
                         this.remainingUpdateSize = 0.1;
                         break;
@@ -114,6 +106,12 @@ class OneShotNode extends node_1.Node {
             }
         }
         this.lastFireValue = fire;
+    }
+    clearTimers() {
+        if (this.timeoutFunc)
+            clearTimeout(this.timeoutFunc);
+        if (this.remainingFunc)
+            clearInterval(this.remainingFunc);
     }
 }
 container_1.Container.registerNodeType('boolean/one-shot', OneShotNode);

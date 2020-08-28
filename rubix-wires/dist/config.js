@@ -1,5 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 const config = {
     secretKey: '__SECRET_KEY__',
     port: 1313,
@@ -15,8 +13,8 @@ const config = {
     rubix: {
         branch: '(HEAD',
         build: '',
-        hash: 'c39581a',
-        version: '1.3.7',
+        hash: '6f6eb83',
+        version: '1.3.8',
     },
     bsa: {
         baseURL: '',
