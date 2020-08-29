@@ -325,13 +325,13 @@ class HistoryBase extends node_1.Node {
                     clientIdFromPlat = yield system_utils_1.default.getClientID(this);
                 }
                 catch (e) {
-                    clientIdFromPlat = 'unknownDeviceID';
+                    clientIdFromPlat = 'unknownClientID';
                 }
                 try {
                     deviceIdFromPlat = yield system_utils_1.default.getDeviceID(this);
                 }
                 catch (e) {
-                    deviceIdFromPlat = 'unknownClientID';
+                    deviceIdFromPlat = 'unknownDeviceID';
                 }
                 const multiPointPost = points.map(point => ({
                     deviceid: deviceIdFromPlat,

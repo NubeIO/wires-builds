@@ -39,7 +39,9 @@ module.exports = {
       'local-devices': 'empty-module',
       'twilio': 'empty-module',
       'dgram': 'empty-module',
-      'systeminformation': 'empty-module'
+      'systeminformation': 'empty-module',
+      'vm2': 'empty-module',
+      'coffee-script': 'empty-module'
     },
   },
   module: {

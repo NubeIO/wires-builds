@@ -84,13 +84,13 @@ class BSACumulocityDeviceNode extends node_1.Node {
                 clientIdFromPlat = yield system_utils_1.default.getClientID(this);
             }
             catch (e) {
-                clientIdFromPlat = 'unknownDeviceID';
+                clientIdFromPlat = 'unknownClientID';
             }
             try {
                 deviceIdFromPlat = yield system_utils_1.default.getDeviceID(this);
             }
             catch (e) {
-                deviceIdFromPlat = 'unknownClientID';
+                deviceIdFromPlat = 'unknownDeviceID';
             }
             let deviceName = this.getDeviceName();
             let cfg = bsa_client_config_1.bsaClientConfig('device');

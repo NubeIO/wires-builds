@@ -19,9 +19,9 @@ createDirIfNotExist() {
     # Create directory and change ownership if not exist
     [[ -d ${DB_LOCATION} ]] || {
         echo -e "${GREEN}Creating a location ${DB_LOCATION} and set ownership ${USER}:`echo ${USER_GROUP} || echo ${USER}`${DEFAULT}"
-        mkdir ${DB_LOCATION}
-        sudo chown -R ${USER}:`echo ${USER_GROUP} || echo ${USER}` ${DB_LOCATION}
+        sudo mkdir ${DB_LOCATION}
     }
+    sudo chown -R ${USER}:`echo ${USER_GROUP} || echo ${USER}` ${DB_LOCATION}
 }
 
 createLogger() {
