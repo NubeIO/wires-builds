@@ -219,6 +219,7 @@ require("./time/stopwatch");
 require("./time/cron-interval");
 require("./time/cron-weekly");
 require("./time/cron-expression");
+require("./time/timestamp-generator");
 require("./trigger/change-of-value");
 require("./trigger/random");
 require("./trigger/inject");

@@ -35,10 +35,15 @@ class BACnetPoint extends HistoryBase_1.default {
             'All bacnet-point nodes should be added within the bacnet-device container node. Configuration of BACnet points are set from settings.  If the bacnet-network, and bacnet-device are configured correctly, the BACnet points will be available to select from the ‘Select a point’ setting; otherwise the point can be set manually. For information on History settings, see History/History node. Configuration is the same for bacnet-point histories.';
         this.addInput('input', node_1.Type.NUMBER);
         this.addOutput('output', node_1.Type.STRING);
-        this.addOutput('out bytes', node_1.Type.STRING);
+        this.addOutput('output json', node_1.Type.STRING);
         this.addOutput('error', node_1.Type.STRING);
         this.settings['pointEnable'] = {
             description: 'Point enable',
+            value: false,
+            type: node_1.SettingType.BOOLEAN,
+        };
+        this.settings['pointWriteEnable'] = {
+            description: 'Point write enable',
             value: false,
             type: node_1.SettingType.BOOLEAN,
         };
@@ -117,7 +122,6 @@ class BACnetPoint extends HistoryBase_1.default {
             onInputUpdated: { get: () => super.onInputUpdated }
         });
         return __awaiter(this, void 0, void 0, function* () {
-            this.setOutputData(0, 1);
             yield _super.onInputUpdated.call(this);
             if (this.side !== container_1.Side.server)
                 return;
@@ -127,6 +131,7 @@ class BACnetPoint extends HistoryBase_1.default {
             const priority = this.settings['priority'].value;
             const manualPoint = this.settings['manualPoint'].value;
             const selectPoint = this.settings['pointsList'].value;
+            let pointWriteEnable = this.settings['pointWriteEnable'].value;
             if (manualPoint) {
                 objectType = this.settings['objectType'].value;
                 objectInstance = this.settings['objectInstance'].value;
@@ -136,6 +141,8 @@ class BACnetPoint extends HistoryBase_1.default {
                 objectInstance = selectPoint.instance;
             }
             if (value === undefined)
+                return;
+            if (pointWriteEnable === false)
                 return;
             bacnet_utils_1.default.writePresentValue(this.getParentNode(), [objectType, objectInstance, value, priority]);
         });
@@ -176,12 +183,39 @@ class BACnetPoint extends HistoryBase_1.default {
         }
     }
     setPointValue(msg) {
+        let pointValue = msg.value.values[0].value;
+        let objectType;
+        let objectInstance;
+        let pointEnable = this.settings['pointEnable'].value;
+        let pointWriteEnable = this.settings['pointWriteEnable'].value;
+        const priority = this.settings['priority'].value;
+        const manualPoint = this.settings['manualPoint'].value;
+        const selectPoint = this.settings['pointsList'].value;
+        if (manualPoint) {
+            objectType = this.settings['objectType'].value;
+            objectInstance = this.settings['objectInstance'].value;
+        }
+        if (selectPoint) {
+            objectType = selectPoint.type;
+            objectInstance = selectPoint.instance;
+        }
+        const json = {
+            name: this.name,
+            pointValue: pointValue,
+            enable: pointEnable,
+            pointWriteEnable: pointWriteEnable,
+            objectType: objectType,
+            objectInstance: objectInstance,
+            priority: priority
+        };
         if (msg.value) {
-            this.setOutputData(0, msg.value.values[0].value, true);
+            this.setOutputData(0, pointValue, true);
+            this.setOutputData(1, json, true);
             this.setOutputData(2, null);
         }
         else {
             this.setOutputData(0, null, true);
+            this.setOutputData(1, null, true);
             if (msg.error) {
                 this.setOutputData(2, 'Error on reading value');
             }
@@ -209,9 +243,6 @@ class BACnetPoint extends HistoryBase_1.default {
             default:
                 this.debugWarn("Request action doesn't match");
         }
-    }
-    emitResult(id, out) {
-        this.setOutputData(id, out);
     }
     readObjectName(type) {
         switch (type) {

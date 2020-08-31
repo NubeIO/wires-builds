@@ -16,7 +16,7 @@ class TimeDiffNode extends node_1.Node {
             `## Description\n ` +
                 ` The is node is used to compare the difference between two timestamps\n ` +
                 `## Inputs\n ` +
-                ` The inputs can either be sent as a unix timestamp ***epoch*** or as a date string ***YYYY:MM:DD:HH:MM:SS***. Change the settings ***Time input type*** for different input type \n ` +
+                ` The inputs can be sent as a unix timestamp ***epoch***. Change the settings ***Time input type*** for different input type \n ` +
                 `## Outputs (return data type is ***JSON***)\n ` +
                 ` ***out-difference-time*** will return the time difference in for example: ***hours: 1, minutes: 30 ***\n ` +
                 ` ***out-difference-totals*** will return the time difference in for example: ***hours: 1, minutes: 90 ***\n `;
@@ -29,7 +29,6 @@ class TimeDiffNode extends node_1.Node {
             type: node_1.SettingType.DROPDOWN,
             config: {
                 items: [
-                    { value: TIME_TYPE.TIME, text: TIME_TYPE.TIME },
                     { value: TIME_TYPE.EPOCH, text: TIME_TYPE.EPOCH },
                 ],
             },

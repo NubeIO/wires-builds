@@ -24,7 +24,8 @@ class ModbusPointNode extends node_1.Node {
         this.inInput = 2;
         this.outVal = 0;
         this.outError = 1;
-        this.outMessageJson = 2;
+        this.outModbusMessage = 2;
+        this.outMessageJson = 3;
         this.outAlarm = 3;
         this.dynamicInputsCount = () => this.inputCount;
         this.addDynamicInputsOnRange = (save = true) => {
@@ -79,9 +80,10 @@ class ModbusPointNode extends node_1.Node {
                 `   \n ` +
                 ` This will enable/disable the point from polling \n ` +
                 `   \n `;
-        this.addOutput('out', node_1.Type.NUMBER);
+        this.addOutput('output', node_1.Type.NUMBER);
         this.addOutput('error', node_1.Type.STRING);
-        this.addOutput('message', node_1.Type.STRING);
+        this.addOutput('output-modbus-array', node_1.Type.STRING);
+        this.addOutput('output json', node_1.Type.STRING);
         this.properties['pointVal'] = null;
         this.settings['pointEnable'] = {
             description: 'Point enable',
@@ -247,6 +249,7 @@ class ModbusPointNode extends node_1.Node {
         if (this.side !== container_1.Side.server)
             return;
         this.onInputUpdated();
+        this.updateTitle();
     }
     onInputUpdated() {
         let pointType = this.settings['pointType'].value;
@@ -262,7 +265,7 @@ class ModbusPointNode extends node_1.Node {
                 }
             }
             let input = check_types_1.default.formatValueReturnType(inputValue);
-            this.setOutputData(this.outMessageJson, `write val ${inputValue} @ priority ${priority - 1}`, true);
+            this.setOutputData(this.outModbusMessage, `write val ${inputValue} @ priority ${priority - 1}`, true);
             if (input !== this.lastInputState) {
                 this.properties['pointVal'] = input;
                 this.persistProperties(false, true);
@@ -274,12 +277,13 @@ class ModbusPointNode extends node_1.Node {
         }
     }
     updateTitle() {
-        this.title = `MB Pnt (FC: ${this.settings['pointType'].value}, AD: ${this.settings['address'].value}, ID: ${this.container.id}_${this.id})`;
+        this.title = `Modbus Point (FC: ${this.settings['pointType'].value}, AD: ${this.settings['address'].value})`;
         this.broadcastSettingsToClients();
     }
     onAfterSettingsChange() {
         this.updateNodeInputs(true);
         this.onInputUpdated();
+        this.updateTitle();
     }
     updateNodeInputs(save) {
         let pointType = this.settings['pointType'].value;
@@ -302,16 +306,25 @@ class ModbusPointNode extends node_1.Node {
             hidden: false,
         };
     }
+    sendJson(pointValue) {
+        return {
+            name: this.name,
+            pointValue: pointValue,
+            enable: this.settings['pointEnable'].value
+        };
+    }
     subscribe(payload) {
         let pointType = this.settings['pointType'].value;
-        this.setOutputData(this.outMessageJson, payload.res.data);
+        this.setOutputData(this.outModbusMessage, payload.res.data);
         this.setOutputData(this.outError, false, true);
         if ([5, 6, 15, 16, 25, 26].includes(pointType)) {
             if (payload.payload === 'writeOk') {
                 this.setOutputData(this.outVal, this.properties['pointVal']);
+                this.setOutputData(this.outMessageJson, this.sendJson(this.properties['pointVal']));
             }
             else {
-                this.setOutputData(this.outMessageJson, `write fail`, true);
+                this.setOutputData(this.outModbusMessage, `write fail`, true);
+                this.setOutputData(this.outMessageJson, null);
             }
         }
         else {
@@ -322,21 +335,24 @@ class ModbusPointNode extends node_1.Node {
                 if (MathUtils_1.default.validateNumbers(payload.payload, mathValue)) {
                     out = MathUtils_1.default.mathSwitch(mathFunc, payload.payload, mathValue);
                     this.setOutputData(this.outVal, out);
+                    this.setOutputData(this.outMessageJson, this.sendJson(out));
                 }
             }
             else {
                 if (typeof payload.payload === 'number') {
                     this.setOutputData(this.outVal, payload.payload);
+                    this.setOutputData(this.outMessageJson, this.sendJson(payload.payload));
                 }
                 else if (typeof payload.payload === 'boolean') {
                     this.setOutputData(this.outVal, payload.payload ? 1 : 0);
+                    this.setOutputData(this.outMessageJson, this.sendJson(payload.payload ? 1 : 0));
                 }
             }
         }
     }
     subscribeError(e) {
         this.setOutputData(this.outError, true, true);
-        this.setOutputData(this.outMessageJson, e, true);
+        this.setOutputData(this.outModbusMessage, e, true);
     }
 }
 exports.ModbusPointNode = ModbusPointNode;
