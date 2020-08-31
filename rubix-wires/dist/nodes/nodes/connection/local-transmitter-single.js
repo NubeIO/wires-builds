@@ -54,17 +54,17 @@ class ConnectionLocalTransmitterNode extends node_1.Node {
         this.onInputUpdated();
     }
     onRemoved() {
-        setTimeout(() => {
-            this.updateTransmitterTopics();
-        }, 100);
+        this.updateTransmitterTopics();
     }
     updateTransmitterTopics() {
         if (this.side !== container_1.Side.server)
             return;
-        const receivers = this.getReceivers();
-        receivers.forEach(receiver => {
-            receiver['triggerTransmitterTopicUpdate']();
-        });
+        setTimeout(() => {
+            const receivers = this.getReceivers();
+            receivers.forEach(receiver => {
+                receiver['triggerTransmitterTopicUpdate']();
+            });
+        }, 100);
     }
     getReceivers() {
         return container_1.Container.containers[0].getNodesByType('connection/link-receiver-single', true);

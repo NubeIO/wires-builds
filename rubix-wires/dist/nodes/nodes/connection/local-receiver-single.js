@@ -38,6 +38,9 @@ class ConnectionLocalReceiverNode extends node_1.Node {
     }
     onAfterSettingsChange() {
         this.updateTitle();
+        if (this.side !== container_1.Side.server)
+            return;
+        this.transmitterTopic();
         this.updateChannel();
     }
     pushSettings() {
@@ -47,11 +50,12 @@ class ConnectionLocalReceiverNode extends node_1.Node {
         this.settings['channel'].config = {
             items: unitCategory,
         };
+        this.persistProperties(true);
         this.updateTitle();
         this.updateChannel();
-        this.broadcastSettingsToClients();
-        this.broadcastTitleToClients();
-        this.broadcastOutputsToClients();
+        this.broadcastSettingsToClients(false);
+        this.broadcastTitleToClients(false);
+        this.broadcastOutputsToClients(false);
     }
     transmitterTopic() {
         const transmitters = container_1.Container.containers[0].getNodesByType('connection/link-transmitter-single', true);

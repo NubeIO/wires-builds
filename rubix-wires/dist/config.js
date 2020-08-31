@@ -13,8 +13,8 @@ const config = {
     rubix: {
         branch: '(HEAD',
         build: '',
-        hash: 'dcb4210',
-        version: '1.4.1',
+        hash: 'c76e0db',
+        version: '1.4.2',
     },
     bsa: {
         baseURL: '',

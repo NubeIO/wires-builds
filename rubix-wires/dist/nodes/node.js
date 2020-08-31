@@ -233,7 +233,7 @@ class Node {
             return;
         const props = {};
         if (saveSettings)
-            props['props'] = this.settings;
+            props['settings'] = this.settings;
         if (saveProperties)
             props['properties'] = this.properties;
         if (saveInputs)
@@ -741,26 +741,26 @@ class Node {
             this.setDirtyCanvas(true, true);
         }
     }
-    broadcastSettingsToClients() {
-        this.sendMessageToEditorSide({ action: BROADCAST.UPDATE_SETTINGS, payload: this.settings });
+    broadcastSettingsToClients(onlyConnectedUsers = true) {
+        this.sendMessageToEditorSide({ action: BROADCAST.UPDATE_SETTINGS, payload: this.settings }, onlyConnectedUsers);
     }
-    broadcastPropertiesToClients() {
-        this.sendMessageToEditorSide({ action: BROADCAST.UPDATE_PROPERTIES, payload: this.properties });
+    broadcastPropertiesToClients(onlyConnectedUsers = true) {
+        this.sendMessageToEditorSide({ action: BROADCAST.UPDATE_PROPERTIES, payload: this.properties }, onlyConnectedUsers);
     }
-    broadcastOutputsToClients() {
-        this.sendMessageToEditorSide({ action: BROADCAST.UPDATE_OUTPUTS, payload: this.outputs });
+    broadcastOutputsToClients(onlyConnectedUsers = true) {
+        this.sendMessageToEditorSide({ action: BROADCAST.UPDATE_OUTPUTS, payload: this.outputs }, onlyConnectedUsers);
     }
-    broadcastNodeStateToClients() {
-        this.sendMessageToEditorSide({ action: BROADCAST.UPDATE_STATE, payload: this.nodeState });
+    broadcastNodeStateToClients(onlyConnectedUsers = true) {
+        this.sendMessageToEditorSide({ action: BROADCAST.UPDATE_STATE, payload: this.nodeState }, onlyConnectedUsers);
     }
-    broadcastTitleToClients() {
-        this.sendMessageToEditorSide({ action: BROADCAST.UPDATE_TITLE, payload: this.title });
+    broadcastTitleToClients(onlyConnectedUsers = true) {
+        this.sendMessageToEditorSide({ action: BROADCAST.UPDATE_TITLE, payload: this.title }, onlyConnectedUsers);
     }
-    broadcastNameToClients() {
-        this.sendMessageToEditorSide({ action: BROADCAST.UPDATE_NAME, payload: this.name });
+    broadcastNameToClients(onlyConnectedUsers = true) {
+        this.sendMessageToEditorSide({ action: BROADCAST.UPDATE_NAME, payload: this.name }, onlyConnectedUsers);
     }
-    broadcastValToClients(key, val) {
-        this.sendMessageToEditorSide({ action: BROADCAST.UPDATE_VALUE, key: key, payload: val });
+    broadcastValToClients(key, val, onlyConnectedUsers = true) {
+        this.sendMessageToEditorSide({ action: BROADCAST.UPDATE_VALUE, key: key, payload: val }, onlyConnectedUsers);
     }
     onGetMessageToEditorSide({ action, payload, key }) {
         switch (action) {
