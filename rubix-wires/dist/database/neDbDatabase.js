@@ -16,7 +16,6 @@ const ScheduleDataSource_1 = require("./datasource/ScheduleDataSource");
 const HistorianDataSource_1 = require("./datasource/HistorianDataSource");
 const UserDataSource_1 = require("./datasource/UserDataSource");
 const AuthUserDataSource_1 = require("./datasource/AuthUserDataSource");
-const WireNameDataSource_1 = require("./datasource/WireNameDataSource");
 class NeDbDatabase {
     constructor() {
         this.authUserDatabase = new AuthUserDataSource_1.default();
@@ -25,7 +24,6 @@ class NeDbDatabase {
         this.dashboardDatabase = new DashboardDataSource_1.default();
         this.appDatabase = new AppDataSource_1.default();
         this.scheduleDatabase = new ScheduleDataSource_1.default();
-        this.wireNameDatabase = new WireNameDataSource_1.default();
         this.historianDatabase = new HistorianDataSource_1.default();
     }
     asyncLoadDatabase(cleanUpInterval = NeDbDatabase.CLEANUP_INTERVAL) {
@@ -161,12 +159,6 @@ class NeDbDatabase {
     }
     isAuthenticated(token) {
         return this.authUserDatabase.isAuthenticated(token);
-    }
-    getWireName() {
-        return this.wireNameDatabase.getWireName();
-    }
-    changeWireName(name) {
-        return this.wireNameDatabase.changeWireName(name);
     }
 }
 NeDbDatabase.CLEANUP_INTERVAL = 5 * 60 * 1000;

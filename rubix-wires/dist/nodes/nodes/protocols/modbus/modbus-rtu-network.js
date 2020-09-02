@@ -17,7 +17,6 @@ const modbus_point_methods_1 = require("./modbus-fc/modbus-point-methods");
 const constants_1 = require("../../../constants");
 const utils_1 = require("../../../utils");
 const registry_1 = require("../../../registry");
-const SerialPort = require('serialport');
 const ModbusRTU = require('modbus-serial');
 var Poll;
 (function (Poll) {
@@ -25,6 +24,11 @@ var Poll;
     Poll[Poll["FIRST_START"] = 1] = "FIRST_START";
     Poll[Poll["STOP"] = 2] = "STOP";
 })(Poll || (Poll = {}));
+var Transport;
+(function (Transport) {
+    Transport["TCP"] = "tcp";
+    Transport["RTU"] = "rtu";
+})(Transport || (Transport = {}));
 class ModbusSerialNetworkNode extends container_node_1.ContainerNode {
     constructor(container) {
         super(container);
@@ -34,6 +38,7 @@ class ModbusSerialNetworkNode extends container_node_1.ContainerNode {
         this.serialPortStatus = false;
         this.pollEnableSetting = false;
         this.client = null;
+        this.tcpClients = {};
         this.outStatus = 0;
         this.outError = 1;
         this.outPortStatus = 2;
@@ -74,11 +79,11 @@ class ModbusSerialNetworkNode extends container_node_1.ContainerNode {
             type: node_1.SettingType.DROPDOWN,
             config: {
                 items: [
-                    { value: 'rtu', text: 'Modbus RTU over Serial 485' },
-                    { value: 'tcp', text: 'Modbus TCP/IP' },
+                    { value: Transport.RTU, text: 'Modbus RTU over Serial 485' },
+                    { value: Transport.TCP, text: 'Modbus TCP/IP' },
                 ],
             },
-            value: 'rtu',
+            value: Transport.RTU,
         };
         this.setSettingsConfig({
             groups: [
@@ -88,19 +93,19 @@ class ModbusSerialNetworkNode extends container_node_1.ContainerNode {
             ],
             conditions: {
                 port: setting => {
-                    return setting['transport'].value === 'rtu';
+                    return setting['transport'].value === Transport.RTU;
                 },
                 baudRate: setting => {
-                    return setting['transport'].value === 'rtu';
+                    return setting['transport'].value === Transport.RTU;
                 },
                 parity: setting => {
-                    return setting['transport'].value === 'rtu';
+                    return setting['transport'].value === Transport.RTU;
                 },
                 dataBits: setting => {
-                    return setting['transport'].value === 'rtu';
+                    return setting['transport'].value === Transport.RTU;
                 },
                 stopBits: setting => {
-                    return setting['transport'].value === 'rtu';
+                    return setting['transport'].value === Transport.RTU;
                 },
             },
         });
@@ -213,6 +218,10 @@ class ModbusSerialNetworkNode extends container_node_1.ContainerNode {
             if (this.client) {
                 this.client.close(() => { });
             }
+            Object.keys(this.tcpClients).forEach(key => {
+                if (this.tcpClients[key])
+                    this.tcpClients[key].close(() => { });
+            });
         });
     }
     onAfterSettingsChange(oldSettings) {
@@ -221,37 +230,8 @@ class ModbusSerialNetworkNode extends container_node_1.ContainerNode {
         });
         return __awaiter(this, void 0, void 0, function* () {
             _super.onAfterSettingsChange.call(this, oldSettings);
-            this.persistSettings();
             yield this.setupForPolling();
         });
-    }
-    checkRS485Device() {
-        return __awaiter(this, void 0, void 0, function* () {
-            this.checkPort = new SerialPort(this.port, { baudRate: this.baudRate, autoOpen: false });
-            yield this.checkPort.on('open', () => {
-                this.debugInfo('Port connected');
-                this.setOutputData(this.outPortMsg, `INFO: ok, port is ok!`);
-                this.setOutputData(this.outStatus, true, true);
-                this.isPortOk = true;
-                this.closePort();
-            });
-            this.checkPort.on('error', err => {
-                this.checkPort = null;
-                this.debugErr(err.message);
-                this.setOutputData(this.outPortMsg, `ERROR! this port: ${this.port.substring(5)} is in use`);
-                this.setOutputData(this.outStatus, false, true);
-                this.isPortOk = false;
-            });
-            this.checkPort.open();
-            yield utils_1.default.sleep(10000);
-            return this.isPortOk;
-        });
-    }
-    closePort() {
-        if (this.checkPort) {
-            this.checkPort.close();
-        }
-        this.checkPort = null;
     }
     polling(poll) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -265,37 +245,29 @@ class ModbusSerialNetworkNode extends container_node_1.ContainerNode {
                     this.client.close(() => { });
                 return;
             }
-            if (this.transport === 'rtu') {
+            if (this.transport === Transport.RTU) {
                 if (this.client)
                     this.client.close(() => { });
-                try {
-                    this.client = new ModbusRTU();
-                    this.client.setTimeout(500);
-                    setTimeout(() => {
-                        this.client
-                            .connectRTUBuffered(this.port, {
-                            baudRate: this.baudRate,
-                            parity: this.parity,
-                            dataBits: this.dataBits,
-                            stopBits: this.stopBits,
-                        })
-                            .catch(e => {
-                            this.setOutputData(this.outStatus, false, true);
-                            this.setOutputData(this.outError, true, true);
-                            this.setOutputData(this.outPortMsg, `ERROR! port: ${this.port.substring(5)}`);
-                        });
-                        this.setOutputData(this.outStatus, true, true);
-                        this.setOutputData(this.outPortMsg, `INFO: polling RS485 `);
-                    }, 500);
-                }
-                catch (error) {
-                    this.setOutputData(this.outStatus, false, true);
-                    this.setOutputData(this.outError, true, true);
-                }
+                this.client = new ModbusRTU();
+                this.client.setTimeout(500);
+                setTimeout(() => {
+                    this.client
+                        .connectRTUBuffered(this.port, {
+                        baudRate: this.baudRate,
+                        parity: this.parity,
+                        dataBits: this.dataBits,
+                        stopBits: this.stopBits,
+                    })
+                        .catch(() => {
+                        this.setOutputData(this.outStatus, false, true);
+                        this.setOutputData(this.outError, true, true);
+                        this.setOutputData(this.outPortMsg, `ERROR! port: ${this.port.substring(5)}`);
+                    });
+                    this.setOutputData(this.outStatus, true, true);
+                    this.setOutputData(this.outPortMsg, `INFO: polling RS485 `);
+                }, 500);
             }
             else {
-                this.client = new ModbusRTU();
-                this.setOutputData(this.outStatus, true, true);
                 this.setOutputData(this.outPortMsg, `INFO: polling TCP `);
             }
             if (this.poll === Poll.FIRST_START) {
@@ -315,17 +287,35 @@ class ModbusSerialNetworkNode extends container_node_1.ContainerNode {
                 if (!deviceNode)
                     return;
                 let points = device.points;
-                if (this.transport === 'tcp') {
-                    try {
-                        this.client.connectTCP(ipAddress, { port: ipPort });
+                let client = this.client;
+                let existingTcpClients = [];
+                if (this.transport === Transport.TCP) {
+                    const key = this.getTcpKey(ipAddress, ipPort);
+                    existingTcpClients.push(key);
+                    if (!this.tcpClients[key]) {
+                        this.debugInfo(`Creating tcpClient with IP: ${ipAddress} and Port: ${ipPort}`);
+                        this.tcpClients[key] = new ModbusRTU();
                     }
-                    catch (e) {
-                        errorOnModbusDevicesExec = true;
-                        modbus_functions_1.default.sendDeviceError(deviceNode, e);
-                        this.setOutputData(this.outError, e);
-                        continue;
+                    if (!this.tcpClients[key].isOpen) {
+                        this.debugInfo(`Connecting tcpClient with IP: ${ipAddress} and Port: ${ipPort}`);
+                        try {
+                            yield this.tcpClients[key].connectTCP(ipAddress, { port: ipPort });
+                            this.tcpClients[key].setTimeout(5000);
+                        }
+                        catch (e) {
+                            errorOnModbusDevicesExec = true;
+                            modbus_functions_1.default.sendDeviceError(deviceNode, e);
+                            this.setOutputData(this.outError, e);
+                            continue;
+                        }
                     }
+                    client = this.tcpClients[key];
                 }
+                Object.keys(this.tcpClients).forEach(key => {
+                    if (!existingTcpClients.includes(key)) {
+                        this.tcpClients[key].close(() => { });
+                    }
+                });
                 let errorOnModbusPointsExec = false;
                 for (let point of points) {
                     const { pntAddr, pntType, pntOffset, pntVal, pntCid, pntId, pntDataType, pntDataEndian } = point;
@@ -334,7 +324,7 @@ class ModbusSerialNetworkNode extends container_node_1.ContainerNode {
                     if (!pointNode)
                         return;
                     try {
-                        const response = yield modbus_point_methods_1.default.modbusMethods(this.client, deviceAddress, pntType, pntAddr, pntOffset, pntVal, pntDataType, pntDataEndian, deviceAddressOffset);
+                        const response = yield modbus_point_methods_1.default.modbusMethods(client, deviceAddress, pntType, pntAddr, pntOffset, pntVal, pntDataType, pntDataEndian, deviceAddressOffset);
                         modbus_functions_1.default.sendPointMessage(pointNode, response);
                         modbus_functions_1.default.sendPointMessage(pointNode, response);
                         modbus_functions_1.default.sendDeviceMessage(deviceNode, response);
@@ -350,8 +340,14 @@ class ModbusSerialNetworkNode extends container_node_1.ContainerNode {
                     modbus_functions_1.default.sendDeviceError(deviceNode, null);
                 errorOnModbusDevicesExec = errorOnModbusDevicesExec || errorOnModbusPointsExec;
             }
-            if (!errorOnModbusDevicesExec)
-                this.setOutputData(this.outError, null);
+            if (errorOnModbusDevicesExec) {
+                this.setOutputData(this.outStatus, false, true);
+                this.setOutputData(this.outError, true, true);
+            }
+            else {
+                this.setOutputData(this.outStatus, true, true);
+                this.setOutputData(this.outError, null, true);
+            }
             yield utils_1.default.sleep(this.devicePolling || 2000);
             yield this.pollDevicesPoints();
         });
@@ -384,15 +380,8 @@ class ModbusSerialNetworkNode extends container_node_1.ContainerNode {
             }
         });
     }
-    persistSettings() {
-        if (!this.container.db)
-            return;
-        this.container.db.updateNode(this.id, this.container.id, {
-            $set: {
-                settings: this.settings,
-                properties: this.properties,
-            },
-        });
+    getTcpKey(address, port) {
+        return `${address}:${port}`;
     }
 }
 container_1.Container.registerNodeType(constants_1.MODBUS_RTU_NETWORK, ModbusSerialNetworkNode);

@@ -11,19 +11,30 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const app_1 = require("../../app");
+const WireNameDataSource_1 = require("../../database/datasource/WireNameDataSource");
 let router = express.Router();
 router.get('', function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        const wire = yield app_1.default.db.getWireName();
-        res.json(wire);
+        try {
+            const wire = yield WireNameDataSource_1.default.getWireName();
+            res.json(wire);
+        }
+        catch (e) {
+            res.status(500).send(e);
+        }
     });
 });
 router.put('', function ({ body }, res) {
     return __awaiter(this, void 0, void 0, function* () {
         const { name } = body;
-        yield app_1.default.db.changeWireName(name);
-        app_1.default.server.wireNameSocket.io.emit('wire-name-update', name);
-        res.send(body);
+        try {
+            yield WireNameDataSource_1.default.changeWireName(name);
+            app_1.default.server.wireNameSocket.io.emit('wire-name-update', name);
+            res.status(201).send(body);
+        }
+        catch (e) {
+            res.status(500).send(e);
+        }
     });
 });
 module.exports = router;
