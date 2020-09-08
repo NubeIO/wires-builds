@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const uuid_utils_1 = require("../../utils/uuid-utils");
 const moment = require("moment-timezone");
 class WeeklyScheduleNode extends node_1.Node {
@@ -10,7 +11,7 @@ class WeeklyScheduleNode extends node_1.Node {
         this.daysArray = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
         this.title = 'Weekly Schedule';
         this.description = 'Weekly Schedule';
-        this.addOutput('output', node_1.Type.BOOLEAN);
+        this.addOutput('output', node_io_1.Type.BOOLEAN);
         this.settings['enable'] = {
             description: 'Schedule Enable',
             value: true,

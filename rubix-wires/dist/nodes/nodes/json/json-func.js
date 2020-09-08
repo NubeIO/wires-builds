@@ -3,14 +3,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
 const config_1 = require("../../../config");
+const node_io_1 = require("../../node-io");
 class JsonFunc extends node_1.Node {
     constructor() {
         super();
         this.title = 'Json ForEach functions';
         this.description = 'Return json object values.';
-        this.addInput('input', node_1.Type.STRING);
-        this.addOutput('output', node_1.Type.STRING);
-        this.addOutput('error', node_1.Type.STRING);
+        this.addInput('input', node_io_1.Type.STRING);
+        this.addOutput('output', node_io_1.Type.STRING);
+        this.addOutput('error', node_io_1.Type.STRING);
         this.settings['operation'] = {
             description: 'Output type',
             type: node_1.SettingType.DROPDOWN,

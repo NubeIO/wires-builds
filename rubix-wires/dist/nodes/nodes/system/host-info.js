@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const os_utils_1 = require("../../utils/os-utils");
 class HostInfo extends node_1.Node {
     constructor() {
@@ -22,13 +23,13 @@ class HostInfo extends node_1.Node {
                 `   \n ` +
                 ` On change of settings output ***system-info*** will return data in json format\n ` +
                 `   \n `;
-        this.addInput('trigger', node_1.Type.BOOLEAN);
-        this.addOutput('system-info', node_1.Type.JSON);
-        this.addOutput('cpu-temp', node_1.Type.JSON);
-        this.addOutput('disc-usage', node_1.Type.JSON);
-        this.addOutput('system-time', node_1.Type.JSON);
-        this.addOutput('system-memory', node_1.Type.JSON);
-        this.addOutput('error', node_1.Type.STRING);
+        this.addInput('trigger', node_io_1.Type.BOOLEAN);
+        this.addOutput('system-info', node_io_1.Type.JSON);
+        this.addOutput('cpu-temp', node_io_1.Type.JSON);
+        this.addOutput('disc-usage', node_io_1.Type.JSON);
+        this.addOutput('system-time', node_io_1.Type.JSON);
+        this.addOutput('system-memory', node_io_1.Type.JSON);
+        this.addOutput('error', node_io_1.Type.STRING);
     }
     onCreated() {
         this.onAfterSettingsChange();

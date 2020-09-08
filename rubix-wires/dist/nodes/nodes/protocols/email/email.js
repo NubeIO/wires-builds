@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../../node");
 const container_1 = require("../../../container");
 const nodemailer = require("nodemailer");
+const node_io_1 = require("../../../node-io");
 const crypto_utils_1 = require("../../../utils/crypto-utils");
 const utils_1 = require("../../../utils");
 class EmailNode extends node_1.Node {
@@ -24,12 +25,12 @@ class EmailNode extends node_1.Node {
         };
         this.settings['user'] = { description: 'Email', value: '', type: node_1.SettingType.STRING };
         this.settings['pass'] = { description: 'Password', value: '', type: node_1.SettingType.PASSWORD };
-        this.addInput('trigger', node_1.Type.BOOLEAN);
-        this.addInputWithSettings('recipient', node_1.Type.STRING, '', 'To', false);
-        this.addInputWithSettings('subject', node_1.Type.STRING, '', 'Subject', false);
-        this.addInputWithSettings('message', node_1.Type.STRING, '', 'Message', false);
-        this.addOutput('response', node_1.Type.STRING);
-        this.addOutput('error', node_1.Type.STRING);
+        this.addInput('trigger', node_io_1.Type.BOOLEAN);
+        this.addInputWithSettings('recipient', node_io_1.Type.STRING, '', 'To', false);
+        this.addInputWithSettings('subject', node_io_1.Type.STRING, '', 'Subject', false);
+        this.addInputWithSettings('message', node_io_1.Type.STRING, '', 'Message', false);
+        this.addOutput('response', node_io_1.Type.STRING);
+        this.addOutput('error', node_io_1.Type.STRING);
     }
     onInputUpdated() {
         if (this.side !== container_1.Side.server)

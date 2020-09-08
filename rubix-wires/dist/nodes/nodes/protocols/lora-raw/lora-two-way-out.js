@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../../node");
 const container_1 = require("../../../container");
+const node_io_1 = require("../../../node-io");
 const lora_two_way_in_1 = require("./lora-two-way-in");
 class LoRaRawTwoWayOutput extends node_1.Node {
     constructor() {
@@ -35,9 +36,9 @@ class LoRaRawTwoWayOutput extends node_1.Node {
             type: node_1.SettingType.STRING,
             value: '',
         };
-        this.addInput('trigger', node_1.Type.BOOLEAN);
-        this.addOutput('error', node_1.Type.STRING);
-        this.addOutput('output', node_1.Type.ANY);
+        this.addInput('trigger', node_io_1.Type.BOOLEAN);
+        this.addOutput('error', node_io_1.Type.STRING);
+        this.addOutput('output', node_io_1.Type.ANY);
     }
     init() {
         this.updateOutputs();
@@ -156,7 +157,7 @@ class LoRaRawTwoWayOutput extends node_1.Node {
             }
             this.inputsUpdated = new Array(data.length);
             for (let i = 0; i < data.length; i++) {
-                this.addInput(i.toString(), node_1.Type.NUMBER);
+                this.addInput(i.toString(), node_io_1.Type.NUMBER);
                 this.inputsUpdated[i] = false;
             }
         }

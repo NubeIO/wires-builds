@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const time_utils_1 = require("../../utils/time-utils");
 class DelayOffNode extends node_1.Node {
     constructor() {
@@ -10,12 +11,12 @@ class DelayOffNode extends node_1.Node {
         this.title = 'Off Delay';
         this.description =
             "‘output’ matches ‘input’, but ‘output’ transitions from 'true' to 'false' are delayed by 'delay' duration. The delay is cancelled when 'reset' transitions from 'false' to 'true. ‘offDelay active’ is ‘true’ during ‘offDelay’ periods. 'delay' units can be configured from settings.  Maximum ‘delay’ setting is 587 hours. (See Figure A.)";
-        this.addInput('input', node_1.Type.BOOLEAN);
-        this.addInputWithSettings('delay', node_1.Type.NUMBER, 1, 'Off Delay Duration (Max 597 Hours)');
-        this.addInput('reset', node_1.Type.BOOLEAN);
-        this.addOutput('output', node_1.Type.BOOLEAN);
-        this.addOutput('offDelay active', node_1.Type.BOOLEAN);
-        this.addOutput('remaining', node_1.Type.NUMBER);
+        this.addInput('input', node_io_1.Type.BOOLEAN);
+        this.addInputWithSettings('delay', node_io_1.Type.NUMBER, 1, 'Off Delay Duration (Max 597 Hours)');
+        this.addInput('reset', node_io_1.Type.BOOLEAN);
+        this.addOutput('output', node_io_1.Type.BOOLEAN);
+        this.addOutput('offDelay active', node_io_1.Type.BOOLEAN);
+        this.addOutput('remaining', node_io_1.Type.NUMBER);
         this.settings['time'] = {
             description: 'Units',
             type: node_1.SettingType.DROPDOWN,

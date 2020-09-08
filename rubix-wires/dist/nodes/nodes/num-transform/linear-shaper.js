@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 class LinearShaperNode extends node_1.Node {
     constructor() {
@@ -9,7 +10,7 @@ class LinearShaperNode extends node_1.Node {
         this.title = 'Linear shaper';
         this.description =
             "Performs a linear interpolation of the 'input' value between configured inflection points.  The number of inflection points can be configured in settings.  The inflection points will be evenly distributed from 0-100.  Values for each inflection point can be wired in, or set from settings.  When the 'input' value is between 0 and 100 the 'output' value will be the linear interpolation of the 'input' value between the surrounding inflection point values. ";
-        this.addInput('input', node_1.Type.NUMBER);
+        this.addInput('input', node_io_1.Type.NUMBER);
         this.settings['inputs'] = {
             description: 'Inflection Points Count',
             value: 3,
@@ -30,10 +31,10 @@ class LinearShaperNode extends node_1.Node {
             value: 0,
             type: node_1.SettingType.NUMBER,
         };
-        this.addInput('[0]', node_1.Type.NUMBER);
-        this.addInput('[50]', node_1.Type.NUMBER);
-        this.addInput('[100]', node_1.Type.NUMBER);
-        this.addOutput('output', node_1.Type.NUMBER);
+        this.addInput('[0]', node_io_1.Type.NUMBER);
+        this.addInput('[50]', node_io_1.Type.NUMBER);
+        this.addInput('[100]', node_io_1.Type.NUMBER);
+        this.addOutput('output', node_io_1.Type.NUMBER);
     }
     onAfterSettingsChange() {
         const inputCountBefore = this.getInputsCount();
@@ -42,7 +43,7 @@ class LinearShaperNode extends node_1.Node {
         inputs = inputs + 1;
         if (inputs == inputCountBefore)
             return;
-        this.changeInputsCount(inputs, node_1.Type.NUMBER);
+        this.changeInputsCount(inputs, node_io_1.Type.NUMBER);
         if (inputs > 4) {
             for (let i = 4; i < inputs; i++) {
                 if (!this.settings['in' + i]) {

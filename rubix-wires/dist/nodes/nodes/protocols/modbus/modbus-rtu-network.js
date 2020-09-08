@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const container_node_1 = require("../../../container-node");
 const container_1 = require("../../../container");
 const node_1 = require("../../../node");
+const node_io_1 = require("../../../node-io");
 const modbus_functions_1 = require("./modbus-functions");
 const modbus_point_methods_1 = require("./modbus-fc/modbus-point-methods");
 const constants_1 = require("../../../constants");
@@ -54,11 +55,11 @@ class ModbusSerialNetworkNode extends container_node_1.ContainerNode {
                 `   \n ` +
                 ` This will enable/disable the network from polling \n ` +
                 `   \n `;
-        this.addOutput('status', node_1.Type.BOOLEAN);
-        this.addOutput('error', node_1.Type.STRING);
-        this.addOutput('port status', node_1.Type.STRING);
-        this.addOutput('port messages', node_1.Type.STRING);
-        this.addOutput('message', node_1.Type.STRING);
+        this.addOutput('status', node_io_1.Type.BOOLEAN);
+        this.addOutput('error', node_io_1.Type.STRING);
+        this.addOutput('port status', node_io_1.Type.STRING);
+        this.addOutput('port messages', node_io_1.Type.STRING);
+        this.addOutput('message', node_io_1.Type.STRING);
         this.settings['networkEnable'] = {
             description: 'Network enable',
             value: false,

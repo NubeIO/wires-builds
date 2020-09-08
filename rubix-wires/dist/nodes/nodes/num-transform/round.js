@@ -2,14 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class MathDecimalPlaceNode extends node_1.Node {
     constructor() {
         super();
         this.title = 'Round (Decimal Place)';
         this.description =
             "'output' is the 'input' value rounded to the configured number of decimal places.  The number of decimal places can be configured from settings (limited to 5 decimal places).";
-        this.addInput('input', node_1.Type.NUMBER);
-        this.addOutput('output', node_1.Type.NUMBER);
+        this.addInput('input', node_io_1.Type.NUMBER);
+        this.addOutput('output', node_io_1.Type.NUMBER);
         this.settings['decimals'] = {
             description: 'Decimal Places (Limit 5)',
             value: 1,

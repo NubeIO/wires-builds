@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const logplease_1 = require("logplease");
 const enums_1 = require("../../../utils/enums");
 const helper_1 = require("../../../utils/helper");
-const node_1 = require("../../node");
+const node_io_1 = require("../../node-io");
 const registry_1 = require("../../registry");
 const node_mixin_1 = require("../node-mixin");
 const logger = logplease_1.create('observer', { color: logplease_1.Colors.Yellow });
@@ -58,8 +58,8 @@ function ExternalConnectionNodeMixin(Base) {
             return this.statusOutputIdx() + 1;
         }
         mixinConnectionStatusOutput() {
-            this.addOutput('status', node_1.Type.STRING);
-            this.addOutput('error', node_1.Type.STRING);
+            this.addOutput('status', node_io_1.Type.STRING);
+            this.addOutput('error', node_io_1.Type.STRING);
             this.setOutputData(this.statusOutputIdx(), this.getConnectionStatus().label);
             return {};
         }

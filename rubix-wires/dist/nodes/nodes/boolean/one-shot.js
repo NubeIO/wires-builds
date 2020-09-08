@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const time_utils_1 = require("../../utils/time-utils");
 class OneShotNode extends node_1.Node {
     constructor() {
@@ -9,11 +10,11 @@ class OneShotNode extends node_1.Node {
         this.title = 'One Shot';
         this.description =
             "Triggers output to 'true' for 'interval' duration when 'trigger' input transitions from 'false' to 'true.  Output is reset to 'false' when 'reset' transitions from 'false' to 'true. 'interval' units can be configured from settings. Maximum ‘interval’ setting is 587 hours. (See Figure A.).  If 'Retrigger While Output Is 'true'' setting is false, then 'fire' input transitions will have an effect when output is 'false'.";
-        this.addInput('trigger', node_1.Type.BOOLEAN);
-        this.addInput('reset', node_1.Type.BOOLEAN);
-        this.addInputWithSettings('interval', node_1.Type.NUMBER, 1, 'Interval (Max is 597 Hours)');
-        this.addOutput('output', node_1.Type.BOOLEAN);
-        this.addOutput('remaining', node_1.Type.NUMBER);
+        this.addInput('trigger', node_io_1.Type.BOOLEAN);
+        this.addInput('reset', node_io_1.Type.BOOLEAN);
+        this.addInputWithSettings('interval', node_io_1.Type.NUMBER, 1, 'Interval (Max is 597 Hours)');
+        this.addOutput('output', node_io_1.Type.BOOLEAN);
+        this.addOutput('remaining', node_io_1.Type.NUMBER);
         this.settings['time'] = {
             description: 'Units',
             type: node_1.SettingType.DROPDOWN,

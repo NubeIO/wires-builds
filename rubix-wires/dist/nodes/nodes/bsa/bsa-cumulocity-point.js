@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const moment = require("moment-timezone");
 const node_1 = require("../../node");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 const time_utils_1 = require("../../utils/time-utils");
 const axios_1 = require("axios");
@@ -29,14 +30,14 @@ class BSACumulocityNode extends node_1.Node {
         this.interval = -1;
         this.title = 'BSA Cumulocity Point (History)';
         this.description = '';
-        this.addInput('input', node_1.Type.ANY);
+        this.addInput('input', node_io_1.Type.ANY);
     }
     addHistoryConfiguration() {
-        this.addInput('histTrigger', node_1.Type.BOOLEAN);
-        this.addInput('clearStoredHis', node_1.Type.BOOLEAN);
-        this.addOutput('histError', node_1.Type.ANY);
-        this.addOutput('storedHistCount', node_1.Type.NUMBER);
-        this.addOutput('lastHistExport', node_1.Type.STRING);
+        this.addInput('histTrigger', node_io_1.Type.BOOLEAN);
+        this.addInput('clearStoredHis', node_io_1.Type.BOOLEAN);
+        this.addOutput('histError', node_io_1.Type.ANY);
+        this.addOutput('storedHistCount', node_io_1.Type.NUMBER);
+        this.addOutput('lastHistExport', node_io_1.Type.STRING);
         this.settings['enable'] = {
             description: 'History Enable',
             value: false,
@@ -79,12 +80,12 @@ class BSACumulocityNode extends node_1.Node {
             type: node_1.SettingType.DROPDOWN,
             config: {
                 items: [
-                    { value: node_1.Type.NUMBER, text: 'Number' },
-                    { value: node_1.Type.BOOLEAN, text: 'Boolean' },
-                    { value: node_1.Type.STRING, text: 'String' },
+                    { value: node_io_1.Type.NUMBER, text: 'Number' },
+                    { value: node_io_1.Type.BOOLEAN, text: 'Boolean' },
+                    { value: node_io_1.Type.STRING, text: 'String' },
                 ],
             },
-            value: node_1.Type.NUMBER,
+            value: node_io_1.Type.NUMBER,
         };
         this.settings['threshold'] = {
             description: 'COV Threshold',

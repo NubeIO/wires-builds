@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const container_1 = require("../../container");
 const node_1 = require("../../node");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 class ConnectionLocalTransmitterNode extends node_1.Node {
     constructor() {
@@ -58,7 +59,7 @@ class ConnectionLocalTransmitterNode extends node_1.Node {
         let diff = target_count - this.properties['inputsCount'];
         if (diff == 0)
             return;
-        this.changeInputsCount(target_count, node_1.Type.STRING);
+        this.changeInputsCount(target_count, node_io_1.Type.STRING);
         if (diff > 0) {
             for (let i = this.properties['inputsCount'] + 1; i <= target_count; i++) {
                 this.settings['in' + i] = {

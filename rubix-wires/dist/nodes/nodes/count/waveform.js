@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const time_utils_1 = require("../../utils/time-utils");
 class WaveformNode extends node_1.Node {
     constructor() {
@@ -9,7 +10,7 @@ class WaveformNode extends node_1.Node {
         this.title = 'Waveform';
         this.description =
             "This node generates a sequence of numbers based on the selected settings; these sequences (waveforms) are of the form 'Ramp', 'Sine', 'Square', 'Triangle', and 'Sawtooth'. While 'enable' is 'true', 'output' will produce the next number in the sequence after every 'interval' duration. The period (how often the waveform pattern repeats) is defined by 'period'. The amplitude of the waveform is defined by 'amplitude'. The waveform can be inverted by setting 'Invert Output' to 'true' in settings. The waveform will reset to its starting position if 'reset' transitions from 'false' to 'true'.  'interval' and ‘period’ units can be configured from settings.  Maximum 'interval' and ‘period’ setting is 587 hours.";
-        this.addInputWithSettings('enable', node_1.Type.BOOLEAN, 0, 'min', false);
+        this.addInputWithSettings('enable', node_io_1.Type.BOOLEAN, 0, 'min', false);
         this.settings['signalType'] = {
             description: 'Signal Type',
             type: node_1.SettingType.DROPDOWN,
@@ -24,11 +25,11 @@ class WaveformNode extends node_1.Node {
             },
             value: 'Ramp',
         };
-        this.addInputWithSettings('interval', node_1.Type.NUMBER, 1, 'Interval', false);
-        this.addInputWithSettings('period', node_1.Type.NUMBER, 10, 'Period', false);
-        this.addInputWithSettings('amplitude', node_1.Type.NUMBER, 1, 'Amplitude', false);
-        this.addInput('reset', node_1.Type.BOOLEAN);
-        this.addOutput('output', node_1.Type.BOOLEAN);
+        this.addInputWithSettings('interval', node_io_1.Type.NUMBER, 1, 'Interval', false);
+        this.addInputWithSettings('period', node_io_1.Type.NUMBER, 10, 'Period', false);
+        this.addInputWithSettings('amplitude', node_io_1.Type.NUMBER, 1, 'Amplitude', false);
+        this.addInput('reset', node_io_1.Type.BOOLEAN);
+        this.addOutput('output', node_io_1.Type.BOOLEAN);
         this.settings['intervalTime'] = {
             description: 'Units',
             type: node_1.SettingType.DROPDOWN,

@@ -2,61 +2,62 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const helper_1 = require("../../../utils/helper");
 const container_1 = require("../../container");
-const node_1 = require("../../node");
-const node_icons_1 = require("../../node-icons");
+const node_io_1 = require("../../node-io");
 const registry_1 = require("../../registry");
-const icon = node_icons_1.default.aiIcon;
-class ContainerOutputNode extends node_1.Node {
+const abstract_folder_io_1 = require("./abstract-folder-io");
+class ContainerOutputNode extends abstract_folder_io_1.AbstractFolderIONode {
     constructor(container) {
-        super(container);
-        this.title = 'Folder Output';
-        this.description = 'Output of the container';
-        this.iconImageUrl = icon;
+        super(container, 'Folder Output', 'Output of the container');
         this.addInput('output', null);
-        this.properties = { type: null };
     }
     onCreated() {
-        if (helper_1.isNull(this.container.container_node))
+        if (!this.isUnderContainer())
             return;
         let containerNode = this.container.container_node;
-        const id = containerNode.addOutput(this.name, this.properties['type'], this.properties['slot']);
-        this.properties['slot'] = id;
+        const id = containerNode.addOutput(this.name, node_io_1.Type.ANY, undefined, { subNodeId: this.id });
         this.name = containerNode.outputs[id].name;
-        this.linkHandler.recomputeOutputLinks(registry_1.default.getId(this.container.container_node.cid, this.container.container_node.id));
+        this.linkHandler.recomputeOutputLinks(registry_1.default.getId(containerNode.cid, containerNode.id));
     }
     onRemoved() {
-        if (helper_1.isNull(this.container.container_node))
+        if (!this.isUnderContainer())
             return;
-        let cont_node = this.container.container_node;
-        cont_node.removeOutput(this.properties['slot']);
-        this.properties['slot'] = -1;
-        this.linkHandler.recomputeOutputLinks(registry_1.default.getId(this.container.container_node.cid, this.container.container_node.id));
-        if (this.container.db) {
-            this.container.db.updateNode(cont_node.id, cont_node.container.id, {
-                $set: { size: cont_node.size },
-            });
+        let containerNode = this.container.container_node;
+        let [outputId, _] = this.findParentOutputById(this.container.container_node, 'outputs');
+        if (helper_1.isNull(outputId)) {
+            return;
         }
-    }
-    onInputUpdated() {
-        if (helper_1.isNull(this.container.container_node))
-            return;
-        let val = this.getInputData(0);
-        let cont_node = this.container.container_node;
-        let slot = this.properties['slot'];
-        this.isRecentlyActive = true;
-        cont_node.setOutputData(slot, val);
+        containerNode.removeOutput(+outputId);
+        this.linkHandler.recomputeOutputLinks(registry_1.default.getId(containerNode.cid, containerNode.id));
+        this.emitChange(containerNode, 'size');
     }
     onAfterSettingsChange() {
-        if (helper_1.isNull(this.container.container_node))
+        if (!this.isUnderContainer())
             return;
         const containerNode = this.container.container_node;
-        containerNode.outputs[this.properties['slot']].name = this.name;
-        if (this.container.db) {
-            let serializedContainerNode = containerNode.serialize();
-            this.container.db.updateNode(serializedContainerNode.id, containerNode.container.id, {
-                $set: { outputs: serializedContainerNode.outputs },
-            });
+        let [outputId, _] = this.findParentOutputById(containerNode, 'outputs');
+        if (helper_1.isNull(outputId)) {
+            return;
         }
+        containerNode.outputs[outputId].name = this.name;
+        this.emitChange(containerNode, 'outputs');
+    }
+    onInputUpdated() {
+        if (!this.isUnderContainer())
+            return;
+        let [outputId, _] = this.findParentOutputById(this.container.container_node, 'outputs');
+        if (helper_1.isNull(outputId)) {
+            return;
+        }
+        this.isRecentlyActive = true;
+        this.container.container_node.setOutputData(+outputId, this.getInputData(0));
+    }
+    correctParentIO(containerNode, slot) {
+        let output = containerNode.outputs[slot];
+        if (helper_1.isNull(output)) {
+            return;
+        }
+        output.subNodeId = this.id;
+        this.emitChange(containerNode, 'outputs');
     }
 }
 container_1.Container.registerNodeType('container/folder-output', ContainerOutputNode, null, true, false, true);

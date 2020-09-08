@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 const time_utils_1 = require("../../utils/time-utils");
 class StopwatchNode extends node_1.Node {
@@ -18,8 +19,8 @@ class StopwatchNode extends node_1.Node {
         this.title = 'Stopwatch';
         this.description =
             "This node converts between Time units Days('day'), Hours('hour'), Minutes('min'), Seconds('sec'), and Milliseconds('milli'). Input type can be selected from settings. Outputs will change based on selected input type. The number of decimal places that output values have can be set from the 'Precision' setting.  ‘interval’ units can be configured from settings. Maximum ‘interval’ setting is 587 hours.";
-        this.addInputWithSettings('enable', node_1.Type.BOOLEAN, 0, 'Enable', false);
-        this.addInput('reset', node_1.Type.BOOLEAN);
+        this.addInputWithSettings('enable', node_io_1.Type.BOOLEAN, 0, 'Enable', false);
+        this.addInput('reset', node_io_1.Type.BOOLEAN);
         this.settings['units'] = {
             description: 'Output Units',
             type: node_1.SettingType.DROPDOWN,
@@ -34,7 +35,7 @@ class StopwatchNode extends node_1.Node {
             },
             value: 1,
         };
-        this.addInputWithSettings('interval', node_1.Type.NUMBER, 200, 'Count Interval', false);
+        this.addInputWithSettings('interval', node_io_1.Type.NUMBER, 200, 'Count Interval', false);
         this.settings['time'] = {
             description: 'Units',
             type: node_1.SettingType.DROPDOWN,
@@ -51,7 +52,7 @@ class StopwatchNode extends node_1.Node {
         this.setSettingsConfig({
             groups: [{ interval: { weight: 2 }, time: {} }],
         });
-        this.addOutput('elapsed', node_1.Type.NUMBER);
+        this.addOutput('elapsed', node_io_1.Type.NUMBER);
         this.setOutputData(0, null);
         this.elapsed = 0;
     }

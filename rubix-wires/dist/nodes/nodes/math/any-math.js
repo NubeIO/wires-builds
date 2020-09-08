@@ -2,16 +2,17 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 class AnyMathNode extends node_1.Node {
     constructor() {
         super();
         this.title = 'flexible math';
         this.description = '';
-        this.addInput('in 1', node_1.Type.NUMBER);
-        this.addOutput('out', node_1.Type.NUMBER);
-        this.addOutput('operation', node_1.Type.STRING);
-        this.addOutput('pass through', node_1.Type.NUMBER);
+        this.addInput('in 1', node_io_1.Type.NUMBER);
+        this.addOutput('out', node_io_1.Type.NUMBER);
+        this.addOutput('operation', node_io_1.Type.STRING);
+        this.addOutput('pass through', node_io_1.Type.NUMBER);
         this.settings['select'] = {
             description: 'Select Operation',
             value: '+',

@@ -169,13 +169,11 @@ class DefaultLinkHandler {
                 if (helper_1.isNull(targetNode) || helper_1.isNull(targetNode.inputs[_a = link.target_input_id, (_a !== null && _a !== void 0 ? _a : link.target_slot)])) {
                     return;
                 }
-                let outputLink = {
+                targetNode.inputs[_b = link.target_input_id, (_b !== null && _b !== void 0 ? _b : link.target_slot)].link = {
                     target_node_id: node.id,
                     target_slot: slot,
                     target_input_id: +outputId,
                 };
-                console.log(`${JSON.stringify(outputLink)}`);
-                targetNode.inputs[_b = link.target_input_id, (_b !== null && _b !== void 0 ? _b : link.target_slot)].link = outputLink;
                 this.emitChange(targetNode, 'inputs');
             });
         });

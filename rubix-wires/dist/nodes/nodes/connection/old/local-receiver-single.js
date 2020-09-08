@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../../node");
 const container_1 = require("../../../container");
+const node_io_1 = require("../../../node-io");
 class ConnectionLocalReceiverSingleNode extends node_1.Node {
     constructor() {
         super();
@@ -11,9 +12,9 @@ class ConnectionLocalReceiverSingleNode extends node_1.Node {
         this.properties['val'] = null;
         this.properties['topic'] = null;
         this.properties['topic_setting'] = null;
-        this.addInputWithSettings('topic', node_1.Type.STRING, 'ID', 'Topic ID', false);
-        this.addOutput('val', node_1.Type.ANY);
-        this.addOutput('topic', node_1.Type.ANY);
+        this.addInputWithSettings('topic', node_io_1.Type.STRING, 'ID', 'Topic ID', false);
+        this.addOutput('val', node_io_1.Type.ANY);
+        this.addOutput('topic', node_io_1.Type.ANY);
     }
     onAdded() {
         this.setOutputData(0, this.properties['val']);

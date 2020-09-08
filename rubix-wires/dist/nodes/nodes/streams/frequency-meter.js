@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class TimeFrequencyMeterNode extends node_1.Node {
     constructor() {
         super();
@@ -11,8 +12,8 @@ class TimeFrequencyMeterNode extends node_1.Node {
         this.description =
             "This node measures the frequency of the incoming 'input' events.  Any value sent to 'input' (excluding null) will be accepted.  'events/sec' output is the average rate received 'input' values.  'events/sec' is reset when 'reset' transitions from 'false' to 'true'.";
         this.addInput('input');
-        this.addInput('reset', node_1.Type.BOOLEAN);
-        this.addOutput('events/sec', node_1.Type.NUMBER, undefined, { data: 0 });
+        this.addInput('reset', node_io_1.Type.BOOLEAN);
+        this.addOutput('events/sec', node_io_1.Type.NUMBER, undefined, { data: 0 });
         this.lastReset = false;
         setInterval(() => {
             if (this.count != this.countWas) {

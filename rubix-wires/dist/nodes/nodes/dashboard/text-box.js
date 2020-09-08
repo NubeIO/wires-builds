@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const ui_node_1 = require("./ui-node");
 class UiTextBoxNode extends ui_node_1.UiNode {
     constructor(container, id, properties) {
@@ -10,8 +10,8 @@ class UiTextBoxNode extends ui_node_1.UiNode {
             "Dashboard node which provides a user input text box on the dashboard.  The entered string is sent from the node 'output'.  The text-box can be overridden by wiring a String into the node 'input'. ";
         this.title = 'Text-Box';
         this.setState('');
-        this.addInput('input', node_1.Type.STRING);
-        this.addOutput('output', node_1.Type.STRING);
+        this.addInput('input', node_io_1.Type.STRING);
+        this.addOutput('output', node_io_1.Type.STRING);
     }
     onAdded() {
         super.onAdded();

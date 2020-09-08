@@ -2,18 +2,19 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class TriggeredRamp extends node_1.Node {
     constructor() {
         super();
         this.title = 'Triggered Ramp';
         this.description =
             "'output' changes on every time 'trigger' transitions from 'false' to 'true'. If 'count on true->false?' setting is enabled, 'output' will also change on 'false' to 'true' transition.   'output' will change by the 'step' value on each change (if a full 'step' would cause the output to be greater than 'max', or less than 'min' it will be limited by 'max' or 'min' respectively).  'output' will first ramp up to 'max' then it will change directions and ramp down to 'min'.  'output' will be reset to 'min' when 'reset' transitions from 'false' to 'true. ";
-        this.addInput('trigger', node_1.Type.BOOLEAN);
-        this.addInputWithSettings('min', node_1.Type.NUMBER, 0, 'min', false);
-        this.addInputWithSettings('max', node_1.Type.NUMBER, 10, 'max', false);
-        this.addInputWithSettings('step', node_1.Type.NUMBER, 1, 'Step Size', false);
-        this.addInput('reset', node_1.Type.BOOLEAN);
-        this.addOutput('output', node_1.Type.NUMBER);
+        this.addInput('trigger', node_io_1.Type.BOOLEAN);
+        this.addInputWithSettings('min', node_io_1.Type.NUMBER, 0, 'min', false);
+        this.addInputWithSettings('max', node_io_1.Type.NUMBER, 10, 'max', false);
+        this.addInputWithSettings('step', node_io_1.Type.NUMBER, 1, 'Step Size', false);
+        this.addInput('reset', node_io_1.Type.BOOLEAN);
+        this.addOutput('output', node_io_1.Type.NUMBER);
         this.settings['countOnFalse'] = {
             description: 'Also count on true->false?',
             value: false,

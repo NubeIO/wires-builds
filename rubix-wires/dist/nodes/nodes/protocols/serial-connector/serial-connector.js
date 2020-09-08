@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../../node");
 const container_1 = require("../../../container");
+const node_io_1 = require("../../../node-io");
 const serial_utils_1 = require("../../../utils/serial-utils");
 const SerialPort = require('serialport');
 class SerialConnectorNode extends node_1.Node {
@@ -17,14 +18,14 @@ class SerialConnectorNode extends node_1.Node {
                 `   \n ` +
                 `## Nube LoRa Raw Baud Rate\n ` +
                 ` Default Baud Rate For Nube LoRa Raw is ***38400*** \n `;
-        this.addInput('writeValue', node_1.Type.STRING);
-        this.addInput('enable', node_1.Type.BOOLEAN);
-        this.addInput('list-ports', node_1.Type.BOOLEAN);
-        this.addOutput('output', node_1.Type.STRING);
-        this.addOutput('error', node_1.Type.STRING);
-        this.addOutput('status', node_1.Type.BOOLEAN);
-        this.addOutput('last-message', node_1.Type.STRING);
-        this.addOutput('active-ports', node_1.Type.BOOLEAN);
+        this.addInput('writeValue', node_io_1.Type.STRING);
+        this.addInput('enable', node_io_1.Type.BOOLEAN);
+        this.addInput('list-ports', node_io_1.Type.BOOLEAN);
+        this.addOutput('output', node_io_1.Type.STRING);
+        this.addOutput('error', node_io_1.Type.STRING);
+        this.addOutput('status', node_io_1.Type.BOOLEAN);
+        this.addOutput('last-message', node_io_1.Type.STRING);
+        this.addOutput('active-ports', node_io_1.Type.BOOLEAN);
         this.settings['port'] = {
             description: 'Serial Port',
             value: '/dev/ttyUSB2',

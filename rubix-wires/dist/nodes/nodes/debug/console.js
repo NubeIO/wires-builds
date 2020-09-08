@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const log = require('logplease').create('node', { color: 5 });
 class ConsoleNode extends node_1.Node {
     constructor() {
@@ -10,7 +11,7 @@ class ConsoleNode extends node_1.Node {
         this.messagesPerSec = 0;
         this.title = 'Console';
         this.description = 'Show value inside the console';
-        this.addInput('input', node_1.Type.ANY);
+        this.addInput('input', node_io_1.Type.ANY);
     }
     onAdded() {
         if (this.side == container_1.Side.server)

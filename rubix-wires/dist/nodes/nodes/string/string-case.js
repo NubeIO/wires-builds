@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 class StringCaseChangeNode extends node_1.Node {
     constructor() {
@@ -9,8 +10,8 @@ class StringCaseChangeNode extends node_1.Node {
         this.title = 'String Case (Lower)';
         this.description =
             "'output' is the 'input' string with all characters changed to either upper or lower case.  Upper or Lower case can be selected from settings.";
-        this.addInput('input', node_1.Type.STRING);
-        this.addOutput('output', node_1.Type.STRING);
+        this.addInput('input', node_io_1.Type.STRING);
+        this.addOutput('output', node_io_1.Type.STRING);
         this.setOutputData(0, null);
         this.settings['function'] = {
             description: 'Select Case',

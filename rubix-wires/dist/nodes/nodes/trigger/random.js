@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 class RandomNode extends node_1.Node {
     constructor() {
@@ -15,10 +16,10 @@ class RandomNode extends node_1.Node {
             value: 3,
             type: node_1.SettingType.NUMBER,
         };
-        this.addInput('trigger', node_1.Type.BOOLEAN);
-        this.addInputWithSettings('max', node_1.Type.NUMBER, 1, 'Maximum Value');
-        this.addInputWithSettings('min', node_1.Type.NUMBER, 0, 'Minimum Value');
-        this.addOutput('output', node_1.Type.NUMBER);
+        this.addInput('trigger', node_io_1.Type.BOOLEAN);
+        this.addInputWithSettings('max', node_io_1.Type.NUMBER, 1, 'Maximum Value');
+        this.addInputWithSettings('min', node_io_1.Type.NUMBER, 0, 'Minimum Value');
+        this.addOutput('output', node_io_1.Type.NUMBER);
         this.setOutputData(0, null);
     }
     onAdded() {

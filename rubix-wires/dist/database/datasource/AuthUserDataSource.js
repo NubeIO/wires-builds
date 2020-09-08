@@ -88,19 +88,13 @@ class AuthUserDataSource {
                     reject(err);
                     log.error(err);
                 }
-                else if (!doc) {
-                    log.warn(`Username ${authUser.password} isn't found`);
-                    reject(`Username ${authUser.password} isn't found`);
+                else if (doc && crypto_utils_1.default.decrypt(doc.password) === authUser.password) {
+                    const token = jwt.sign({ username: doc.username }, config_1.default.secretKey, { expiresIn: 18000 });
+                    resolve(`${token}`);
                 }
                 else {
-                    if (crypto_utils_1.default.decrypt(doc.password) !== authUser.password) {
-                        log.warn('Credential mismatch');
-                        reject('Credential mismatch');
-                    }
-                    else {
-                        const token = jwt.sign({ username: doc.username }, config_1.default.secretKey, { expiresIn: 18000 });
-                        resolve(`${token}`);
-                    }
+                    log.warn('Invalid Credentials');
+                    reject('Invalid Credentials');
                 }
             });
         });

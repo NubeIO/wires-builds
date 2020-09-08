@@ -2,17 +2,18 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class BetweenNode extends node_1.Node {
     constructor() {
         super();
         this.title = 'Between';
         this.description =
             "'output' is 'true' when 'in 1' is within the numeric range between 'from' value and 'to' value (exclusive), otherwise 'output' is 'false'.  'output' will be 'false' if either input is undefined. 'outp not' is always the opposite of 'output'.";
-        this.addInput('input', node_1.Type.NUMBER);
-        this.addInputWithSettings('from', node_1.Type.NUMBER, 0, 'From Value', false);
-        this.addInputWithSettings('to', node_1.Type.NUMBER, 1, 'To Value', false);
-        this.addOutput('output', node_1.Type.BOOLEAN);
-        this.addOutput('out not', node_1.Type.BOOLEAN);
+        this.addInput('input', node_io_1.Type.NUMBER);
+        this.addInputWithSettings('from', node_io_1.Type.NUMBER, 0, 'From Value', false);
+        this.addInputWithSettings('to', node_io_1.Type.NUMBER, 1, 'To Value', false);
+        this.addOutput('output', node_io_1.Type.BOOLEAN);
+        this.addOutput('out not', node_io_1.Type.BOOLEAN);
         this.setOutputData(0, false);
         this.setOutputData(1, true);
     }

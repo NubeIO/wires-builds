@@ -4,6 +4,7 @@ const Bacnet = require("node-bacnet");
 const node_1 = require("../../../node");
 const container_1 = require("../../../container");
 const container_node_1 = require("../../../container-node");
+const node_io_1 = require("../../../node-io");
 const bacnet_constant_1 = require("./bacnet-constant");
 const bacnet_utils_1 = require("./bacnet-utils");
 const constants_1 = require("../../../constants");
@@ -19,10 +20,10 @@ class BACnetNetwork extends container_node_1.ContainerNode {
         this.title = 'BACnet Network';
         this.description =
             'This node acts as a container for bacnet-device nodes. All bacnet-device nodes should be added within the bacnet-network container.  IP configuration for the BACnet network connection are set from settings.  The bacnet-network node can also be used to perform a BACnet Discover (WhoIs).';
-        this.addInput('discover', node_1.Type.BOOLEAN);
-        this.addOutput('out', node_1.Type.STRING);
-        this.addOutput('out msg', node_1.Type.STRING);
-        this.addOutput('error', node_1.Type.BOOLEAN);
+        this.addInput('discover', node_io_1.Type.BOOLEAN);
+        this.addOutput('out', node_io_1.Type.STRING);
+        this.addOutput('out msg', node_io_1.Type.STRING);
+        this.addOutput('error', node_io_1.Type.BOOLEAN);
         this.settings['networkEnable'] = {
             description: 'Network enable',
             value: false,

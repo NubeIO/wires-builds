@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const container_1 = require("../../container");
 const node_1 = require("../../node");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 const request_1 = require("../../utils/axios/request");
 var ALARM_TYPE;
@@ -24,9 +25,9 @@ class AlertsNode extends node_1.Node {
         super();
         this.title = 'Alerts';
         this.description = '';
-        this.addInput('in', node_1.Type.BOOLEAN);
-        this.addInputWithSettings('alarmClass', node_1.Type.DROPDOWN, ALARM_TYPE.WARNING, 'Alarm Class', false, alarmConfig);
-        this.addOutput('out', node_1.Type.BOOLEAN);
+        this.addInput('in', node_io_1.Type.BOOLEAN);
+        this.addInputWithSettings('alarmClass', node_io_1.Type.DROPDOWN, ALARM_TYPE.WARNING, 'Alarm Class', false, alarmConfig);
+        this.addOutput('out', node_io_1.Type.BOOLEAN);
     }
     getAlert(url) {
         return request_1.default.get(url);

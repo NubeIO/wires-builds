@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const time_utils_1 = require("../../utils/time-utils");
 class ScheduleAfterhoursOffWidgetNode extends node_1.Node {
     constructor() {
@@ -13,13 +14,13 @@ class ScheduleAfterhoursOffWidgetNode extends node_1.Node {
         this.description =
             "This node works with a multi-select cloud dashboard widget to perform the logic to output 'enable' and 'remaining runtime'.  Widget Example:  " +
                 `{"new":false,"widgetType":"MultiSwitch","dataSource":"Ditto","tableSelectionMode":"Tabular","cellWidthAuto":true,"numCharts":1,"timeSeriesData":true,"valuePrecision":3,"trimTableHeaders":0,"enableTooltip":true,"enableLegend":true,"enableZoomSlider":true,"syncTime":60,"chartSettings":[{"xAxisSplits":3,"yAxisSplits":5}],"graphType":"LineChart","fontSize":35,"statusImageName":"Light","trueStatus":1,"falseStatus":0,"priority":16,"sliderMin":10,"sliderMax":30,"sliderStep":0.1,"min":0,"max":100,"gaugeSplits":6,"maximum":0,"unit":"°C","steps":0,"reverseGradient":true,"lowerBound":0,"upperBound":100,"cellWidth":150,"tickCount":100,"theme":"nube","titleColor":"#333333","gateway":"/api/ditto","query":"/api/2/things/com.nubeio:97768707-4a17-4d36-baa5-e1f95cbd74d4/features/points/properties/CHAPEL_Mode","units":"%","title":"AC Control","containerHeight":150,"icon":"None","topicIcon":"None","subTopicIcon":"None","layouts":{"lg":{"w":6,"h":4,"x":0,"y":7,"moved":false,"static":false},"md":{"x":0,"y":144,"w":6,"h":8},"sm":{"x":0,"y":104,"w":6,"h":8},"xs":{"x":0,"y":8,"w":4,"h":8},"xxs":{"x":0,"y":8,"w":2,"h":8}},"numButtons":3,"buttonSettings":[{"name":"SCHEDULE","value":"SCHEDULE"},{"name":"AFTERHOURS","value":"AFTERHOURS"},{"name":"OFF","value":"OFF"}],"dataType":"Global","enableBackground":false,"isSelect":false,"fontWeight":"bold","fontColor":"","overriddenFields":[],"isTransparent":false,"isSelectedDitto":true,"showValue":true,"dataEditorCode":""}`;
-        this.addInput('modeInput', node_1.Type.STRING);
-        this.addInput('scheduleInput', node_1.Type.BOOLEAN);
-        this.addInput('scheduleNextStop', node_1.Type.NUMBER);
-        this.addInputWithSettings('AH duration (mins)', node_1.Type.NUMBER, 120, 'Afterhours Duration (minutes)');
-        this.addOutput('modeOutput', node_1.Type.STRING);
-        this.addOutput('enableOutput', node_1.Type.BOOLEAN);
-        this.addOutput('remainingRuntime (ms)', node_1.Type.NUMBER);
+        this.addInput('modeInput', node_io_1.Type.STRING);
+        this.addInput('scheduleInput', node_io_1.Type.BOOLEAN);
+        this.addInput('scheduleNextStop', node_io_1.Type.NUMBER);
+        this.addInputWithSettings('AH duration (mins)', node_io_1.Type.NUMBER, 120, 'Afterhours Duration (minutes)');
+        this.addOutput('modeOutput', node_io_1.Type.STRING);
+        this.addOutput('enableOutput', node_io_1.Type.BOOLEAN);
+        this.addOutput('remainingRuntime (ms)', node_io_1.Type.NUMBER);
         this.AHRuntime = time_utils_1.default.timeConvert(120, 'minutes');
     }
     onCreated() {

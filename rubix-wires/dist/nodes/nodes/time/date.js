@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class DateNode extends node_1.Node {
     constructor() {
         super();
@@ -9,12 +10,12 @@ class DateNode extends node_1.Node {
         this.title = 'Date';
         this.description =
             "Outputs various date information based on the system time.  String 'dateString' is the current date.  String 'dayString' is the current day of the week. Numeric 'dayOfWeek' is an integer between 0 and 6 corresponding to Sunday(0) through Saturday(6).  Numeric 'date' is and integer of the current date.  Numeric 'month' is an integer of the current month Jan(0) - Dec(12).  Numeric 'year' is an integer of the current year.";
-        this.addOutput('dateString', node_1.Type.STRING);
-        this.addOutput('dayString', node_1.Type.STRING);
-        this.addOutput('dayOfWeek', node_1.Type.NUMBER);
-        this.addOutput('date', node_1.Type.NUMBER);
-        this.addOutput('month', node_1.Type.NUMBER);
-        this.addOutput('year', node_1.Type.NUMBER);
+        this.addOutput('dateString', node_io_1.Type.STRING);
+        this.addOutput('dayString', node_io_1.Type.STRING);
+        this.addOutput('dayOfWeek', node_io_1.Type.NUMBER);
+        this.addOutput('date', node_io_1.Type.NUMBER);
+        this.addOutput('month', node_io_1.Type.NUMBER);
+        this.addOutput('year', node_io_1.Type.NUMBER);
     }
     onAdded() {
         clearInterval(this.timeoutFunc);

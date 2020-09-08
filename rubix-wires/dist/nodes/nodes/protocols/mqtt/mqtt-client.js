@@ -3,8 +3,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mqtt = require("mqtt");
 const container_1 = require("../../../container");
 const node_1 = require("../../../node");
+const node_io_1 = require("../../../node-io");
 const utils_1 = require("../../../utils");
 const crypto_utils_1 = require("../../../utils/crypto-utils");
+const config_1 = require("../../../../config");
+const helper_1 = require("../../../../utils/helper");
 const matchMQTT = require('mqtt-match');
 class MqttClientNode extends node_1.Node {
     constructor() {
@@ -19,11 +22,22 @@ class MqttClientNode extends node_1.Node {
                 'this node will read and write to MQTT topics when ‘enable’ is ‘true’.  ' +
                 'Number of topics, and the topic names can be configured from settings. ' +
                 'Each topic will have a corresponding input and output. ';
-        this.addInput('[enable]', node_1.Type.BOOLEAN);
-        this.addOutput('connected', node_1.Type.BOOLEAN);
+        this.addInput('[enable]', node_io_1.Type.BOOLEAN);
+        this.addOutput('connected', node_io_1.Type.BOOLEAN);
+        this.settings['enable'] = { description: 'Enable', value: false, type: node_1.SettingType.BOOLEAN };
+        this.settings['broker_group'] = {
+            description: 'Broker settings',
+            value: '',
+            type: node_1.SettingType.GROUP,
+        };
+        this.settings['broker_group'] = {
+            description: 'Broker settings',
+            value: '',
+            type: node_1.SettingType.GROUP,
+        };
+        this.settings['useEnv'] = { description: 'Dont use env settings', value: false, type: node_1.SettingType.BOOLEAN };
         this.settings['server'] = { description: 'Broker URL', value: '0.0.0.0', type: node_1.SettingType.STRING };
         this.settings['port'] = { description: 'Broker port', value: '1883', type: node_1.SettingType.STRING };
-        this.settings['enable'] = { description: 'Enable', value: false, type: node_1.SettingType.BOOLEAN };
         this.settings['authentication'] = {
             description: 'Use Authentication',
             value: false,
@@ -31,6 +45,11 @@ class MqttClientNode extends node_1.Node {
         };
         this.settings['username'] = { description: 'User name', value: '', type: node_1.SettingType.STRING };
         this.settings['password'] = { description: 'Password', value: '', type: node_1.SettingType.PASSWORD };
+        this.settings['topics_group'] = {
+            description: 'Topic settings',
+            value: '',
+            type: node_1.SettingType.GROUP,
+        };
         this.settings['topics_count'] = {
             description: 'Number of Topics',
             value: 1,
@@ -59,20 +78,26 @@ class MqttClientNode extends node_1.Node {
         this.setSettingsConfig({
             groups: [
                 { server: { weight: 3 }, port: { weight: 1 } },
-                { enable: {}, authentication: {} },
+                { useEnv: {}, authentication: {} },
                 { username: {}, password: {} },
                 { topics_count: {}, decimals: {} },
             ],
             conditions: {
+                server: setting => {
+                    return !!setting['useEnv'].value;
+                },
+                port: setting => {
+                    return !!setting['useEnv'].value;
+                },
+                authentication: setting => {
+                    return !!setting['useEnv'].value;
+                },
                 username: setting => {
                     return !!setting['authentication'].value;
                 },
                 password: setting => {
                     return !!setting['authentication'].value;
-                },
-                topics_count2: setting => {
-                    return !setting['authentication'].value;
-                },
+                }
             },
         });
     }
@@ -93,13 +118,34 @@ class MqttClientNode extends node_1.Node {
         }
     }
     connectToBroker() {
-        let options = { host: this.settings['server'].value };
-        if (this.settings['port'].value != null && this.settings['port'].value != '')
-            options.port = this.settings['port'].value;
-        if (this.settings['username'].value != null && this.settings['username'].value != '')
-            options.username = this.settings['username'].value;
-        if (this.settings['password'].value != null && this.settings['password'].value != '')
-            options.password = crypto_utils_1.default.decrypt(this.settings['password'].value);
+        let { protocol, host, port, username, password } = config_1.default.mqtt;
+        let options = {};
+        if (this.settings['useEnv'].value) {
+            if (this.settings['server'].value != null && this.settings['server'].value != '')
+                options.host = this.settings['server'].value;
+            if (this.settings['port'].value != null && this.settings['port'].value != '')
+                options.port = this.settings['port'].value;
+            if (this.settings['username'].value != null && this.settings['username'].value != '')
+                options.username = this.settings['username'].value;
+            if (this.settings['password'].value != null && this.settings['password'].value != '')
+                options.password = crypto_utils_1.default.decrypt(this.settings['password'].value);
+        }
+        else {
+            if (helper_1.isNull(host))
+                return;
+            if (helper_1.isNull(port))
+                return;
+            options.host = host;
+            options.port = port;
+            if (this.settings['authentication'].value === true) {
+                if (!helper_1.isNull(options.username)) {
+                    options.username = username;
+                }
+                if (!helper_1.isNull(options.password)) {
+                    options.password = crypto_utils_1.default.decrypt(password);
+                }
+            }
+        }
         this.client = mqtt.connect(options);
         this.client.on('connect', () => {
             this.setOutputData(0, true);
@@ -148,7 +194,7 @@ class MqttClientNode extends node_1.Node {
                     let payload = '';
                     if (isJSON &&
                         data.hasOwnProperty('topic') &&
-                        typeof data.topic === node_1.Type.STRING &&
+                        typeof data.topic === node_io_1.Type.STRING &&
                         data.hasOwnProperty('payload')) {
                         payload = JSON.stringify(data.payload);
                         this.client.publish(data.topic, '' + payload);
@@ -186,8 +232,8 @@ class MqttClientNode extends node_1.Node {
         let diff = target_count - this.topicsCount;
         if (diff == 0)
             return;
-        this.changeInputsCount(target_count + 1, node_1.Type.STRING);
-        this.changeOutputsCount(target_count + 1, node_1.Type.STRING);
+        this.changeInputsCount(target_count + 1, node_io_1.Type.STRING);
+        this.changeOutputsCount(target_count + 1, node_io_1.Type.STRING);
         if (diff > 0) {
             for (let i = this.topicsCount + 1; i <= target_count; i++) {
                 this.settings['outputType' + i] = {

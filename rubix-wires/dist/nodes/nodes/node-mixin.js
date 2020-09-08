@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const helper_1 = require("../../utils/helper");
-const node_1 = require("../node");
+const node_io_1 = require("../node-io");
 class NodeInputOutputDecoratorProxy {
     constructor(func) {
         this.func = func;
@@ -16,7 +16,7 @@ exports.NodeInputOutputDecoratorProxy = NodeInputOutputDecoratorProxy;
 function AbleEnableNode(Base) {
     class AbleEnableNodeBase extends Base {
         mixinEnableInputSetting() {
-            this.addInputWithSettings(this.enableSettingKey(), node_1.Type.BOOLEAN, false, this.enableDescription());
+            this.addInputWithSettings(this.enableSettingKey(), node_io_1.Type.BOOLEAN, false, this.enableDescription());
             return { conditions: {} };
         }
         reEvaluateSettingByInput(inputs, settings) {

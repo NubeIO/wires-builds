@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 class PressureConvertNode extends node_1.Node {
     constructor() {
@@ -9,10 +10,10 @@ class PressureConvertNode extends node_1.Node {
         this.title = 'Pressure Conversion (Pa)';
         this.description =
             'This node converts between Pressure units: Pascal (Pa), Standard Atmosphere (atm), Bar (bar), and Pound-force per square inch (lbf/in2) .  Input type can be selected from settings. Outputs will change based on selected input type.';
-        this.addInput('Pa', node_1.Type.NUMBER);
-        this.addOutput('atm', node_1.Type.NUMBER);
-        this.addOutput('bar', node_1.Type.NUMBER);
-        this.addOutput('lbf/in2', node_1.Type.NUMBER);
+        this.addInput('Pa', node_io_1.Type.NUMBER);
+        this.addOutput('atm', node_io_1.Type.NUMBER);
+        this.addOutput('bar', node_io_1.Type.NUMBER);
+        this.addOutput('lbf/in2', node_io_1.Type.NUMBER);
         this.settings['inputType'] = {
             description: 'Input Type',
             type: node_1.SettingType.DROPDOWN,

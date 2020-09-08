@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const node_io_1 = require("../../../node-io");
 const crypto_utils_1 = require("../../../utils/crypto-utils");
 const node_1 = require("../../../node");
 const container_1 = require("../../../container");
@@ -21,11 +22,11 @@ class WebSocketNode extends node_1.Node {
         this.client = null;
         this.title = 'WebSocket';
         this.description = 'WebSocket Client for request/listen output';
-        this.addInput('send', node_1.Type.STRING);
-        this.addInput('connect', node_1.Type.BOOLEAN);
-        this.addOutput('message', node_1.Type.STRING);
-        this.addOutput('error', node_1.Type.STRING);
-        this.addOutput('status', node_1.Type.STRING);
+        this.addInput('send', node_io_1.Type.STRING);
+        this.addInput('connect', node_io_1.Type.BOOLEAN);
+        this.addOutput('message', node_io_1.Type.STRING);
+        this.addOutput('error', node_io_1.Type.STRING);
+        this.addOutput('status', node_io_1.Type.STRING);
         this.settings['authorization-type'] = {
             description: 'Authorization Type',
             value: Authorization.Basic,

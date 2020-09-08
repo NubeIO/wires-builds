@@ -2,14 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class FiltersOnlyTrueNode extends node_1.Node {
     constructor() {
         super();
         this.title = 'Only True';
         this.description =
             "This node filters 'input' values.  Only 'true' values are passed to 'output'.";
-        this.addInput('input', node_1.Type.BOOLEAN);
-        this.addOutput('output', node_1.Type.BOOLEAN);
+        this.addInput('input', node_io_1.Type.BOOLEAN);
+        this.addOutput('output', node_io_1.Type.BOOLEAN);
     }
     onInputUpdated() {
         if (this.getInputData(0) === true)

@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 class EnergyUnitConversionNode extends node_1.Node {
     constructor() {
@@ -9,12 +10,12 @@ class EnergyUnitConversionNode extends node_1.Node {
         this.title = 'Energy Conversion (W·h)';
         this.description =
             'This node converts between Energy units watt-hour (W·h), kilowatt-hour (kW·h), British Thermal Unit (Btu), calorie (cal), joule(J), and joule(kJ).  Input type can be selected from settings. Outputs will change based on selected input type.';
-        this.addInput('W·h', node_1.Type.NUMBER);
-        this.addOutput('kW·h', node_1.Type.NUMBER);
-        this.addOutput('Btu', node_1.Type.NUMBER);
-        this.addOutput('cal', node_1.Type.NUMBER);
-        this.addOutput('J', node_1.Type.NUMBER);
-        this.addOutput('kJ', node_1.Type.NUMBER);
+        this.addInput('W·h', node_io_1.Type.NUMBER);
+        this.addOutput('kW·h', node_io_1.Type.NUMBER);
+        this.addOutput('Btu', node_io_1.Type.NUMBER);
+        this.addOutput('cal', node_io_1.Type.NUMBER);
+        this.addOutput('J', node_io_1.Type.NUMBER);
+        this.addOutput('kJ', node_io_1.Type.NUMBER);
         this.settings['inputType'] = {
             description: 'Input Type',
             type: node_1.SettingType.DROPDOWN,

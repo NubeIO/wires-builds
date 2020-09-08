@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class FiltersReduceEventsNode extends node_1.Node {
     constructor() {
         super();
@@ -28,8 +29,8 @@ class FiltersReduceEventsNode extends node_1.Node {
             value: true,
             type: node_1.SettingType.BOOLEAN,
         };
-        this.addInputWithSettings('interval', node_1.Type.NUMBER, 1000, 'Interval', false);
-        this.addInput('reset', node_1.Type.BOOLEAN);
+        this.addInputWithSettings('interval', node_io_1.Type.NUMBER, 1000, 'Interval', false);
+        this.addInput('reset', node_io_1.Type.BOOLEAN);
         this.addOutput('value');
         this.lastTime = Date.now();
     }

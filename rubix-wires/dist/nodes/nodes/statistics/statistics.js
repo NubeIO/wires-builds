@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const node_1 = require("../../node");
 const flexible_node_1 = require("../../flexible-node");
+const node_io_1 = require("../../node-io");
 class Statistics extends flexible_node_1.FlexibleNode {
     constructor() {
         super();
-        this.dynamicInputsType = node_1.Type.NUMBER;
+        this.dynamicInputsType = node_io_1.Type.NUMBER;
     }
     onAdded() {
         this.size = this.computeSize();

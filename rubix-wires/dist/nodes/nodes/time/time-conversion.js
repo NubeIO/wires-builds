@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 class TimeConvertNode extends node_1.Node {
     constructor() {
@@ -9,11 +10,11 @@ class TimeConvertNode extends node_1.Node {
         this.title = 'Time Conversion (min)';
         this.description =
             "This node converts between Time units Days('day'), Hours('hour'), Minutes('min'), Seconds('sec'), and Milliseconds('milli').  Input type can be selected from settings. Outputs will change based on selected input type.  The number of decimal places that output values have can be set from the 'Precision' setting.";
-        this.addInput('min', node_1.Type.NUMBER);
-        this.addOutput('day', node_1.Type.NUMBER);
-        this.addOutput('hour', node_1.Type.NUMBER);
-        this.addOutput('sec', node_1.Type.NUMBER);
-        this.addOutput('milli', node_1.Type.NUMBER);
+        this.addInput('min', node_io_1.Type.NUMBER);
+        this.addOutput('day', node_io_1.Type.NUMBER);
+        this.addOutput('hour', node_io_1.Type.NUMBER);
+        this.addOutput('sec', node_io_1.Type.NUMBER);
+        this.addOutput('milli', node_io_1.Type.NUMBER);
         this.settings['inputType'] = {
             description: 'Input Type',
             type: node_1.SettingType.DROPDOWN,

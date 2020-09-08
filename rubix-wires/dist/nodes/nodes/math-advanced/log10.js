@@ -2,13 +2,14 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class MathLogarithmNode extends node_1.Node {
     constructor() {
         super();
         this.title = 'Logarithm (Base 10)';
         this.description = "'log10(x)' is the result of log('x') with base 10.";
-        this.addInput('x', node_1.Type.NUMBER);
-        this.addOutput('log10(x)', node_1.Type.NUMBER);
+        this.addInput('x', node_io_1.Type.NUMBER);
+        this.addOutput('log10(x)', node_io_1.Type.NUMBER);
     }
     onAdded() {
         this.onInputUpdated();

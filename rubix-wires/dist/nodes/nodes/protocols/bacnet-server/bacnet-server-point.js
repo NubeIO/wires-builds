@@ -5,6 +5,7 @@ const helper_1 = require("../../../../utils/helper");
 const pattern_1 = require("../../../../utils/pattern");
 const container_1 = require("../../../container");
 const node_1 = require("../../../node");
+const node_io_1 = require("../../../node-io");
 const registry_1 = require("../../../registry");
 const connection_node_mixin_1 = require("../connection-node-mixin");
 const point_node_1 = require("../model/point-node");
@@ -19,14 +20,14 @@ class BACnetServerPointNode extends connection_node_mixin_1.DependantConnectionN
                 'BACnet point details should be set in settings. BACnet point settings include ID, Type, and Name.';
         this.mixinEnableInputSetting();
         this.mixinConnectionStatusOutput();
-        this.addInputWithSettings('point-id', node_1.Type.NUMBER, 1, 'BACnet Object Id');
+        this.addInputWithSettings('point-id', node_io_1.Type.NUMBER, 1, 'BACnet Object Id');
         this.settings['point-kind'] = {
             description: 'BACnet Object Type',
             type: node_1.SettingType.DROPDOWN,
             config: { items: bacnet_model_1.PointKind.items() },
             value: bacnet_model_1.PointKind.ANALOG_INPUT.enumKey,
         };
-        this.addInputWithSettings('point-name', node_1.Type.STRING, 'bacnet-point', 'BACnet Point Name');
+        this.addInputWithSettings('point-name', node_io_1.Type.STRING, 'bacnet-point', 'BACnet Point Name');
         this.setSettingsConfig(this.mixinPointValueInputOutput());
     }
     flowHandler() {

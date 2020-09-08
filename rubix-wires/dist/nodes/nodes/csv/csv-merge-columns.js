@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 let moment = require('moment-timezone');
 class CSVMergeColumnsNode extends node_1.Node {
     constructor() {
@@ -10,9 +11,9 @@ class CSVMergeColumnsNode extends node_1.Node {
         this.title = 'CSV Merge Columns';
         this.description =
             'This node merges the columns of properly formatted CSV strings.  ‘merge’ CSV string will be joined with the ‘original’ CSV string.  The ‘merge’ CSV columns will be added to the right of the ‘original’ CSV columns.  ‘null’ will be added to rows where no value exists for that column.  No error checking.';
-        this.addInput('original', node_1.Type.STRING);
-        this.addInput('merge', node_1.Type.STRING);
-        this.addOutput('output', node_1.Type.STRING);
+        this.addInput('original', node_io_1.Type.STRING);
+        this.addInput('merge', node_io_1.Type.STRING);
+        this.addOutput('output', node_io_1.Type.STRING);
     }
     onAdded() {
         this.setOutputData(0, '');

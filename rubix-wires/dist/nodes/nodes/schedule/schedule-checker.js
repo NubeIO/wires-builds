@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const moment = require("moment-timezone");
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const schedule_utils_1 = require("./schedule-utils");
 const time_utils_1 = require("../../utils/time-utils");
 class ScheduleChecker extends node_1.Node {
@@ -20,14 +21,14 @@ class ScheduleChecker extends node_1.Node {
         this.title = 'Schedule Checker (unconfigured)';
         this.description =
             'This node checks the API-Schedule output string for active schedules that match the selected ‘Schedule Name’ setting.  ‘output’ will be ‘true’ when the matching schedule is active and ‘enable’ is ‘true’; otherwise ‘output’ will be ‘false’.  ‘nextStart’ is the timestamp output of the next scheduled start time.  ‘nextStop’ is the timestamp output of the next scheduled stop time.  ‘lastCheck’ is the timestamp output of the last time a schedule check was run.  ‘error’ output will be ‘true’ if there is an error while checking the schedule input string; otherwise ‘error’ will be false.  The frequency that schedules are checked can be modified with the ‘Schedule Check Interval’ setting (set in millis).  The ‘Timestamp Output Format’ setting can be adjusted to output timestamps as strings or as Epoch Timestamps.  String timestamps will be displayed in the timezone specified by the ‘Timezone’ setting.';
-        this.addInputWithSettings('enable', node_1.Type.BOOLEAN, true, 'Enable', false);
-        this.addInput('schedules', node_1.Type.JSON);
-        this.addOutput('output', node_1.Type.BOOLEAN);
-        this.addOutput('payload', node_1.Type.BOOLEAN);
-        this.addOutput('nextStart', node_1.Type.STRING);
-        this.addOutput('nextStop', node_1.Type.STRING);
-        this.addOutput('lastCheck', node_1.Type.STRING);
-        this.addOutput('error', node_1.Type.STRING);
+        this.addInputWithSettings('enable', node_io_1.Type.BOOLEAN, true, 'Enable', false);
+        this.addInput('schedules', node_io_1.Type.JSON);
+        this.addOutput('output', node_io_1.Type.BOOLEAN);
+        this.addOutput('payload', node_io_1.Type.BOOLEAN);
+        this.addOutput('nextStart', node_io_1.Type.STRING);
+        this.addOutput('nextStop', node_io_1.Type.STRING);
+        this.addOutput('lastCheck', node_io_1.Type.STRING);
+        this.addOutput('error', node_io_1.Type.STRING);
         this.settings['stringScheduleName'] = {
             description: 'Schedule Name',
             value: '',

@@ -2,17 +2,18 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class DeadbandNode extends node_1.Node {
     constructor() {
         super();
         this.title = 'Deadband';
         this.description =
             "This node applies a Hysteresis function (see hysteresis node), with a deadband centered at 'setpoint'.  The ON direction can be reversed from settings.";
-        this.addInput('input', node_1.Type.NUMBER);
-        this.addInputWithSettings('setpoint', node_1.Type.NUMBER, 0, 'Setpoint');
-        this.addInputWithSettings('deadband', node_1.Type.NUMBER, 0, 'Deadband');
-        this.addOutput('out', node_1.Type.BOOLEAN);
-        this.addOutput('out not', node_1.Type.BOOLEAN);
+        this.addInput('input', node_io_1.Type.NUMBER);
+        this.addInputWithSettings('setpoint', node_io_1.Type.NUMBER, 0, 'Setpoint');
+        this.addInputWithSettings('deadband', node_io_1.Type.NUMBER, 0, 'Deadband');
+        this.addOutput('out', node_io_1.Type.BOOLEAN);
+        this.addOutput('out not', node_io_1.Type.BOOLEAN);
         this.settings['invert'] = {
             description: 'Reverses ON direction when true',
             value: false,

@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const base_edge_1 = require("./base-edge");
 const utils_1 = require("../../utils");
 const axios_1 = require("axios");
@@ -22,10 +23,10 @@ class ApiSchedules extends base_edge_1.BaseEdge {
         this.title = 'Api Schedule';
         this.description =
             "This node is used to fetch schedules from Nube devices.  Once the nube/login node is successfully authenticated, the API-Schedule nodes will have their settings updated with values from the connected Nube devices.  API-Schedule node will output all schedules from the device; Specific schedule selection is done on the ‘Schedule-Checker’ node.  ‘interval’ is how often the node will re-check for schedule changes (minimum 30 seconds).  It is recommended that the API-Schedule node is used in conjunction with a filter/prevent-null node to maintain the last successful schedule read in the case that the API-Login node becomes disconnected. 'interval’ units can be configured from settings.  Maximum ‘interval’ setting is 587 hours.";
-        this.addInput('trigger', node_1.Type.BOOLEAN);
-        this.addInputWithSettings('interval', node_1.Type.NUMBER, 60, 'Interval (minimum 30 seconds)', false);
-        this.addOutput('data', node_1.Type.JSON);
-        this.addOutput('error', node_1.Type.STRING);
+        this.addInput('trigger', node_io_1.Type.BOOLEAN);
+        this.addInputWithSettings('interval', node_io_1.Type.NUMBER, 60, 'Interval (minimum 30 seconds)', false);
+        this.addOutput('data', node_io_1.Type.JSON);
+        this.addOutput('error', node_io_1.Type.STRING);
         this.settings['time'] = {
             description: 'Units',
             type: node_1.SettingType.DROPDOWN,

@@ -13,6 +13,7 @@ const axios_1 = require("axios");
 const _ = require("lodash");
 const container_1 = require("../../container");
 const node_1 = require("../../node");
+const node_io_1 = require("../../node-io");
 const bsa_client_config_1 = require("./bsa-client-config");
 let moment = require('moment-timezone');
 var ALARM_TYPE;
@@ -35,11 +36,11 @@ class BSACumulocityAlarmNode extends node_1.Node {
         super();
         this.title = 'BSA Cumulocity Alarm';
         this.description = '';
-        this.addInput('alarmInput', node_1.Type.BOOLEAN);
-        this.addInputWithSettings('alarmText', node_1.Type.STRING, 'No Alarm Message Available', 'Enter Alarm Message');
-        this.addInputWithSettings('alarmClass', node_1.Type.DROPDOWN, ALARM_TYPE.WARNING, 'Alarm Class', false, alarmConfig);
-        this.addOutput('status', node_1.Type.BOOLEAN);
-        this.addOutput('error', node_1.Type.STRING);
+        this.addInput('alarmInput', node_io_1.Type.BOOLEAN);
+        this.addInputWithSettings('alarmText', node_io_1.Type.STRING, 'No Alarm Message Available', 'Enter Alarm Message');
+        this.addInputWithSettings('alarmClass', node_io_1.Type.DROPDOWN, ALARM_TYPE.WARNING, 'Alarm Class', false, alarmConfig);
+        this.addOutput('status', node_io_1.Type.BOOLEAN);
+        this.addOutput('error', node_io_1.Type.STRING);
         this.settings['enable'] = {
             description: 'Alarm Enable',
             value: true,

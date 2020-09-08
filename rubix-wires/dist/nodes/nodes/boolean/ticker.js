@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const time_utils_1 = require("../../utils/time-utils");
 class TickerNode extends node_1.Node {
     constructor() {
@@ -12,9 +13,9 @@ class TickerNode extends node_1.Node {
         this.title = 'Ticker';
         this.description =
             "While 'enable' is 'true', ‘output’ will change to 'true' at every 'interval' period. If 'Generate False' setting is set to ‘true’, ‘output’ will be 'false' for the second half of the 'interval' period. When 'enable' is 'false', ‘output’ will be 'false'. 'interval' units can be configured from settings.  Maximum ‘interval’ setting is 587 hours.  (See Figure A.)";
-        this.addInputWithSettings('enable', node_1.Type.BOOLEAN, true, 'Enable');
-        this.addInputWithSettings('interval', node_1.Type.NUMBER, 1, 'Interval');
-        this.addOutput('output', node_1.Type.BOOLEAN);
+        this.addInputWithSettings('enable', node_io_1.Type.BOOLEAN, true, 'Enable');
+        this.addInputWithSettings('interval', node_io_1.Type.NUMBER, 1, 'Interval');
+        this.addOutput('output', node_io_1.Type.BOOLEAN);
         this.settings['time'] = {
             description: 'Units',
             type: node_1.SettingType.DROPDOWN,

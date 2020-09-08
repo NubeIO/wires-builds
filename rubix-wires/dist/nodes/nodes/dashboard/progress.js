@@ -1,15 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const node_io_1 = require("../../node-io");
 const ui_node_1 = require("./ui-node");
 const container_1 = require("../../container");
-const node_1 = require("../../node");
 class UiProgressNode extends ui_node_1.UiNode {
     constructor(container, id, properties) {
         super('Progress', 'UiProgressNode', properties);
         this.description =
             "Dashboard node which displays 'input' value from 0-100 on a progress bar on the dashboard.";
         this.title = 'Progress';
-        this.addInput('input', node_1.Type.NUMBER);
+        this.addInput('input', node_io_1.Type.NUMBER);
         this.UPDATE_INPUTS_INTERVAL = 100;
         this.setState(0);
     }

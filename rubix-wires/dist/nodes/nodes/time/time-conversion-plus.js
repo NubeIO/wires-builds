@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const time_utils_1 = require("../../utils/time-utils");
 var TIME_TYPE;
 (function (TIME_TYPE) {
@@ -18,8 +19,8 @@ class TimeConvertPlusNode extends node_1.Node {
                 ` This node will let you convert a timestamp or unix (epoch) timestamp into date and time parts \n ` +
                 ` ## Example output\n ` +
                 ` ***{"date":"Mon Aug 17 2020","yearMonthDay":"2020-08-17","year":"2020","month":"Aug","monthAsNumber":"08","dayAsNumber":"17","dayOfYearNumber":"230","day":"Mon","pmOrAm":"PM","hourAsAmPm":"8","hour":"20","timeHourMin":"20:26","time":"20:26:49","minute":"26","minutesSeconds":"26:49","seconds":"49","milliseconds":"000","epoch":"1597660009000","rawDate":"2020-08-17T10:26:49.000Z"}***\n `;
-        this.addInput('input', node_1.Type.ANY);
-        this.addOutput('out-json', node_1.Type.JSON);
+        this.addInput('input', node_io_1.Type.ANY);
+        this.addOutput('out-json', node_io_1.Type.JSON);
         this.settings['time'] = {
             description: 'Time',
             type: node_1.SettingType.DROPDOWN,

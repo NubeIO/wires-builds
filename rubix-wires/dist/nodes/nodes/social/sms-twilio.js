@@ -2,17 +2,18 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const Twilio = require('twilio');
 class TwilioNode extends node_1.Node {
     constructor() {
         super();
         this.title = 'twilio SMS';
         this.description = 'Send a sms without the need of a sim card using twilio.';
-        this.addInputWithSettings('enable', node_1.Type.BOOLEAN, true, 'Enable', false);
-        this.addInput('message in', node_1.Type.STRING);
-        this.addOutput('result', node_1.Type.STRING);
-        this.addOutput('error', node_1.Type.BOOLEAN);
-        this.addOutput('error message', node_1.Type.STRING);
+        this.addInputWithSettings('enable', node_io_1.Type.BOOLEAN, true, 'Enable', false);
+        this.addInput('message in', node_io_1.Type.STRING);
+        this.addOutput('result', node_io_1.Type.STRING);
+        this.addOutput('error', node_io_1.Type.BOOLEAN);
+        this.addOutput('error message', node_io_1.Type.STRING);
         this.settings['cell-numbers'] = {
             description: 'Cell numbers',
             value: '+134345324, +6143789762',

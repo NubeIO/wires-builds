@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 const container_1 = require("../../container");
 const SlackBot = require('slackbots');
@@ -18,7 +19,7 @@ class SlackNode extends node_1.Node {
         super();
         this.title = 'Slack Bot';
         this.description = 'Slack.';
-        this.addInput('message', node_1.Type.STRING);
+        this.addInput('message', node_io_1.Type.STRING);
         this.settings['boot-name'] = {
             description: 'Boot Name',
             value: '****',
@@ -26,8 +27,8 @@ class SlackNode extends node_1.Node {
         };
         this.settings['token'] = { description: 'token', value: '****', type: node_1.SettingType.STRING };
         this.settings['group'] = { description: 'group', value: '****', type: node_1.SettingType.STRING };
-        this.addOutput('message', node_1.Type.STRING);
-        this.addOutput('error', node_1.Type.STRING);
+        this.addOutput('message', node_io_1.Type.STRING);
+        this.addOutput('error', node_io_1.Type.STRING);
     }
     onInputUpdated() {
         return __awaiter(this, void 0, void 0, function* () {

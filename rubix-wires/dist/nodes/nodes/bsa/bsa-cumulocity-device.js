@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = require("axios");
 const container_1 = require("../../container");
 const node_1 = require("../../node");
+const node_io_1 = require("../../node-io");
 const bsa_client_config_1 = require("./bsa-client-config");
 const system_utils_1 = require("../system/system-utils");
 class BSACumulocityDeviceNode extends node_1.Node {
@@ -19,9 +20,9 @@ class BSACumulocityDeviceNode extends node_1.Node {
         super();
         this.title = 'Create BSA Cumulocity Device';
         this.description = '';
-        this.addInput('createDevice', node_1.Type.BOOLEAN);
-        this.addOutput('id', node_1.Type.NUMBER);
-        this.addOutput('message', node_1.Type.STRING);
+        this.addInput('createDevice', node_io_1.Type.BOOLEAN);
+        this.addOutput('id', node_io_1.Type.NUMBER);
+        this.addOutput('message', node_io_1.Type.STRING);
         this.settings['CumulocityDeviceName'] = {
             description: 'Cumulocity Device Name',
             value: '',

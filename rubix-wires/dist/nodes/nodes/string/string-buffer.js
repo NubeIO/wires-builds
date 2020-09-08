@@ -2,17 +2,18 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class StringBufferNode extends node_1.Node {
     constructor() {
         super();
         this.title = 'String Buffer';
         this.description = '';
-        this.addInput('input', node_1.Type.STRING);
-        this.addInput('sendBuffer', node_1.Type.BOOLEAN);
-        this.addInput('clearBuffer', node_1.Type.BOOLEAN);
-        this.addInput('addToBuffer', node_1.Type.BOOLEAN);
-        this.addOutput('output', node_1.Type.STRING);
-        this.addOutput('currentBuffer', node_1.Type.STRING);
+        this.addInput('input', node_io_1.Type.STRING);
+        this.addInput('sendBuffer', node_io_1.Type.BOOLEAN);
+        this.addInput('clearBuffer', node_io_1.Type.BOOLEAN);
+        this.addInput('addToBuffer', node_io_1.Type.BOOLEAN);
+        this.addOutput('output', node_io_1.Type.STRING);
+        this.addOutput('currentBuffer', node_io_1.Type.STRING);
         this.settings['useTrigger'] = {
             description: 'Select a Buffer Input Method',
             type: node_1.SettingType.DROPDOWN,
@@ -50,7 +51,7 @@ class StringBufferNode extends node_1.Node {
         const triggerInput = this.settings['useTrigger'].value;
         if (triggerInput !== this.useTrigger) {
             if (triggerInput)
-                this.addInput('addToBuffer', node_1.Type.BOOLEAN);
+                this.addInput('addToBuffer', node_io_1.Type.BOOLEAN);
             else
                 this.removeInput(3);
         }

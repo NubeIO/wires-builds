@@ -2,19 +2,20 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class ThermostatNode extends node_1.Node {
     constructor() {
         super();
         this.title = 'Heat/Cool Thermostat';
         this.description =
             "This node functions as a Heat/Cool thermostat. While 'enable' is set to 'true', the node will function as follows: 'CLG Mode' will be set to 'true' if 'input' is greater than 'setpoint' + 'CLG offset', 'CLG Mode' will be set to 'false' if 'input' is less than 'setpoint'.  'HTG Mode' will be set to 'true' if 'input' is less than 'setpoint' - 'HTG offset', 'HTG Mode' will be set to 'false' if 'input' is greater than 'setpoint'.  If 'enable' is 'false', 'CLG Mode' and 'HTG Mode' will both be set to 'false'. ";
-        this.addInput('input', node_1.Type.NUMBER);
-        this.addInputWithSettings('enable', node_1.Type.BOOLEAN, true, 'Enable');
-        this.addInputWithSettings('setpoint', node_1.Type.NUMBER, 20, 'Setpoint');
-        this.addInputWithSettings('CLG offset', node_1.Type.NUMBER, 1, 'CLG offset');
-        this.addInputWithSettings('HTG offset', node_1.Type.NUMBER, 1, 'HTG offset');
-        this.addOutput('CLG Mode', node_1.Type.BOOLEAN);
-        this.addOutput('HTG Mode', node_1.Type.BOOLEAN);
+        this.addInput('input', node_io_1.Type.NUMBER);
+        this.addInputWithSettings('enable', node_io_1.Type.BOOLEAN, true, 'Enable');
+        this.addInputWithSettings('setpoint', node_io_1.Type.NUMBER, 20, 'Setpoint');
+        this.addInputWithSettings('CLG offset', node_io_1.Type.NUMBER, 1, 'CLG offset');
+        this.addInputWithSettings('HTG offset', node_io_1.Type.NUMBER, 1, 'HTG offset');
+        this.addOutput('CLG Mode', node_io_1.Type.BOOLEAN);
+        this.addOutput('HTG Mode', node_io_1.Type.BOOLEAN);
         this.setOutputData(0, false);
         this.setOutputData(1, false);
         this.clgMode = false;

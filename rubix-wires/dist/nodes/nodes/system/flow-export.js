@@ -2,14 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class FlowExport extends node_1.Node {
     constructor() {
         super();
         this.title = 'Flow Export';
         this.description =
             'A node to export the wires flow to JSON when trigger values gets changed to true from different state';
-        this.addOutput('output', node_1.Type.STRING);
-        this.addInput('trigger', node_1.Type.BOOLEAN);
+        this.addOutput('output', node_io_1.Type.STRING);
+        this.addInput('trigger', node_io_1.Type.BOOLEAN);
     }
     init() {
         if (!this.properties) {

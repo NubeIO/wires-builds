@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
 const fs = require("fs");
+const node_io_1 = require("../../node-io");
 class SystemFileNode extends node_1.Node {
     constructor() {
         super();
@@ -13,12 +14,12 @@ class SystemFileNode extends node_1.Node {
                 'With logic inputs named Read, Write, Clear you can perform the requested operation. <br/>' +
                 'The input named Text set a text value to be written to the file. <br/>' +
                 'The contents of the file will be sent to the output.';
-        this.addInput('file name', node_1.Type.STRING);
-        this.addInput('text', node_1.Type.STRING);
-        this.addInput('read', node_1.Type.BOOLEAN);
-        this.addInput('write', node_1.Type.BOOLEAN);
-        this.addInput('clear', node_1.Type.BOOLEAN);
-        this.addOutput('text', node_1.Type.STRING);
+        this.addInput('file name', node_io_1.Type.STRING);
+        this.addInput('text', node_io_1.Type.STRING);
+        this.addInput('read', node_io_1.Type.BOOLEAN);
+        this.addInput('write', node_io_1.Type.BOOLEAN);
+        this.addInput('clear', node_io_1.Type.BOOLEAN);
+        this.addOutput('text', node_io_1.Type.STRING);
     }
     onInputUpdated() {
         if (this.inputs[2].updated && this.inputs[2].data) {

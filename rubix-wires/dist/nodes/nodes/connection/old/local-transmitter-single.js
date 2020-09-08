@@ -2,14 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../../node");
 const container_1 = require("../../../container");
+const node_io_1 = require("../../../node-io");
 class ConnectionLocalTransmitterSingleNode extends node_1.Node {
     constructor() {
         super();
         this.title = 'Link Transmitter';
         this.description =
             "This node works in conjunction with link-receiver node, and provides a connection of nodes without the graphical wires.  'in #' inputs will be sent to the corresponding 'out #' output on link-receiver nodes with matching 'Topic ID' settings.";
-        this.addInput('input', node_1.Type.ANY);
-        this.addInputWithSettings('topic', node_1.Type.STRING, 'ID', 'Topic ID', false);
+        this.addInput('input', node_io_1.Type.ANY);
+        this.addInputWithSettings('topic', node_io_1.Type.STRING, 'ID', 'Topic ID', false);
     }
     onAdded() {
         this.onInputUpdated();

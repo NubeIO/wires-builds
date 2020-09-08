@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
 const moment = require("moment");
+const node_io_1 = require("../../node-io");
 class TimestampGeneratorNode extends node_1.Node {
     constructor() {
         super();
@@ -20,10 +21,10 @@ class TimestampGeneratorNode extends node_1.Node {
                 `-ENTER in settings	***LT*** with return 8:30 PM\n ` +
                 `-ENTER in settings	***LTS*** with return 8:30:25 PM\n ` +
                 `-ENTER in settings	***LLLL*** with return 	Thursday, September 4, 1986 8:30 PM\n `;
-        this.addInput('input', node_1.Type.ANY);
-        this.addOutput('date-string', node_1.Type.STRING);
-        this.addOutput('date-unix', node_1.Type.STRING);
-        this.addOutput('date-format', node_1.Type.STRING);
+        this.addInput('input', node_io_1.Type.ANY);
+        this.addOutput('date-string', node_io_1.Type.STRING);
+        this.addOutput('date-unix', node_io_1.Type.STRING);
+        this.addOutput('date-format', node_io_1.Type.STRING);
         this.settings['format'] = {
             description: 'Formatting options',
             value: "x",

@@ -2,16 +2,17 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class LimitNode extends node_1.Node {
     constructor() {
         super();
         this.title = 'Limit';
         this.description =
             "'output' follows the 'input' value when it is between the 'min' and 'max' values.  If 'input' is greater than the 'max' value, 'output' will be the 'max' value.  If 'input' is less than the 'min' value, 'output' will be the 'min' value.  'max' and 'min' values can be configured from settings.";
-        this.addInput('input', node_1.Type.NUMBER);
-        this.addInputWithSettings('min', node_1.Type.NUMBER, 0, 'min', false);
-        this.addInputWithSettings('max', node_1.Type.NUMBER, 5, 'max', false);
-        this.addOutput('output', node_1.Type.NUMBER);
+        this.addInput('input', node_io_1.Type.NUMBER);
+        this.addInputWithSettings('min', node_io_1.Type.NUMBER, 0, 'min', false);
+        this.addInputWithSettings('max', node_io_1.Type.NUMBER, 5, 'max', false);
+        this.addOutput('output', node_io_1.Type.NUMBER);
     }
     onCreated() {
         this.setOutputData(0, this.settings['min'].value);

@@ -1,26 +1,26 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 const statistics_1 = require("./statistics");
-const node_1 = require("../../node");
 class AnyStatAllNode extends statistics_1.default {
     constructor() {
         super();
         this.title = 'all stats';
         this.description =
             'Outputs the Maximum, Minimum, Range, Sum, Mean, Median, Modes, Variance, Standard Deviation, Mean Absolute Deviation, and Z Score values of all the (non null) Numeric inputs. The number of inputs and their values can be modified from settings.';
-        this.addOutput('max', node_1.Type.NUMBER);
-        this.addOutput('min', node_1.Type.NUMBER);
-        this.addOutput('range', node_1.Type.NUMBER);
-        this.addOutput('sum', node_1.Type.NUMBER);
-        this.addOutput('mean', node_1.Type.NUMBER);
-        this.addOutput('median', node_1.Type.NUMBER);
-        this.addOutput('modes', node_1.Type.NUMBER);
-        this.addOutput('variance', node_1.Type.NUMBER);
-        this.addOutput('standardDeviation', node_1.Type.NUMBER);
-        this.addOutput('meanAbsoluteDeviation', node_1.Type.NUMBER);
-        this.addOutput('zScores', node_1.Type.NUMBER);
+        this.addOutput('max', node_io_1.Type.NUMBER);
+        this.addOutput('min', node_io_1.Type.NUMBER);
+        this.addOutput('range', node_io_1.Type.NUMBER);
+        this.addOutput('sum', node_io_1.Type.NUMBER);
+        this.addOutput('mean', node_io_1.Type.NUMBER);
+        this.addOutput('median', node_io_1.Type.NUMBER);
+        this.addOutput('modes', node_io_1.Type.NUMBER);
+        this.addOutput('variance', node_io_1.Type.NUMBER);
+        this.addOutput('standardDeviation', node_io_1.Type.NUMBER);
+        this.addOutput('meanAbsoluteDeviation', node_io_1.Type.NUMBER);
+        this.addOutput('zScores', node_io_1.Type.NUMBER);
     }
     onInputUpdated() {
         const a = this.getDefinedInputsOrSettingsValues();

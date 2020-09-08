@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const container_1 = require("../../container");
 const node_1 = require("../../node");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 class AddressHelperString extends node_1.Node {
     constructor() {
@@ -10,8 +11,8 @@ class AddressHelperString extends node_1.Node {
         this.title = 'Append To Strings';
         this.description =
             "";
-        this.addInputWithSettings('prepend', node_1.Type.STRING, '', 'Prepend Value');
-        this.addInputWithSettings('append', node_1.Type.STRING, '', 'Append Value');
+        this.addInputWithSettings('prepend', node_io_1.Type.STRING, '', 'Prepend Value');
+        this.addInputWithSettings('append', node_io_1.Type.STRING, '', 'Append Value');
         this.settings['outputs_count'] = {
             description: 'Number of Outputs',
             value: 1,
@@ -53,7 +54,7 @@ class AddressHelperString extends node_1.Node {
         const diff = target_count - this.outputsCount;
         if (diff == 0)
             return;
-        this.changeOutputsCount(target_count + 1, node_1.Type.STRING);
+        this.changeOutputsCount(target_count + 1, node_io_1.Type.STRING);
         if (diff > 0) {
             for (let i = this.outputsCount + 1; i <= target_count; i++) {
                 this.settings['output' + i] = {

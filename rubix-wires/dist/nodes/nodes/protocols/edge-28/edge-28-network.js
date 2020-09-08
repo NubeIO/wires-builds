@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../../node");
 const container_1 = require("../../../container");
 const container_node_1 = require("../../../container-node");
+const node_io_1 = require("../../../node-io");
 const utils_1 = require("../../../utils");
 const axios_1 = require("axios");
 const edge_utils_1 = require("./edge-utils");
@@ -38,10 +39,10 @@ class Edge28ApiNode extends container_node_1.ContainerNode {
         this._di = 'di';
         this.title = 'Edge 28 Network';
         this.description = edge_28_1.default.NetworkDesc;
-        this.addInputWithSettings('enable', node_1.Type.BOOLEAN, true, 'Enable');
-        this.addInputWithSettings('interval', node_1.Type.NUMBER, 2, 'Polling Interval');
-        this.addOutput('connected', node_1.Type.BOOLEAN);
-        this.addOutput('error', node_1.Type.STRING);
+        this.addInputWithSettings('enable', node_io_1.Type.BOOLEAN, true, 'Enable');
+        this.addInputWithSettings('interval', node_io_1.Type.NUMBER, 2, 'Polling Interval');
+        this.addOutput('connected', node_io_1.Type.BOOLEAN);
+        this.addOutput('error', node_io_1.Type.STRING);
         this.iconImageUrl = icon;
         this.headerColor = '#184840';
         this.settings['time'] = {

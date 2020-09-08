@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const base_point_1 = require("./base-point");
 const node_1 = require("../../node");
 const time_utils_1 = require("../../utils/time-utils");
@@ -22,12 +23,12 @@ class NubeAPIInputPoint extends base_point_1.default {
         this.title = 'Nube API Input';
         this.description =
             "This node is used to fetch point values from Nube devices.  Once the nube/login node is successfully authenticated, the API-Input nodes will have their settings updated with values from the connected Nube devices. Connected Nube devices can be selected from the ‘Select URL‘ setting dropdown.  ‘Select Point’ setting dropdown will be populated with the available points from the selected URL.  Ticking the ‘Show Advanced Options’ setting will add outputs to the node with extra information about the selected point.   ‘Interval’ is the update frequency (minimum 1 second). 'interval’ units can be configured from settings.  Maximum ‘interval’ setting is 587 hours.";
-        this.addInput('trigger', node_1.Type.BOOLEAN);
-        this.addInputWithSettings('interval', node_1.Type.NUMBER, 5, 'Interval (minimum 1 second)', false);
-        this.addOutput('name', node_1.Type.STRING);
-        this.addOutput('value', node_1.Type.STRING);
-        this.addOutput('lastUpdate', node_1.Type.STRING);
-        this.addOutput('error', node_1.Type.STRING);
+        this.addInput('trigger', node_io_1.Type.BOOLEAN);
+        this.addInputWithSettings('interval', node_io_1.Type.NUMBER, 5, 'Interval (minimum 1 second)', false);
+        this.addOutput('name', node_io_1.Type.STRING);
+        this.addOutput('value', node_io_1.Type.STRING);
+        this.addOutput('lastUpdate', node_io_1.Type.STRING);
+        this.addOutput('error', node_io_1.Type.STRING);
         this.settings['time'] = {
             description: 'Units',
             type: node_1.SettingType.DROPDOWN,
@@ -125,13 +126,13 @@ class NubeAPIInputPoint extends base_point_1.default {
         this.advancedSetting = this.settings['advancedSetting'].value;
         if (this.advancedSetting && !this.previousAdvancedSetting) {
             this.removeOutput(3);
-            this.addOutput('unit', node_1.Type.STRING);
-            this.addOutput('kind', node_1.Type.STRING);
-            this.addOutput('type', node_1.Type.STRING);
-            this.addOutput('scale', node_1.Type.STRING);
-            this.addOutput('historyType', node_1.Type.STRING);
-            this.addOutput('asObject', node_1.Type.JSON);
-            this.addOutput('error', node_1.Type.STRING);
+            this.addOutput('unit', node_io_1.Type.STRING);
+            this.addOutput('kind', node_io_1.Type.STRING);
+            this.addOutput('type', node_io_1.Type.STRING);
+            this.addOutput('scale', node_io_1.Type.STRING);
+            this.addOutput('historyType', node_io_1.Type.STRING);
+            this.addOutput('asObject', node_io_1.Type.JSON);
+            this.addOutput('error', node_io_1.Type.STRING);
         }
         else if (!this.advancedSetting && this.previousAdvancedSetting) {
             this.removeOutput(3);
@@ -141,7 +142,7 @@ class NubeAPIInputPoint extends base_point_1.default {
             this.removeOutput(7);
             this.removeOutput(8);
             this.removeOutput(9);
-            this.addOutput('error', node_1.Type.STRING);
+            this.addOutput('error', node_io_1.Type.STRING);
         }
         this.previousAdvancedSetting = this.advancedSetting;
     }

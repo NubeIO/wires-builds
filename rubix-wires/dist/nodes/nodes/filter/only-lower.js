@@ -2,15 +2,16 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class FiltersOnlyLowerNode extends node_1.Node {
     constructor() {
         super();
         this.title = 'Only Lower';
         this.description =
             "This node filters 'input' values.  Only Numeric 'input' values less than 'threshold' are passed to 'output'.";
-        this.addInput('input', node_1.Type.NUMBER);
-        this.addInputWithSettings('threshold', node_1.Type.NUMBER, 0, 'threshold', false);
-        this.addOutput('output', node_1.Type.NUMBER);
+        this.addInput('input', node_io_1.Type.NUMBER);
+        this.addInputWithSettings('threshold', node_io_1.Type.NUMBER, 0, 'threshold', false);
+        this.addOutput('output', node_io_1.Type.NUMBER);
     }
     onInputUpdated() {
         let val = this.getInputData(0);

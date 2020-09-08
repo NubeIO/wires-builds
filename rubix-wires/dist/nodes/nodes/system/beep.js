@@ -2,14 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class SystemBeepNode extends node_1.Node {
     constructor() {
         super();
         this.title = 'Beep';
         this.description =
             'This node plays a default system sound on the server (not in the browser) when ‘trigger’ transitions from ‘false’ to ‘true’.';
-        this.addInput('trigger', node_1.Type.BOOLEAN);
-        this.addOutput('error', node_1.Type.STRING);
+        this.addInput('trigger', node_io_1.Type.BOOLEAN);
+        this.addOutput('error', node_io_1.Type.STRING);
     }
     onInputUpdated() {
         try {

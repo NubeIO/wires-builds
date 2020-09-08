@@ -4,6 +4,7 @@ const helper_1 = require("../../../../utils/helper");
 const pattern_1 = require("../../../../utils/pattern");
 const container_1 = require("../../../container");
 const node_1 = require("../../../node");
+const node_io_1 = require("../../../node-io");
 const registry_1 = require("../../../registry");
 const node_mixin_1 = require("../../node-mixin");
 const connection_node_mixin_1 = require("../connection-node-mixin");
@@ -55,7 +56,7 @@ function MqttGenericNodeMixin(Base) {
             return _a = this.getParentNode(), (_a !== null && _a !== void 0 ? _a : pattern_1.MockCentralizedListener.LISTENER);
         }
         mixinMqttTopicInputSetting() {
-            this.addInputWithSettings(this._iTopic, node_1.Type.STRING, '', 'MQTT Topic');
+            this.addInputWithSettings(this._iTopic, node_io_1.Type.STRING, '', 'MQTT Topic');
         }
         handleOnUpdate(current, prev) {
             var _a, _b;
@@ -121,8 +122,8 @@ class MqttGenericNode extends connection_node_mixin_1.DependantConnectionNodeMix
 class MqttPublisherNode extends MqttGenericNode {
     constructor() {
         super('MQTT Publisher', `MQTT Publisher Node is used to publish MQTT message for generic purpose`);
-        this.addInputWithSettings('is-json', node_1.Type.BOOLEAN, false, 'MQTT Message is JSON type');
-        this.addInputWithSettings('message', node_1.Type.ANY, '', 'MQTT Message');
+        this.addInputWithSettings('is-json', node_io_1.Type.BOOLEAN, false, 'MQTT Message is JSON type');
+        this.addInputWithSettings('message', node_io_1.Type.ANY, '', 'MQTT Message');
     }
     onConvertMessage(data) {
         var _a;
@@ -170,7 +171,7 @@ class MqttPublisherNode extends MqttGenericNode {
 class MqttSubscriberNode extends MqttGenericNode {
     constructor() {
         super('MQTT Subscriber', `MQTT Subscriber Node is used for generic purpose`);
-        this.addOutput('out', node_1.Type.ANY);
+        this.addOutput('out', node_io_1.Type.ANY);
     }
     onReceiveMessage(incomingMessage) {
         this.setOutputData(this.errorOutputIdx() + 1, incomingMessage);

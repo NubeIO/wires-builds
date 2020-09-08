@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Bacnet = require("node-bacnet");
+const node_io_1 = require("../../../node-io");
 const bacnet_utils_1 = require("./bacnet-utils");
 const constants_1 = require("../../../constants");
 const container_1 = require("../../../container");
@@ -38,12 +39,12 @@ class BACnetDevice extends container_node_1.ContainerNode {
         this.title = 'BACnet Device';
         this.description =
             'This node acts as a container for bacnet-point nodes. All bacnet-device nodes should be added within the bacnet-network container.  All bacnet-point nodes should be added within a bacnet-device container node.  Configuration of BACnet device connections are set from settings.  Both IP and MSTP BACnet devices can be configured from the bacnet-device settings.';
-        this.addInput('get-point-list', node_1.Type.BOOLEAN);
-        this.addOutput('out', node_1.Type.STRING);
-        this.addOutput('out msg', node_1.Type.STRING);
-        this.addOutput('error', node_1.Type.STRING);
-        this.addOutput('points-discovered', node_1.Type.STRING);
-        this.addOutput('points-to-poll', node_1.Type.STRING);
+        this.addInput('get-point-list', node_io_1.Type.BOOLEAN);
+        this.addOutput('out', node_io_1.Type.STRING);
+        this.addOutput('out msg', node_io_1.Type.STRING);
+        this.addOutput('error', node_io_1.Type.STRING);
+        this.addOutput('points-discovered', node_io_1.Type.STRING);
+        this.addOutput('points-to-poll', node_io_1.Type.STRING);
         this.properties['pointsList'] = null;
         this.settings['deviceEnable'] = {
             description: 'Device enable',

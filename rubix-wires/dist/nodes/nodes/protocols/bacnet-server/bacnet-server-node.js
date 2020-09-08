@@ -9,7 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const decorators_1 = require("../../../../utils/decorators");
 const helper_1 = require("../../../../utils/helper");
 const container_1 = require("../../../container");
-const node_1 = require("../../../node");
+const node_io_1 = require("../../../node-io");
 const registry_1 = require("../../../registry");
 const container_node_store_1 = require("../model/container-node-store");
 const point_node_1 = require("../model/point-node");
@@ -57,13 +57,13 @@ class BACnetServerNode extends ProtocolDeviceNode_1.ProtocolDeviceNode {
         this.device = null;
         this.store = new BacnetNodeServerStore();
         this.mixinEnableInputSetting();
-        this.addInputWithSettings('address', node_1.Type.STRING, '0.0.0.0', 'BACnet Server Address');
-        this.addInputWithSettings('broadcast', node_1.Type.STRING, '255.255.255.255', 'Broadcast Address');
-        this.addInputWithSettings('port', node_1.Type.NUMBER, 47808, 'BACnet port');
-        this.addInputWithSettings('id', node_1.Type.NUMBER, 1, 'BACnet Device Id');
-        this.addInputWithSettings('name', node_1.Type.STRING, 'nube-bacnet', 'BACnet Device Name');
-        this.addInputWithSettings('apdu', node_1.Type.NUMBER, 1476, 'BACnet APDU');
-        this.addOutput('points', node_1.Type.JSON);
+        this.addInputWithSettings('address', node_io_1.Type.STRING, '0.0.0.0', 'BACnet Server Address');
+        this.addInputWithSettings('broadcast', node_io_1.Type.STRING, '255.255.255.255', 'Broadcast Address');
+        this.addInputWithSettings('port', node_io_1.Type.NUMBER, 47808, 'BACnet port');
+        this.addInputWithSettings('id', node_io_1.Type.NUMBER, 1, 'BACnet Device Id');
+        this.addInputWithSettings('name', node_io_1.Type.STRING, 'nube-bacnet', 'BACnet Device Name');
+        this.addInputWithSettings('apdu', node_io_1.Type.NUMBER, 1476, 'BACnet APDU');
+        this.addOutput('points', node_io_1.Type.JSON);
     }
     listen({ action, payload }) {
         this.debugInfo(`Handling ${action}:${payload.identifier}...`);

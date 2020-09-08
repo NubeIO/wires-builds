@@ -2,15 +2,16 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const string_json_compare_utils_1 = require("../../utils/string-json-compare-utils");
 class JsonFilter extends node_1.Node {
     constructor() {
         super();
         this.title = 'Json Filter';
         this.description = 'Filter a json object Example: msg.myKey';
-        this.addInput('input', node_1.Type.STRING);
-        this.addOutput('output', node_1.Type.STRING);
-        this.addOutput('output-key', node_1.Type.STRING);
+        this.addInput('input', node_io_1.Type.STRING);
+        this.addOutput('output', node_io_1.Type.STRING);
+        this.addOutput('output-key', node_io_1.Type.STRING);
         this.settings['filter'] = {
             description: 'Example: msg.myKey',
             value: 'myKey',

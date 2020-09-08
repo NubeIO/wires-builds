@@ -2,13 +2,14 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class TextStringLengthNode extends node_1.Node {
     constructor() {
         super();
         this.title = 'String Length';
         this.description = "'output' is the number of characters in the given String 'input' value.";
-        this.addInput('input', node_1.Type.STRING);
-        this.addOutput('output', node_1.Type.NUMBER);
+        this.addInput('input', node_io_1.Type.STRING);
+        this.addOutput('output', node_io_1.Type.NUMBER);
     }
     onAdded() {
         this.onInputUpdated();

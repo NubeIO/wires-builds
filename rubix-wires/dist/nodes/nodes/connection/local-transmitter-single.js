@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const container_1 = require("../../container");
 const node_1 = require("../../node");
 const node_icons_1 = require("../../node-icons");
+const node_io_1 = require("../../node-io");
 const icon = node_icons_1.default.aiIcon;
 class ConnectionLocalTransmitterNode extends node_1.Node {
     constructor() {
@@ -11,9 +12,9 @@ class ConnectionLocalTransmitterNode extends node_1.Node {
         this.description =
             "This node works in conjunction with link-receiver node, and provides a connection of nodes without the graphical wires. 'in #' inputs will be sent to the corresponding 'out #' output on link-receiver nodes with matching 'Channel Number' settings. The number of inputs is configurable from settings.";
         this.iconImageUrl = icon;
-        this.addInput('input', node_1.Type.ANY);
-        this.addInputWithSettings('channel', node_1.Type.STRING, '1', 'Topic Name', false);
-        this.addInputWithSettings('enable', node_1.Type.BOOLEAN, true, 'Enable');
+        this.addInput('input', node_io_1.Type.ANY);
+        this.addInputWithSettings('channel', node_io_1.Type.STRING, '1', 'Topic Name', false);
+        this.addInputWithSettings('enable', node_io_1.Type.BOOLEAN, true, 'Enable');
     }
     init() {
         if (!this.properties['channel']) {

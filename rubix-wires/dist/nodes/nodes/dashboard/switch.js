@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const ui_node_1 = require("./ui-node");
-const node_1 = require("../../node");
 class UiSwitchNode extends ui_node_1.UiNode {
     constructor(container, id, properties) {
         super('Switch', 'UiSwitchNode', properties);
@@ -10,8 +10,8 @@ class UiSwitchNode extends ui_node_1.UiNode {
             "Dashboard node which displays a toggle switchon the dashboard.  When clicked it will switch the node 'output' between 'true' and 'false'.  The button text can be edited in settings.  The button can be overridden by wiring a Boolean into the node 'input'. ";
         this.title = 'Switch';
         this.setState(false);
-        this.addInput('input', node_1.Type.BOOLEAN);
-        this.addOutput('output', node_1.Type.BOOLEAN);
+        this.addInput('input', node_io_1.Type.BOOLEAN);
+        this.addOutput('output', node_io_1.Type.BOOLEAN);
     }
     onAdded() {
         super.onAdded();

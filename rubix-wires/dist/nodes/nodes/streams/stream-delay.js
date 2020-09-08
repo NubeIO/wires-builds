@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const time_utils_1 = require("../../utils/time-utils");
 class DelayNode extends node_1.Node {
     constructor() {
@@ -11,7 +12,7 @@ class DelayNode extends node_1.Node {
         this.description =
             "‘input' values are passed to 'output' after a 'delay' period. Each 'input' value is delayed by the same 'delay' period. 'delay' units can be configured from settings. Maximum ‘delay’ setting is 587 hours.";
         this.addInput('input');
-        this.addInputWithSettings('delay', node_1.Type.NUMBER, 1000, 'Delay (millis)', false);
+        this.addInputWithSettings('delay', node_io_1.Type.NUMBER, 1000, 'Delay (millis)', false);
         this.addOutput('output');
         this.settings['time'] = {
             description: 'Units',

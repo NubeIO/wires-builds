@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class ToggleNode extends node_1.Node {
     constructor() {
         super();
@@ -10,8 +11,8 @@ class ToggleNode extends node_1.Node {
         this.title = 'Toggle';
         this.description =
             "When the 'input' transitions from 'false' to 'true', 'output' will switch between 'false'/'true'.   (See Figure A.)";
-        this.addInput('input', node_1.Type.BOOLEAN);
-        this.addOutput('output', node_1.Type.BOOLEAN);
+        this.addInput('input', node_io_1.Type.BOOLEAN);
+        this.addOutput('output', node_io_1.Type.BOOLEAN);
         this.settings['reset-on-disc'] = {
             description: 'Reset on disconnected or input is null',
             value: false,

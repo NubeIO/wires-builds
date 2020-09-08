@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../../node");
 const container_1 = require("../../../container");
+const node_io_1 = require("../../../node-io");
 const check_types_1 = require("../../../utils/check-types");
 const constants_1 = require("../../../constants");
 const BACnet_enums_units_1 = require("../../../utils/points/BACnet-enums-units");
@@ -18,7 +19,7 @@ class ModbusPointNode extends node_1.Node {
         this.dynamicOutputsExist = false;
         this.dynamicInputsStartName = 'in';
         this.dynamicOutputsStartName = 'out';
-        this.dynamicInputsType = node_1.Type.NUMBER;
+        this.dynamicInputsType = node_io_1.Type.NUMBER;
         this.inAlarmTrigger = 0;
         this.inHistoryTrigger = 1;
         this.inInput = 2;
@@ -80,10 +81,10 @@ class ModbusPointNode extends node_1.Node {
                 `   \n ` +
                 ` This will enable/disable the point from polling \n ` +
                 `   \n `;
-        this.addOutput('output', node_1.Type.NUMBER);
-        this.addOutput('error', node_1.Type.STRING);
-        this.addOutput('output-modbus-array', node_1.Type.STRING);
-        this.addOutput('output json', node_1.Type.STRING);
+        this.addOutput('output', node_io_1.Type.NUMBER);
+        this.addOutput('error', node_io_1.Type.STRING);
+        this.addOutput('output-modbus-array', node_io_1.Type.STRING);
+        this.addOutput('output json', node_io_1.Type.STRING);
         this.properties['pointVal'] = null;
         this.settings['pointEnable'] = {
             description: 'Point enable',

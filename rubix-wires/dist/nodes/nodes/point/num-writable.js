@@ -1,16 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const node_1 = require("../../node");
 const container_1 = require("../../container");
 const flexible_node_1 = require("../../flexible-node");
+const node_io_1 = require("../../node-io");
 class NumWritableNode extends flexible_node_1.FlexibleNode {
     constructor() {
         super();
-        this.dynamicInputsType = node_1.Type.NUMBER;
+        this.dynamicInputsType = node_io_1.Type.NUMBER;
         this.title = 'Numeric Writable (Priority)';
         this.description =
             "Outputs the highest priority, non-null, Numeric input.  Highest priority is 'in 1' then 'in 2' and so on.  Input values can also be wired in, or set from settings. The number of inputs can be modified from settings.";
-        this.addOutput('out', node_1.Type.NUMBER);
+        this.addOutput('out', node_io_1.Type.NUMBER);
     }
     onAdded() {
         this.onInputUpdated();

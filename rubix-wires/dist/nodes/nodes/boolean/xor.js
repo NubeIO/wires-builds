@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
 const node_icons_1 = require("../../node-icons");
+const node_io_1 = require("../../node-io");
 let logicMainColour = node_icons_1.default.logicMainColour;
 let logicAndIcon = node_icons_1.default.logicAndIcon;
 let logicOrIcon = node_icons_1.default.logicOrIcon;
@@ -12,10 +13,10 @@ class XorNode extends node_1.Node {
         this.title = 'XOR';
         this.description =
             "Performs a logical 'XOR' operation (output 'true' when EITHER input is 'true', but not both). Limited to only 2 inputs.";
-        this.addInput('in 1', node_1.Type.BOOLEAN);
-        this.addInput('in 2', node_1.Type.BOOLEAN);
-        this.addOutput('output', node_1.Type.BOOLEAN);
-        this.addOutput('out not', node_1.Type.BOOLEAN);
+        this.addInput('in 1', node_io_1.Type.BOOLEAN);
+        this.addInput('in 2', node_io_1.Type.BOOLEAN);
+        this.addOutput('output', node_io_1.Type.BOOLEAN);
+        this.addOutput('out not', node_io_1.Type.BOOLEAN);
     }
     onAdded() {
         this.onInputUpdated();

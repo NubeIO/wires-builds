@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 const time_utils_1 = require("../time-utils");
 const setting_utils_1 = require("../setting-utils");
@@ -22,10 +23,10 @@ const Influx = require('influx');
 const moment = require('moment-timezone');
 class HistoryConfig {
     static addHistorySettings(self) {
-        self.addInput('histTrigger', node_1.Type.BOOLEAN);
-        self.addOutput('histError', node_1.Type.ANY);
-        self.addOutput('storedHistCount', node_1.Type.NUMBER);
-        self.addOutput('lastHistExport', node_1.Type.STRING);
+        self.addInput('histTrigger', node_io_1.Type.BOOLEAN);
+        self.addOutput('histError', node_io_1.Type.ANY);
+        self.addOutput('storedHistCount', node_io_1.Type.NUMBER);
+        self.addOutput('lastHistExport', node_io_1.Type.STRING);
         for (let input in self.inputs) {
             if (self.inputs.hasOwnProperty(input)) {
                 if (self.inputs[input].name == 'histTrigger')
@@ -464,7 +465,7 @@ class HistoryConfig {
         let diff = target_count - self.properties['alarmsCount'];
         if (diff == 0)
             return;
-        self.changeInputsCount(target_count + self.properties['dynamicInputStartPosition'], node_1.Type.STRING);
+        self.changeInputsCount(target_count + self.properties['dynamicInputStartPosition'], node_io_1.Type.STRING);
         var alarmsToAdd = {};
         if (diff > 0) {
             for (let i = self.properties['alarmsCount'] + 1; i <= target_count; i++) {

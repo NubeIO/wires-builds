@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
 const helper_1 = require("../../../utils/helper");
+const node_io_1 = require("../../node-io");
 class EventCounterNode extends node_1.Node {
     constructor() {
         super();
@@ -10,9 +11,9 @@ class EventCounterNode extends node_1.Node {
         this.description =
             "‘count' increases by 1 every time an event occurs at 'input'. Any incoming value, including null, will be taken. 'count' will be reset to 0 when 'reset' transitions from 'false' to 'true.  ‘toggle’ will alternate between ‘true’ and ‘false’, changing each time count increases. ";
         this.addInput('input');
-        this.addInput('reset', node_1.Type.BOOLEAN);
-        this.addOutput('count', node_1.Type.NUMBER);
-        this.addOutput('toggle', node_1.Type.NUMBER);
+        this.addInput('reset', node_io_1.Type.BOOLEAN);
+        this.addOutput('count', node_io_1.Type.NUMBER);
+        this.addOutput('toggle', node_io_1.Type.NUMBER);
         this.setOutputData(0, 0);
         this.setOutputData(1, false);
         this.settings['null'] = {

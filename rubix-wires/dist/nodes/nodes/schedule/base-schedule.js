@@ -2,14 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class BaseScheduleNode extends node_1.Node {
     constructor() {
         super();
         this.settings['id'] = { description: 'ID', value: '', type: node_1.SettingType.READONLY };
-        this.addInput('input', node_1.Type.STRING);
-        this.addOutput('inserted', node_1.Type.BOOLEAN);
-        this.addOutput('updated', node_1.Type.BOOLEAN);
-        this.addOutput('error', node_1.Type.STRING);
+        this.addInput('input', node_io_1.Type.STRING);
+        this.addOutput('inserted', node_io_1.Type.BOOLEAN);
+        this.addOutput('updated', node_io_1.Type.BOOLEAN);
+        this.addOutput('error', node_io_1.Type.STRING);
     }
     onInputUpdated() {
         if (this.side !== container_1.Side.server)

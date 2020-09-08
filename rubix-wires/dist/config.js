@@ -13,8 +13,8 @@ const config = {
     rubix: {
         branch: '(HEAD',
         build: '',
-        hash: '3490816',
-        version: '1.4.3',
+        hash: 'cc13793',
+        version: '1.4.4',
     },
     bsa: {
         baseURL: '',
@@ -55,6 +55,13 @@ const config = {
         baseURL: '',
         port: 5000,
         apiVer: '',
+    },
+    mqtt: {
+        protocol: 'http',
+        host: 'localhost',
+        port: 1883,
+        username: '',
+        password: '',
     },
 };
 const footerPrefix = `-${config.rubix.hash}${config.rubix.build && `-${config.rubix.build}`}`;

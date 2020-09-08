@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../../node");
 const container_1 = require("../../../container");
+const node_io_1 = require("../../../node-io");
 const utils_1 = require("../../../utils");
 const axios_1 = require("axios");
 const time_utils_1 = require("../../../utils/time-utils");
@@ -29,9 +30,9 @@ class Edge28LORAResetNode extends node_1.Node {
                 ` The reason for this nodes is to give the user more control over the nube hardware\n ` +
                 ` When a ***trigger*** is activated on the node input or the ***interval*** timer is triggered the lora-modules will be reset\n ` +
                 ` The reboot of the module only takes ***1000ms*** to restart\n ` +
-                this.addInputWithSettings('enableInterval', node_1.Type.BOOLEAN, false, 'Enable Interval Reset');
-        this.addInputWithSettings('interval', node_1.Type.NUMBER, 15, 'Interval');
-        this.addInput('trigger', node_1.Type.BOOLEAN);
+                this.addInputWithSettings('enableInterval', node_io_1.Type.BOOLEAN, false, 'Enable Interval Reset');
+        this.addInputWithSettings('interval', node_io_1.Type.NUMBER, 15, 'Interval');
+        this.addInput('trigger', node_io_1.Type.BOOLEAN);
         this.addOutput('lastReset');
         this.settings['time'] = {
             description: 'Units',

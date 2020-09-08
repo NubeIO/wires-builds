@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 class PowerUnitConversionNode extends node_1.Node {
     constructor() {
@@ -9,10 +10,10 @@ class PowerUnitConversionNode extends node_1.Node {
         this.title = 'Power Conversion (kW)';
         this.description =
             'This node converts between Power units kilowatt (kW), Tons of Refrigeration (tons),  British Thermal Unit per hour (Btu/h), and Electrical Horsepower (hp).  Input type can be selected from settings. Outputs will change based on selected input type.';
-        this.addInput('kW', node_1.Type.NUMBER);
-        this.addOutput('tons', node_1.Type.NUMBER);
-        this.addOutput('Btu/h', node_1.Type.NUMBER);
-        this.addOutput('hp', node_1.Type.NUMBER);
+        this.addInput('kW', node_io_1.Type.NUMBER);
+        this.addOutput('tons', node_io_1.Type.NUMBER);
+        this.addOutput('Btu/h', node_io_1.Type.NUMBER);
+        this.addOutput('hp', node_io_1.Type.NUMBER);
         this.settings['inputType'] = {
             description: 'Input Type',
             type: node_1.SettingType.DROPDOWN,

@@ -1,18 +1,18 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const node_1 = require("../../node");
 const container_1 = require("../../container");
 const flexible_node_1 = require("../../flexible-node");
+const node_io_1 = require("../../node-io");
 class MathTriggerSubNode extends flexible_node_1.FlexibleNode {
     constructor() {
         super();
-        this.dynamicInputsType = node_1.Type.NUMBER;
+        this.dynamicInputsType = node_io_1.Type.NUMBER;
         super.dynamicInputStartPosition = 1;
         this.title = 'Trigger Subtract';
         this.description =
             "When 'trigger' transitions from 'false' to 'true', 'output' is updated with the result of the subtraction of all inputs ('in 1' - 'in 2' - ...). Input values can be set from settings. The number of inputs is configurable from settings.";
-        this.addInput('trigger', node_1.Type.BOOLEAN);
-        this.addOutput('output', node_1.Type.NUMBER);
+        this.addInput('trigger', node_io_1.Type.BOOLEAN);
+        this.addOutput('output', node_io_1.Type.NUMBER);
     }
     onAdded() {
         this.lastTrigger = false;

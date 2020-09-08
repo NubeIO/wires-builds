@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
 const moment = require("moment");
+const node_io_1 = require("../../node-io");
 var TIME_TYPE;
 (function (TIME_TYPE) {
     TIME_TYPE["TIME"] = "time string as input (YY:MM:DD)";
@@ -20,10 +21,10 @@ class TimeDiffNode extends node_1.Node {
                 `## Outputs (return data type is ***JSON***)\n ` +
                 ` ***out-difference-time*** will return the time difference in for example: ***hours: 1, minutes: 30 ***\n ` +
                 ` ***out-difference-totals*** will return the time difference in for example: ***hours: 1, minutes: 90 ***\n `;
-        this.addInput('time-compare-1', node_1.Type.ANY);
-        this.addInput('time-compare-2', node_1.Type.ANY);
-        this.addOutput('out-difference-time', node_1.Type.ANY);
-        this.addOutput('out-difference-totals', node_1.Type.ANY);
+        this.addInput('time-compare-1', node_io_1.Type.ANY);
+        this.addInput('time-compare-2', node_io_1.Type.ANY);
+        this.addOutput('out-difference-time', node_io_1.Type.ANY);
+        this.addOutput('out-difference-totals', node_io_1.Type.ANY);
         this.settings['time'] = {
             description: 'Time input type',
             type: node_1.SettingType.DROPDOWN,

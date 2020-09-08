@@ -1,16 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const node_1 = require("../../node");
 const container_1 = require("../../container");
 const flexible_node_1 = require("../../flexible-node");
+const node_io_1 = require("../../node-io");
 class AddNode extends flexible_node_1.FlexibleNode {
     constructor() {
         super();
-        this.dynamicInputsType = node_1.Type.NUMBER;
+        this.dynamicInputsType = node_io_1.Type.NUMBER;
         this.title = 'Add';
         this.description =
             "('output' = 'in 1' + 'in 2' + ...) 'output' is the result of adding of all Numeric inputs. Input values can be set from settings. The number of inputs is configurable from settings.";
-        this.addOutput('output', node_1.Type.NUMBER);
+        this.addOutput('output', node_io_1.Type.NUMBER);
     }
     onAdded() {
         this.onInputUpdated();

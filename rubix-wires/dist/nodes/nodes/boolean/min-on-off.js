@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 const time_utils_1 = require("../../utils/time-utils");
 class MinOnOffNode extends node_1.Node {
@@ -10,13 +11,13 @@ class MinOnOffNode extends node_1.Node {
         this.title = 'Min On Off';
         this.description =
             "‘output’ matches ‘input’ but is delayed by the 'minOn' and 'minOff' durations. ‘output’ will remain 'true' for 'minOn' duration then match the ‘input’ value. ‘output’ will remain 'false' for 'minOff' duration then match the ‘input’ value. 'minOn' and 'minOff' delays are cancelled when 'reset' transitions from 'false' to 'true. ‘minOn active’ is ‘true’ during ‘minOn’ periods. ‘minOff active’ is ‘true’ during ‘minOff’ periods.  'minOn' and 'minOff' units can be configured from settings. Maximum ‘minOn’ and ‘'minOff'’ setting is 587 hours.   (See Figure A.)";
-        this.addInput('input', node_1.Type.BOOLEAN);
-        this.addInputWithSettings('minOn', node_1.Type.NUMBER, 1, 'Minimum On Time');
-        this.addInputWithSettings('minOff', node_1.Type.NUMBER, 1, 'Minimum Off Time');
-        this.addInput('reset', node_1.Type.BOOLEAN);
-        this.addOutput('output', node_1.Type.BOOLEAN);
-        this.addOutput('minOn active', node_1.Type.BOOLEAN);
-        this.addOutput('minOff active', node_1.Type.BOOLEAN);
+        this.addInput('input', node_io_1.Type.BOOLEAN);
+        this.addInputWithSettings('minOn', node_io_1.Type.NUMBER, 1, 'Minimum On Time');
+        this.addInputWithSettings('minOff', node_io_1.Type.NUMBER, 1, 'Minimum Off Time');
+        this.addInput('reset', node_io_1.Type.BOOLEAN);
+        this.addOutput('output', node_io_1.Type.BOOLEAN);
+        this.addOutput('minOn active', node_io_1.Type.BOOLEAN);
+        this.addOutput('minOff active', node_io_1.Type.BOOLEAN);
         this.settings['timeMinOn'] = {
             description: 'Units',
             type: node_1.SettingType.DROPDOWN,

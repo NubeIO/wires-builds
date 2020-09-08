@@ -10,16 +10,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
+const node_io_1 = require("../../node-io");
 const node_utils_1 = require("../../utils/node-utils");
 class PriorityConfig {
     static addPrioritySettings(self) {
         self.properties['priorityStartInput'] = self.getFreeInputId();
         self.properties['priorityStartOutput'] = self.getFreeOutputId();
-        self.addInput('inputValue', node_1.Type.ANY);
-        self.addInput('inputPriority', node_1.Type.NUMBER);
-        self.addOutput('outputValue', node_1.Type.ANY);
-        self.addOutput('outputPriority', node_1.Type.NUMBER);
-        self.addOutput('outputJSON', node_1.Type.STRING);
+        self.addInput('inputValue', node_io_1.Type.ANY);
+        self.addInput('inputPriority', node_io_1.Type.NUMBER);
+        self.addOutput('outputValue', node_io_1.Type.ANY);
+        self.addOutput('outputPriority', node_io_1.Type.NUMBER);
+        self.addOutput('outputJSON', node_io_1.Type.STRING);
         for (let input in self.inputs) {
             if (self.inputs[input].name == 'inputValue') {
                 self.properties['valueInput'] = input;
@@ -288,8 +289,8 @@ class PriorityConfig {
                         else if (self.properties['inputMethod'] == 1) {
                             PriorityConfig.updatePriorityInputsFromSettings(self, true);
                         }
-                        self.addInputAtPosition(self.properties['priorityStartInput'], 'inputValue', node_1.Type.ANY);
-                        self.addInputAtPosition(self.properties['priorityStartInput'] + 1, 'inputPriority', node_1.Type.NUMBER);
+                        self.addInputAtPosition(self.properties['priorityStartInput'], 'inputValue', node_io_1.Type.ANY);
+                        self.addInputAtPosition(self.properties['priorityStartInput'] + 1, 'inputPriority', node_io_1.Type.NUMBER);
                         break;
                     case 1:
                         if (self.properties['inputMethod'] == 2) {
@@ -309,7 +310,7 @@ class PriorityConfig {
                             self.removeInputAtPosition(self.properties['priorityStartInput']);
                             self.removeInputAtPosition(self.properties['priorityStartInput']);
                         }
-                        self.addInputAtPosition(self.properties['priorityStartInput'], 'inputJSON', node_1.Type.ANY);
+                        self.addInputAtPosition(self.properties['priorityStartInput'], 'inputJSON', node_io_1.Type.ANY);
                         break;
                 }
             }
@@ -344,7 +345,7 @@ class PriorityConfig {
                         if (inputArrayatY == j + 1)
                             break;
                         if (inputArrayatY == -1 || inputArrayatY > j + 1) {
-                            self.addInputAtPosition(startPosition + y, 'in' + (j + 1), node_1.Type.ANY);
+                            self.addInputAtPosition(startPosition + y, 'in' + (j + 1), node_io_1.Type.ANY);
                             inputsArray.splice(y, 0, j + 1);
                             inputsArray.pop();
                             break;

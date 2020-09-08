@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class WatchNode extends node_1.Node {
     constructor() {
         super();
@@ -9,7 +10,7 @@ class WatchNode extends node_1.Node {
         this.UPDATE_INTERVAL = 300;
         this.title = 'Watch';
         this.description = 'Show value of input';
-        this.addInput('input', node_1.Type.ANY);
+        this.addInput('input', node_io_1.Type.ANY);
     }
     onAdded() {
         if (this.side == container_1.Side.server)

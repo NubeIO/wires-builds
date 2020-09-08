@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const container_1 = require("../../container");
 const node_1 = require("../../node");
+const node_io_1 = require("../../node-io");
 class IntToBits extends node_1.Node {
     constructor() {
         super();
@@ -18,7 +19,7 @@ class IntToBits extends node_1.Node {
             type: node_1.SettingType.NUMBER,
             value: 1,
         };
-        this.addInput('input', node_1.Type.ANY);
+        this.addInput('input', node_io_1.Type.ANY);
     }
     init() {
         this.setNewOutputs();
@@ -57,7 +58,7 @@ class IntToBits extends node_1.Node {
         }
         outputsLen = this.settings['bytes'].value * 8;
         for (let i = 0; i < outputsLen; i++) {
-            this.addOutput(i.toString(), node_1.Type.NUMBER);
+            this.addOutput(i.toString(), node_io_1.Type.NUMBER);
         }
         this.updateNodeOutput();
         this.onInputUpdated();

@@ -1,18 +1,18 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const node_1 = require("../../node");
 const container_1 = require("../../container");
 const flexible_node_1 = require("../../flexible-node");
+const node_io_1 = require("../../node-io");
 class AndNode extends flexible_node_1.FlexibleNode {
     constructor() {
         super();
         this.dynamicSettingsExist = false;
-        this.dynamicInputsType = node_1.Type.BOOLEAN;
+        this.dynamicInputsType = node_io_1.Type.BOOLEAN;
         this.title = 'AND';
         this.description =
             "Performs a logical 'AND' operation (output 'true' when ALL inputs are 'true'). You can specify the number of inputs in the node settings.";
-        this.addOutput('output', node_1.Type.BOOLEAN);
-        this.addOutput('out not', node_1.Type.BOOLEAN);
+        this.addOutput('output', node_io_1.Type.BOOLEAN);
+        this.addOutput('out not', node_io_1.Type.BOOLEAN);
         this.setOutputData(0, false);
         this.setOutputData(1, true);
     }

@@ -13,16 +13,17 @@ const node_1 = require("../../../node");
 const container_1 = require("../../../container");
 const child_process_1 = require("child_process");
 const fs = require("fs");
+const node_io_1 = require("../../../node-io");
 const crypto_utils_1 = require("../../../utils/crypto-utils");
 class MqttBroker extends node_1.Node {
     constructor() {
         super();
         this.title = 'MQTT Broker';
         this.description = '.';
-        this.addInput('ping broker', node_1.Type.STRING);
-        this.addOutput('status', node_1.Type.STRING);
-        this.addOutput('error', node_1.Type.STRING);
-        this.addOutput('debug', node_1.Type.STRING);
+        this.addInput('ping broker', node_io_1.Type.STRING);
+        this.addOutput('status', node_io_1.Type.STRING);
+        this.addOutput('error', node_io_1.Type.STRING);
+        this.addOutput('debug', node_io_1.Type.STRING);
         this.settings['enable'] = {
             description: 'Broker enable',
             value: false,

@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const _ = require("lodash");
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class JsonFilterMultiple extends node_1.Node {
     constructor() {
         super();
@@ -12,8 +13,8 @@ class JsonFilterMultiple extends node_1.Node {
             'Filter a json object to multiple outputs. There are two Output Update options for whether ' +
                 'you want to update all keys or not (ALL: update as `null` when the key value will not be on the JSON, FOUND: ' +
                 "don't update values and leave as is when key key value doesn't exist";
-        this.addInput('input', node_1.Type.STRING);
-        this.addOutput('error', node_1.Type.STRING);
+        this.addInput('input', node_io_1.Type.STRING);
+        this.addOutput('error', node_io_1.Type.STRING);
         this.settings['filter'] = {
             description: 'Example: key1.innerKey1, key2, key2.innerKey2',
             value: '',
@@ -81,7 +82,7 @@ class JsonFilterMultiple extends node_1.Node {
     addOutputs() {
         this.filterKeys = this.getFilterKeys();
         for (let i = 0; i < this.filterKeys.length; i++) {
-            this.addOutput(this.filterKeys[i], node_1.Type.ANY);
+            this.addOutput(this.filterKeys[i], node_io_1.Type.ANY);
         }
     }
     getFilterKeys() {

@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const time_utils_1 = require("../../utils/time-utils");
 const axios_1 = require("axios");
 const system_utils_1 = require("../system/system-utils");
@@ -22,9 +23,9 @@ class GetSchedulesNode extends node_1.Node {
         this.title = 'Get-Schedules';
         this.description =
             "This node is used to fetch schedules from the Nube dashboard.  The ‘Get-Schedules’ node will output all schedules from the device; Specific schedule selection is done on the ‘Schedule-Checker’ node.  ‘Interval’ (set from settings) is how often the node will re-check for schedule changes (minimum 10 seconds).  In order for the ‘get-schedules’ node to work, there must be a `system/platform’ node in the main container (default editor pane) and there must be a ‘deviceID’ in the ‘system/platform’ node settings, It is recommended that the API-Schedule node is used in conjunction with a filter/prevent-null node to maintain the last successful schedule read in the case that the API-Login node becomes disconnected. 'interval’ units can be configured from settings.  Maximum ‘interval’ setting is 587 hours.";
-        this.addInputWithSettings('enable', node_1.Type.BOOLEAN, true, 'Enable');
-        this.addOutput('data', node_1.Type.JSON);
-        this.addOutput('error', node_1.Type.BOOLEAN);
+        this.addInputWithSettings('enable', node_io_1.Type.BOOLEAN, true, 'Enable');
+        this.addOutput('data', node_io_1.Type.JSON);
+        this.addOutput('error', node_io_1.Type.BOOLEAN);
         this.settings['interval'] = {
             description: 'Update Interval (min 10 seconds)',
             type: node_1.SettingType.NUMBER,

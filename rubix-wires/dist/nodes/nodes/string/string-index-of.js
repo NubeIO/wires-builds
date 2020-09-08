@@ -2,16 +2,17 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class StringIndexOfNode extends node_1.Node {
     constructor() {
         super();
         this.title = 'String Index Of';
         this.description =
             "This node takes String 'input' and 'searchFor'; Numeric 'output' is the index(position) of the first instance of 'searchFor' in 'input'.  Index of 0 is the begginning of the 'input' string. ";
-        this.addInputWithSettings('input', node_1.Type.STRING, '', 'Input Value', false);
-        this.addInputWithSettings('searchFor', node_1.Type.STRING, '', 'Search For Value', false);
-        this.addOutput('startIndex', node_1.Type.NUMBER);
-        this.addOutput('endIndex', node_1.Type.NUMBER);
+        this.addInputWithSettings('input', node_io_1.Type.STRING, '', 'Input Value', false);
+        this.addInputWithSettings('searchFor', node_io_1.Type.STRING, '', 'Search For Value', false);
+        this.addOutput('startIndex', node_io_1.Type.NUMBER);
+        this.addOutput('endIndex', node_io_1.Type.NUMBER);
         this.setOutputData(0, null);
         this.setOutputData(1, null);
         this.settings['input'] = {

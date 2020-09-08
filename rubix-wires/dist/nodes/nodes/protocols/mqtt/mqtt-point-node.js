@@ -5,6 +5,7 @@ const helper_1 = require("../../../../utils/helper");
 const pattern_1 = require("../../../../utils/pattern");
 const container_1 = require("../../../container");
 const node_1 = require("../../../node");
+const node_io_1 = require("../../../node-io");
 const registry_1 = require("../../../registry");
 const connection_node_mixin_1 = require("../connection-node-mixin");
 const point_node_1 = require("../model/point-node");
@@ -23,7 +24,7 @@ class MqttPointNode extends connection_node_mixin_1.DependantConnectionNodeMixin
                 'and can publish values once we enable the node.';
         this.mixinEnableInputSetting();
         this.mixinConnectionStatusOutput();
-        this.addInputWithSettings(this._iTopic, node_1.Type.STRING, '', 'MQTT Topic');
+        this.addInputWithSettings(this._iTopic, node_io_1.Type.STRING, '', 'MQTT Topic');
         this.settings[this._sReqRes] = {
             description: 'Request Response mode',
             type: node_1.SettingType.BOOLEAN,
@@ -133,7 +134,7 @@ class MqttPointNode extends connection_node_mixin_1.DependantConnectionNodeMixin
         return 2;
     }
     presentValueType() {
-        return node_1.Type.ANY;
+        return node_io_1.Type.ANY;
     }
     computeTitle() {
         return `MQTT Point (Topic: ${this.settings[this._iTopic].value})`;

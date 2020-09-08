@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 const axios_1 = require("axios");
 const crypto_utils_1 = require("../../utils/crypto-utils");
@@ -25,10 +26,10 @@ class NubeLoginNode extends node_1.Node {
         this.settings['port'] = { description: 'Port', value: '', type: node_1.SettingType.STRING };
         this.settings['username'] = { description: 'Username', value: '', type: node_1.SettingType.STRING };
         this.settings['password'] = { description: 'Password', value: '', type: node_1.SettingType.PASSWORD };
-        this.addInput('trigger', node_1.Type.BOOLEAN);
-        this.addInputWithSettings('interval', node_1.Type.NUMBER, 10, 'Interval(minimum 10 minutes)', false);
-        this.addOutput('jwt', node_1.Type.STRING);
-        this.addOutput('error', node_1.Type.STRING);
+        this.addInput('trigger', node_io_1.Type.BOOLEAN);
+        this.addInputWithSettings('interval', node_io_1.Type.NUMBER, 10, 'Interval(minimum 10 minutes)', false);
+        this.addOutput('jwt', node_io_1.Type.STRING);
+        this.addOutput('error', node_io_1.Type.STRING);
         this.settings['time'] = {
             description: 'Units',
             type: node_1.SettingType.DROPDOWN,

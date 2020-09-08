@@ -1,16 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const node_io_1 = require("../../node-io");
 const ui_node_1 = require("./ui-node");
 const container_1 = require("../../container");
-const node_1 = require("../../node");
 class UiSliderNode extends ui_node_1.UiNode {
     constructor(container, id, properties) {
         super('Slider', 'UiSliderNode', properties);
         this.description =
             "Dashboard node which displays an input slider bar on the dashboard.  The user can move the slider bar knob to adjust the output between 0 and 100.  The slider can be overridden by wiring a Numeric into the node 'input'. ";
         this.title = 'Slider';
-        this.addInput('input', node_1.Type.NUMBER);
-        this.addOutput('output', node_1.Type.NUMBER);
+        this.addInput('input', node_io_1.Type.NUMBER);
+        this.addOutput('output', node_io_1.Type.NUMBER);
         this.UPDATE_INPUTS_INTERVAL = 100;
         this.setState(0);
     }

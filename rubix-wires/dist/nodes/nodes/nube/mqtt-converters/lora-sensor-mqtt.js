@@ -3,15 +3,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../../node");
 const container_1 = require("../../../container");
 const _ = require("lodash");
+const node_io_1 = require("../../../node-io");
 class LoRaSensorToMqtt extends node_1.Node {
     constructor() {
         super();
         this.title = 'LoRa sensor To MQTT';
         this.description = 'LoRa sensor To MQTT';
         this.settings['host'] = { description: 'Device Name', value: '', type: node_1.SettingType.STRING };
-        this.addInput('in', node_1.Type.JSON);
-        this.addOutput('out', node_1.Type.JSON);
-        this.addOutput('error', node_1.Type.STRING);
+        this.addInput('in', node_io_1.Type.JSON);
+        this.addOutput('out', node_io_1.Type.JSON);
+        this.addOutput('error', node_io_1.Type.STRING);
     }
     onInputUpdated() {
         let payload = this.getInputData(0);

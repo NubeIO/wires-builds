@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
 const _ = require("lodash");
+const node_io_1 = require("../../node-io");
 class JSONBuilderNode extends node_1.Node {
     constructor() {
         super();
@@ -14,8 +15,8 @@ class JSONBuilderNode extends node_1.Node {
             type: node_1.SettingType.STRING,
             value: '',
         };
-        this.addInput('trigger', node_1.Type.BOOLEAN);
-        this.addOutput('output', node_1.Type.JSON);
+        this.addInput('trigger', node_io_1.Type.BOOLEAN);
+        this.addOutput('output', node_io_1.Type.JSON);
     }
     init() {
         this.addInputs();
@@ -49,7 +50,7 @@ class JSONBuilderNode extends node_1.Node {
         this.filterKeys = this.getFilterKeys();
         for (let i = 0; i < this.filterKeys.length; i++) {
             let name = this.filterKeys[i];
-            this.addInput(name.toString(), node_1.Type.ANY);
+            this.addInput(name.toString(), node_io_1.Type.ANY);
         }
     }
     getFilterKeys() {

@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 const axios_1 = require("axios");
 const base_point_1 = require("./base-point");
@@ -17,13 +18,13 @@ const node_1 = require("../../node");
 class NubeAPIOutputPoint extends base_point_1.default {
     constructor() {
         super();
-        this.dynamicInputsType = node_1.Type.STRING;
+        this.dynamicInputsType = node_io_1.Type.STRING;
         this.title = 'Nube API Output';
         this.description =
             'This node is used to write to points on connected Nube devices.  Once the nube/login node is successfully authenticated, the API-Output nodes will have their settings updated with values from the connected Nube devices. Connected Nube devices can be selected from the ‘Select URL‘ setting dropdown.  ‘Select Point’ setting dropdown will be populated with the available points from the selected URL.  Nube points have 16 priority levels to write to.  The ‘Priority Level’ setting is the priority that the node will write on.  The ‘in #’ inputs act as a separate priority array; the highest non-null ‘in #’ input will be written to the Nube point on the ‘Priority Level’ setting’.  The number of inputs can be modified from the ‘Inputs Count’ setting. Ticking the ‘Show Advanced Options’ setting will add outputs to the node with extra information about the selected point.';
-        this.addOutput('outValue', node_1.Type.STRING);
-        this.addOutput('lastUpdate', node_1.Type.STRING);
-        this.addOutput('error', node_1.Type.STRING);
+        this.addOutput('outValue', node_io_1.Type.STRING);
+        this.addOutput('lastUpdate', node_io_1.Type.STRING);
+        this.addOutput('error', node_io_1.Type.STRING);
         this.settings['priorityLevel'] = {
             description: 'Priority Level',
             type: node_1.SettingType.DROPDOWN,
@@ -117,13 +118,13 @@ class NubeAPIOutputPoint extends base_point_1.default {
         this.advancedSetting = this.settings['advancedSetting'].value;
         if (this.advancedSetting && !this.previousAdvancedSetting) {
             this.removeOutput(2);
-            this.addOutput('asObject', node_1.Type.JSON);
-            this.addOutput('error', node_1.Type.STRING);
+            this.addOutput('asObject', node_io_1.Type.JSON);
+            this.addOutput('error', node_io_1.Type.STRING);
         }
         else if (!this.advancedSetting && this.previousAdvancedSetting) {
             this.removeOutput(3);
             this.removeOutput(2);
-            this.addOutput('error', node_1.Type.STRING);
+            this.addOutput('error', node_io_1.Type.STRING);
         }
         this.previousAdvancedSetting = this.advancedSetting;
     }

@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const container_1 = require("../../container");
 const node_1 = require("../../node");
+const node_io_1 = require("../../node-io");
 const modbus_point_byte_order_1 = require("../protocols/modbus/modbus-fc/modbus-point-byte-order");
 class ByteArrayToIntNode extends node_1.Node {
     constructor() {
@@ -10,9 +11,9 @@ class ByteArrayToIntNode extends node_1.Node {
         this.title = 'Byte Array To Int';
         this.description =
             'A node to convert an 4 and 8 (long) byte array to an int with Big-endian And Little-endian format. Example [0,0,0,5,11,88,37,12] = 190326028';
-        this.addInput('in 1', node_1.Type.ANY);
-        this.addOutput('out', node_1.Type.JSON);
-        this.addOutput('out buffer', node_1.Type.JSON);
+        this.addInput('in 1', node_io_1.Type.ANY);
+        this.addOutput('out', node_io_1.Type.JSON);
+        this.addOutput('out buffer', node_io_1.Type.JSON);
         this.settings['dataType'] = {
             description: 'Set data type',
             type: node_1.SettingType.DROPDOWN,

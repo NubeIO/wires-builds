@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 class BoolSwitchNode extends node_1.Node {
     constructor() {
@@ -9,10 +10,10 @@ class BoolSwitchNode extends node_1.Node {
         this.title = 'Boolean Switch';
         this.description =
             "Boolean 'switch' passes corresponding Boolean input to 'output'.  If 'switch' is 'true', Boolean 'inTrue' value will be passed to 'output'  'inTrue' and 'inFalse' values can be set in settings.";
-        this.addInput('switch', node_1.Type.BOOLEAN);
-        this.addInput('[inTrue]', node_1.Type.BOOLEAN);
-        this.addInput('[inFalse]', node_1.Type.BOOLEAN);
-        this.addOutput('output', node_1.Type.BOOLEAN);
+        this.addInput('switch', node_io_1.Type.BOOLEAN);
+        this.addInput('[inTrue]', node_io_1.Type.BOOLEAN);
+        this.addInput('[inFalse]', node_io_1.Type.BOOLEAN);
+        this.addOutput('output', node_io_1.Type.BOOLEAN);
         this.settings['inTrue'] = {
             description: 'True Value',
             type: node_1.SettingType.DROPDOWN,

@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
 const node_icons_1 = require("../../node-icons");
+const node_io_1 = require("../../node-io");
 let logicMainColour = node_icons_1.default.logicMainColour;
 let logicNotIcon = node_icons_1.default.logicNotIcon;
 class NotNode extends node_1.Node {
@@ -11,8 +12,8 @@ class NotNode extends node_1.Node {
         this.title = 'NOT';
         this.description =
             "Performs a logical 'NOT' operation (output will be the inverse of the input).";
-        this.addInput('input', node_1.Type.BOOLEAN);
-        this.addOutput('output', node_1.Type.BOOLEAN);
+        this.addInput('input', node_io_1.Type.BOOLEAN);
+        this.addOutput('output', node_io_1.Type.BOOLEAN);
     }
     onAdded() {
         this.onInputUpdated();

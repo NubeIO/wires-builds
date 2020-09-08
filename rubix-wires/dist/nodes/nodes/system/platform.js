@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_node_1 = require("../../container-node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const os_utils_1 = require("../../utils/os-utils");
 const file_utils_1 = require("../../utils/file-utils");
 const uuid_utils_1 = require("../../utils/uuid-utils");
@@ -33,16 +34,16 @@ class PlatNode extends container_node_1.ContainerNode {
         this.title = 'Platform';
         this.description =
             'This node provides global settings for the Wires instance. It should be added to the main(root) Editor Pane of each Wires instance. ‘Client ID’ and ‘Device ID’ are used by each node with a history logging configuration to store data.';
-        this.addInputWithSettings('client-id', node_1.Type.STRING, 'client abc', 'Client ID/Name', false);
-        this.addInputWithSettings('site-id', node_1.Type.STRING, 'site 123', 'Site/Building ID/Name', false);
-        this.addInputWithSettings('client-name', node_1.Type.STRING, 'client 123', 'Client Name', false);
-        this.addInputWithSettings('site-name', node_1.Type.STRING, 'site 123', 'Site/Building Name', false);
-        this.addInputWithSettings('site-address', node_1.Type.STRING, '123 my street', 'Site/Building Address', false);
-        this.addOutput('device-id', node_1.Type.STRING);
-        this.addOutput('client-id', node_1.Type.STRING);
-        this.addOutput('site-id', node_1.Type.STRING);
-        this.addOutput('wires-version', node_1.Type.STRING);
-        this.addOutput('output-json', node_1.Type.JSON);
+        this.addInputWithSettings('clientId', node_io_1.Type.STRING, 'client id', 'client id', false);
+        this.addInputWithSettings('siteId', node_io_1.Type.STRING, 'site id', 'site id', false);
+        this.addInputWithSettings('clientName', node_io_1.Type.STRING, 'client name', 'Client Name', false);
+        this.addInputWithSettings('siteName', node_io_1.Type.STRING, 'site name', 'Site/Building Name', false);
+        this.addInputWithSettings('siteAddress', node_io_1.Type.STRING, '123 my street', 'Site/Building Address', false);
+        this.addOutput('device-id', node_io_1.Type.STRING);
+        this.addOutput('client-id', node_io_1.Type.STRING);
+        this.addOutput('site-id', node_io_1.Type.STRING);
+        this.addOutput('wires-version', node_io_1.Type.STRING);
+        this.addOutput('output-json', node_io_1.Type.JSON);
         this.settings['deviceIdType'] = {
             description: 'Device ID Type',
             type: node_1.SettingType.DROPDOWN,

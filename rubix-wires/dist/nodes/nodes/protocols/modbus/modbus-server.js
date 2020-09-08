@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../../node");
 const container_1 = require("../../../container");
+const node_io_1 = require("../../../node-io");
 let ModbusRTU = require('modbus-serial');
 class ModbusServerNode extends node_1.Node {
     constructor() {
@@ -35,10 +36,10 @@ class ModbusServerNode extends node_1.Node {
                 `   \n ` +
                 ` This will set the modbus server modbus address (valid range between 0 and 255) \n ` +
                 `   \n `;
-        this.addInput('connect', node_1.Type.BOOLEAN);
-        this.addOutput('status', node_1.Type.BOOLEAN);
-        this.addOutput('error', node_1.Type.STRING);
-        this.addOutput('message', node_1.Type.STRING);
+        this.addInput('connect', node_io_1.Type.BOOLEAN);
+        this.addOutput('status', node_io_1.Type.BOOLEAN);
+        this.addOutput('error', node_io_1.Type.STRING);
+        this.addOutput('message', node_io_1.Type.STRING);
         this.settings['serverEnable'] = {
             description: 'Server enable',
             value: false,

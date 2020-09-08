@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const string_json_compare_utils_1 = require("../../utils/string-json-compare-utils");
 var compareType;
 (function (compareType) {
@@ -21,11 +22,11 @@ class JsonFilterCompare extends node_1.Node {
         this.title = 'Json Filter';
         this.description =
             "This node provides several functions to compare a JSON object input, with a Boolean 'output'.  Available comparison functions are: Equals, Includes, Starts With, and Ends With.  The comparison function is selected from settings.";
-        this.addInput('input', node_1.Type.STRING);
-        this.addInputWithSettings('comparison-to', node_1.Type.STRING, '', 'Comparison Value');
-        this.addOutput('output', node_1.Type.STRING);
-        this.addOutput('output-key', node_1.Type.STRING);
-        this.addOutput('match', node_1.Type.BOOLEAN);
+        this.addInput('input', node_io_1.Type.STRING);
+        this.addInputWithSettings('comparison-to', node_io_1.Type.STRING, '', 'Comparison Value');
+        this.addOutput('output', node_io_1.Type.STRING);
+        this.addOutput('output-key', node_io_1.Type.STRING);
+        this.addOutput('match', node_io_1.Type.BOOLEAN);
         this.settings['filter'] = {
             description: 'Example: msg.myKey',
             value: 'myKey',

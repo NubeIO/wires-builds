@@ -2,15 +2,16 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../../node");
 const container_1 = require("../../../container");
+const node_io_1 = require("../../../node-io");
 class LoraRawFilter extends node_1.Node {
     constructor() {
         super();
         this.title = `Nube LoRaRAW Filter`;
         this.description = 'This node filters differe nube lora protocols';
-        this.addInput('rawInput', node_1.Type.STRING);
-        this.addOutput('sensor', node_1.Type.STRING);
-        this.addOutput('two-way', node_1.Type.STRING);
-        this.addOutput('other', node_1.Type.STRING);
+        this.addInput('rawInput', node_io_1.Type.STRING);
+        this.addOutput('sensor', node_io_1.Type.STRING);
+        this.addOutput('two-way', node_io_1.Type.STRING);
+        this.addOutput('other', node_io_1.Type.STRING);
     }
     onInputUpdated() {
         let data = this.getInputData(0) || '';

@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 const psychrolib = require('../../lib/psychrolib');
 class PsychrometricCalculationsNode extends node_1.Node {
@@ -11,17 +12,17 @@ class PsychrometricCalculationsNode extends node_1.Node {
         this.title = 'Psychrometric Calcs (Metric/SI)';
         this.description =
             'This node provides psychrometric calculations based on a selection of: Dry Bulb Temp, Wet Bulb Temp, Dew Point, Relative Humidity, and Pressure.  Inputs and Outputs as follows: (i) Dry bulb temperature in °F [IP] or °C [SI]; (i) Wet bulb temperature in °F [IP] or °C [SI];  (i) Atmospheric pressure in Psi [IP] or Pa [SI];  (o) Humidity ratio in lb_H₂O lb_Air⁻¹ [IP] or kg_H₂O kg_Air⁻¹ [SI];  (o) Dew point temperature in °F [IP] or °C [SI]; \n (o) Relative humidity [0-1];  (o) Partial pressure of water vapor in moist air in Psi [IP] or Pa [SI];  (o) Moist air enthalpy in Btu lb⁻¹ [IP] or J kg⁻¹ [SI];  (o) Specific volume ft³ lb⁻¹ [IP] or in m³ kg⁻¹ [SI].  Input types can be selected from settings. Outputs will change based on selected input type.   Unit system can be set from settings to be in:  Metric/SI or Imperial/IP.';
-        this.addInput('DryBulb', node_1.Type.NUMBER);
-        this.addInput('RelHum(0-1)', node_1.Type.NUMBER);
-        this.addInput('Pressure', node_1.Type.NUMBER);
-        this.addOutput('HumRatio', node_1.Type.NUMBER);
-        this.addOutput('TWetBulb', node_1.Type.NUMBER);
-        this.addOutput('TDewPoint', node_1.Type.NUMBER);
-        this.addOutput('VapPres', node_1.Type.NUMBER);
-        this.addOutput('MoistAirEnthalpy', node_1.Type.NUMBER);
-        this.addOutput('MoistAirVolume', node_1.Type.NUMBER);
-        this.addOutput('DegreeOfSaturation', node_1.Type.NUMBER);
-        this.addOutput('error', node_1.Type.STRING);
+        this.addInput('DryBulb', node_io_1.Type.NUMBER);
+        this.addInput('RelHum(0-1)', node_io_1.Type.NUMBER);
+        this.addInput('Pressure', node_io_1.Type.NUMBER);
+        this.addOutput('HumRatio', node_io_1.Type.NUMBER);
+        this.addOutput('TWetBulb', node_io_1.Type.NUMBER);
+        this.addOutput('TDewPoint', node_io_1.Type.NUMBER);
+        this.addOutput('VapPres', node_io_1.Type.NUMBER);
+        this.addOutput('MoistAirEnthalpy', node_io_1.Type.NUMBER);
+        this.addOutput('MoistAirVolume', node_io_1.Type.NUMBER);
+        this.addOutput('DegreeOfSaturation', node_io_1.Type.NUMBER);
+        this.addOutput('error', node_io_1.Type.STRING);
         this.settings['units'] = {
             description: 'Select Units',
             type: node_1.SettingType.DROPDOWN,

@@ -2,15 +2,16 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class TextCharAtIndexNode extends node_1.Node {
     constructor() {
         super();
         this.title = 'Char at Index';
         this.description =
             "'output' is the character at the Numeric 'index' (position) of String 'input'.  The first character of the String 'input' is 'index' 0. If 'index' is negative, characters will be selected from the end of the 'input' string (eg. -1 is the last character; -2 is the second to last character). 'output' will be 'null' on an invalid 'index'.";
-        this.addInput('input', node_1.Type.STRING);
-        this.addInputWithSettings('index', node_1.Type.NUMBER, 0, 'Index', false);
-        this.addOutput('output', node_1.Type.STRING);
+        this.addInput('input', node_io_1.Type.STRING);
+        this.addInputWithSettings('index', node_io_1.Type.NUMBER, 0, 'Index', false);
+        this.addOutput('output', node_io_1.Type.STRING);
     }
     onAdded() {
         this.onInputUpdated();

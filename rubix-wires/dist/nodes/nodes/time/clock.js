@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const time_utils_1 = require("../../utils/time-utils");
 const moment = require('moment');
 class ClockNode extends node_1.Node {
@@ -11,11 +12,11 @@ class ClockNode extends node_1.Node {
         this.title = 'Clock';
         this.description =
             "Outputs the System Time in various forms. Standard outputs are: Time('timeString') Hours('hour'), Minutes('min'), and Seconds('sec'). There are also Advanced outputs which can be enabled from settings. The Advanced outputs are: Milliseconds(millis), Time String including timezone ('longString'), Timezone Offset from UTC('TZOffset'), and Unix Timestamp ('epoch'). ‘interval’ is the output update frequency.   ‘interval’ units can be configured from settings. Maximum ‘interval’ setting is 587 hours.";
-        this.addOutput('timeString', node_1.Type.STRING);
-        this.addOutput('hour', node_1.Type.NUMBER);
-        this.addOutput('min', node_1.Type.NUMBER);
-        this.addOutput('sec', node_1.Type.NUMBER);
-        this.addInputWithSettings('interval', node_1.Type.NUMBER, 1, 'Interval');
+        this.addOutput('timeString', node_io_1.Type.STRING);
+        this.addOutput('hour', node_io_1.Type.NUMBER);
+        this.addOutput('min', node_io_1.Type.NUMBER);
+        this.addOutput('sec', node_io_1.Type.NUMBER);
+        this.addInputWithSettings('interval', node_io_1.Type.NUMBER, 1, 'Interval');
         this.settings['time'] = {
             description: 'Time',
             type: node_1.SettingType.DROPDOWN,
@@ -102,10 +103,10 @@ class ClockNode extends node_1.Node {
         this.onInputUpdated();
     }
     addOutputs() {
-        this.addOutput('millis', node_1.Type.NUMBER);
-        this.addOutput('longString', node_1.Type.STRING);
-        this.addOutput('TZOffset', node_1.Type.NUMBER);
-        this.addOutput('epoch', node_1.Type.NUMBER);
+        this.addOutput('millis', node_io_1.Type.NUMBER);
+        this.addOutput('longString', node_io_1.Type.STRING);
+        this.addOutput('TZOffset', node_io_1.Type.NUMBER);
+        this.addOutput('epoch', node_io_1.Type.NUMBER);
     }
 }
 exports.ClockNode = ClockNode;

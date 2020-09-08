@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const time_utils_1 = require("../../utils/time-utils");
 class ToggleDurationNode extends node_1.Node {
     constructor() {
@@ -9,10 +10,10 @@ class ToggleDurationNode extends node_1.Node {
         this.title = 'Toggle Duration';
         this.description =
             "This node accepts a 'pushButton' input which triggers 'output' to 'true' for the 'runtime', or until 'pushButton' transitions from 'false' to 'true' within the 'runtime' period";
-        this.addInput('pushButton', node_1.Type.BOOLEAN);
-        this.addInputWithSettings('runtime', node_1.Type.NUMBER, 120, 'Runtime');
-        this.addOutput('output', node_1.Type.BOOLEAN);
-        this.addOutput('remainingRuntime', node_1.Type.NUMBER);
+        this.addInput('pushButton', node_io_1.Type.BOOLEAN);
+        this.addInputWithSettings('runtime', node_io_1.Type.NUMBER, 120, 'Runtime');
+        this.addOutput('output', node_io_1.Type.BOOLEAN);
+        this.addOutput('remainingRuntime', node_io_1.Type.NUMBER);
         this.settings['time'] = {
             description: 'Units',
             type: node_1.SettingType.DROPDOWN,

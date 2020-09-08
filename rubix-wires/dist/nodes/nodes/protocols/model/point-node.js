@@ -12,6 +12,7 @@ const decorators_1 = require("../../../../utils/decorators");
 const helper_1 = require("../../../../utils/helper");
 const container_1 = require("../../../container");
 const node_1 = require("../../../node");
+const node_io_1 = require("../../../node-io");
 const point_node_utils_1 = require("./point-node-utils");
 const logger = logplease_1.create('observer', { color: logplease_1.Colors.Yellow });
 class PointOutputObserver {
@@ -130,12 +131,12 @@ function PointNodeMixin(Base) {
             return this.priorityOutputIdx() + 1;
         }
         presentValueType() {
-            return node_1.Type.NUMBER;
+            return node_io_1.Type.NUMBER;
         }
         mixinPointValueInputOutput() {
-            this.addOutput(this._oOut, node_1.Type.NUMBER);
-            this.addOutput(this._oPriority, node_1.Type.NUMBER);
-            this.addOutput(this._oPriorityArray, node_1.Type.JSON);
+            this.addOutput(this._oOut, node_io_1.Type.NUMBER);
+            this.addOutput(this._oPriority, node_io_1.Type.NUMBER);
+            this.addOutput(this._oPriorityArray, node_io_1.Type.JSON);
             this.settings[this.modelSettingKey()] = { description: '', value: null };
             this.settings[this._iPriorityArrayLot] = { description: '', value: null };
             this.settings[this._sInputGroup] = { description: 'Input Settings', value: '', type: node_1.SettingType.GROUP };
@@ -147,13 +148,13 @@ function PointNodeMixin(Base) {
                 value: point_node_utils_1.InputMethod.VALUE_PRIORITY.enumKey,
             };
             this.addInputWithSettings(this._iPresentValue, this.presentValueType(), null, 'Present Value');
-            this.addInputWithSettings(this._iPriority, node_1.Type.NUMBER, 16, 'Point Priority');
-            this.addInputWithSettings(this._iPriorityArrayJson, node_1.Type.JSON, null, 'Priority Array in JSON or Array');
+            this.addInputWithSettings(this._iPriority, node_io_1.Type.NUMBER, 16, 'Point Priority');
+            this.addInputWithSettings(this._iPriorityArrayJson, node_io_1.Type.JSON, null, 'Priority Array in JSON or Array');
             this.inputs[this.priorityArrayInputIdx()].setting.hidden = true;
             let cfg = {};
             for (let value of helper_1.range(1, 16)) {
                 this.settings[`in${value}`] = { description: `in${value}`, type: node_1.SettingType.BOOLEAN, value: false };
-                this.addInput(`[in${value}]`, node_1.Type.NUMBER, { exist: false, nullable: true, hidden: true });
+                this.addInput(`[in${value}]`, node_io_1.Type.NUMBER, { exist: false, nullable: true, hidden: true });
                 cfg[`in${value}`] = () => point_node_utils_1.InputMethod.PRIORITY_ARRAY_LOT.enumKey === this.settings[this._sInputMethod].value;
             }
             cfg[this.modelSettingKey()] = () => false;

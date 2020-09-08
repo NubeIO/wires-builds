@@ -1,18 +1,18 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const node_1 = require("../../node");
 const container_1 = require("../../container");
 const flexible_node_1 = require("../../flexible-node");
+const node_io_1 = require("../../node-io");
 class OrNode extends flexible_node_1.FlexibleNode {
     constructor() {
         super();
         this.dynamicSettingsExist = false;
-        this.dynamicInputsType = node_1.Type.BOOLEAN;
+        this.dynamicInputsType = node_io_1.Type.BOOLEAN;
         this.title = 'OR';
         this.description =
             "Performs a logical 'OR' operation (output 'true' when ANY input is 'true'). You can specify the number of inputs in the node settings.";
-        this.addOutput('output', node_1.Type.BOOLEAN);
-        this.addOutput('out not', node_1.Type.BOOLEAN);
+        this.addOutput('output', node_io_1.Type.BOOLEAN);
+        this.addOutput('out not', node_io_1.Type.BOOLEAN);
     }
     onAdded() {
         this.onInputUpdated();

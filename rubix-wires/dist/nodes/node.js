@@ -4,17 +4,12 @@ const lodash_1 = require("lodash");
 const moment = require("moment");
 const events_1 = require("../events");
 const container_1 = require("./container");
+const node_io_1 = require("./node-io");
 const node_link_1 = require("./node-link");
 const registry_1 = require("./registry");
 const utils_1 = require("./utils");
 const log = require('logplease').create('node', { color: 5 });
 const doNothing = () => { };
-class NodeOutput {
-}
-exports.NodeOutput = NodeOutput;
-class NodeInput {
-}
-exports.NodeInput = NodeInput;
 var BROADCAST;
 (function (BROADCAST) {
     BROADCAST[BROADCAST["UPDATE_SETTINGS"] = 0] = "UPDATE_SETTINGS";
@@ -25,15 +20,6 @@ var BROADCAST;
     BROADCAST[BROADCAST["UPDATE_NAME"] = 5] = "UPDATE_NAME";
     BROADCAST[BROADCAST["UPDATE_PROPERTIES"] = 6] = "UPDATE_PROPERTIES";
 })(BROADCAST = exports.BROADCAST || (exports.BROADCAST = {}));
-var Type;
-(function (Type) {
-    Type["STRING"] = "string";
-    Type["NUMBER"] = "number";
-    Type["BOOLEAN"] = "boolean";
-    Type["ANY"] = "any";
-    Type["JSON"] = "json";
-    Type["DROPDOWN"] = "dropdown";
-})(Type = exports.Type || (exports.Type = {}));
 var NodeState;
 (function (NodeState) {
     NodeState["NORMAL"] = "normal";
@@ -56,42 +42,16 @@ var SettingType;
     SettingType["PASSWORD"] = "password";
     SettingType["GROUP"] = "group";
 })(SettingType = exports.SettingType || (exports.SettingType = {}));
-exports.convertStringToType = (type) => {
-    switch (type) {
-        case Type.STRING:
-            return Type.STRING;
-        case Type.NUMBER:
-            return Type.NUMBER;
-        case Type.BOOLEAN:
-            return Type.BOOLEAN;
-        case Type.JSON:
-            return Type.JSON;
-    }
-    return Type.ANY;
-};
-exports.convertType = (type) => {
-    switch (type) {
-        case Type.STRING:
-            return SettingType.STRING;
-        case Type.NUMBER:
-            return SettingType.NUMBER;
-        case Type.BOOLEAN:
-            return SettingType.BOOLEAN;
-        case Type.DROPDOWN:
-            return SettingType.DROPDOWN;
-    }
-    return SettingType.STRING;
-};
 exports.convertSettingType = (type) => {
     switch (type) {
         case SettingType.STRING:
-            return Type.STRING;
+            return node_io_1.Type.STRING;
         case SettingType.NUMBER:
-            return Type.NUMBER;
+            return node_io_1.Type.NUMBER;
         case SettingType.BOOLEAN:
-            return Type.BOOLEAN;
+            return node_io_1.Type.BOOLEAN;
     }
-    return Type.ANY;
+    return node_io_1.Type.ANY;
 };
 class Node {
     constructor(container, id, properties) {
@@ -107,16 +67,16 @@ class Node {
         this.showIcon = true;
         this.convertInput = (input, dataType, decimals = 3) => {
             const inputDataType = typeof input;
-            if (dataType === Type.NUMBER) {
+            if (dataType === node_io_1.Type.NUMBER) {
                 input = Number((isNaN(input) ? 0 : Number(input)).toFixed(decimals));
             }
-            else if (dataType === Type.BOOLEAN) {
+            else if (dataType === node_io_1.Type.BOOLEAN) {
                 if (inputDataType === 'boolean')
                     input = Number(input);
                 else
                     input = input === 1 || input === 'true' ? 1 : 0;
             }
-            else if (dataType === Type.STRING && inputDataType !== 'string') {
+            else if (dataType === node_io_1.Type.STRING && inputDataType !== 'string') {
                 input = JSON.stringify(input);
             }
             return input;
@@ -174,6 +134,7 @@ class Node {
                     pos: i.pos,
                     round: i.round,
                     isOptional: i.isOptional,
+                    subNodeId: i.subNodeId
                 };
             }
         }
@@ -189,6 +150,7 @@ class Node {
                     locked: o.locked,
                     pos: o.pos,
                     round: o.round,
+                    subNodeId: o.subNodeId
                 };
             }
         }
@@ -277,10 +239,10 @@ class Node {
             if (this.inputs[slotId] &&
                 this.inputs[slotId].setting &&
                 this.inputs[slotId].setting.exist &&
-                (!utils_1.default.hasValidInput(data, this.inputs[slotId].setting.nullable) || input.type === Type.DROPDOWN)) {
+                (!utils_1.default.hasValidInput(data, this.inputs[slotId].setting.nullable) || input.type === node_io_1.Type.DROPDOWN)) {
                 const settingName = this.inputs[slotId].name.match(/\[(.*?)\]/)[1];
                 const setting = this.settings[settingName];
-                if (input.type === Type.DROPDOWN) {
+                if (input.type === node_io_1.Type.DROPDOWN) {
                     if (!setting.config.items.map(x => x.value).includes(data))
                         data = setting.value;
                 }
@@ -326,7 +288,7 @@ class Node {
         }
     }
     removeOutput(id) {
-        this.disconnectOutputLinks(id);
+        this.linkHandler.disconnectOutput(id);
         delete this.outputs[id];
         this.size = this.computeSize();
         if (this['onOutputRemoved'])
@@ -353,7 +315,7 @@ class Node {
         this.settings[name] = {
             description,
             value: defaultValue,
-            type: exports.convertType(type),
+            type: node_io_1.convertType(type),
         };
         if (config) {
             this.settings[name] = Object.assign(Object.assign({}, this.settings[name]), { config: config });
@@ -419,7 +381,7 @@ class Node {
         }
     }
     removeInput(id) {
-        this.disconnectInputLink(id);
+        this.linkHandler.disconnectInput(id);
         delete this.inputs[id];
         this.size = this.computeSize();
         if (this['onInputRemoved'])

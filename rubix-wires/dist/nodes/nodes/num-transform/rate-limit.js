@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const time_utils_1 = require("../../utils/time-utils");
 class RateLimitNode extends node_1.Node {
     constructor() {
@@ -9,10 +10,10 @@ class RateLimitNode extends node_1.Node {
         this.title = 'Rate-Limit';
         this.description =
             'This node makes a rate limited transition from its current output value to the ‘input’ value.  When ‘enable’ is ‘true’,  ‘output’ is permitted to change towards the ‘input’ value based on settings values.  ‘output’ can change by ‘step’ size every ‘interval’ period.  ‘output’ will be ‘null’ when ‘enable’ is ‘false’.';
-        this.addInput('input', node_1.Type.NUMBER);
-        this.addInputWithSettings('enable', node_1.Type.BOOLEAN, true, 'Enable', false);
-        this.addInputWithSettings('step', node_1.Type.NUMBER, 1, 'Step Size', false);
-        this.addInputWithSettings('interval', node_1.Type.NUMBER, 1, 'Update Interval', false);
+        this.addInput('input', node_io_1.Type.NUMBER);
+        this.addInputWithSettings('enable', node_io_1.Type.BOOLEAN, true, 'Enable', false);
+        this.addInputWithSettings('step', node_io_1.Type.NUMBER, 1, 'Step Size', false);
+        this.addInputWithSettings('interval', node_io_1.Type.NUMBER, 1, 'Update Interval', false);
         this.settings['time'] = {
             description: 'Units',
             type: node_1.SettingType.DROPDOWN,
@@ -29,7 +30,7 @@ class RateLimitNode extends node_1.Node {
         this.setSettingsConfig({
             groups: [{ interval: { weight: 2 }, time: {} }],
         });
-        this.addOutput('output', node_1.Type.NUMBER);
+        this.addOutput('output', node_io_1.Type.NUMBER);
         this.lastInterval = 1000;
         this.lastEnable = true;
         this.currentVal = 0;

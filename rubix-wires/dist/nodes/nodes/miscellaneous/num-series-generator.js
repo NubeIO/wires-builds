@@ -3,18 +3,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
 const flexible_node_1 = require("../../flexible-node");
+const node_io_1 = require("../../node-io");
 class NumSeriesGenerator extends flexible_node_1.FlexibleNode {
     constructor() {
         super();
         this.dynamicOutputsExist = true;
         this.dynamicInputsExist = false;
         this.dynamicSettingsExist = true;
-        super.dynamicOutputsType = node_1.Type.NUMBER;
+        super.dynamicOutputsType = node_io_1.Type.NUMBER;
         this.title = 'Numeric Series Generator';
         this.description =
             "";
-        this.addInputWithSettings('startVal', node_1.Type.NUMBER, 0, 'Start Value');
-        this.addInputWithSettings('addVal', node_1.Type.NUMBER, 1, 'Added Value ');
+        this.addInputWithSettings('startVal', node_io_1.Type.NUMBER, 0, 'Start Value');
+        this.addInputWithSettings('addVal', node_io_1.Type.NUMBER, 1, 'Added Value ');
         this.settings['digits'] = {
             description: 'Number of decimal places',
             value: 1,

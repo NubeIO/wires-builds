@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../../node");
 const container_1 = require("../../../container");
+const node_io_1 = require("../../../node-io");
 class MqttTopicPartsNode extends node_1.Node {
     constructor() {
         super();
@@ -18,10 +19,10 @@ class MqttTopicPartsNode extends node_1.Node {
                 ` ***output*** will return the ***index*** selection \n ` +
                 ` ***output-all*** (Returns an array) will return all the topic parts\n ` +
                 ` For example if the ***topic*** = ***topic/abc/123***  the  ***output-all*** will return ***[topic, abc, 123]***\n `;
-        this.addInput('input', node_1.Type.STRING);
-        this.addInputWithSettings('index', node_1.Type.NUMBER, 0, 'Index', false);
-        this.addOutput('output', node_1.Type.STRING);
-        this.addOutput('output-all', node_1.Type.JSON);
+        this.addInput('input', node_io_1.Type.STRING);
+        this.addInputWithSettings('index', node_io_1.Type.NUMBER, 0, 'Index', false);
+        this.addOutput('output', node_io_1.Type.STRING);
+        this.addOutput('output-all', node_io_1.Type.JSON);
     }
     onAdded() {
         this.onInputUpdated();

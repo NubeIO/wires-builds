@@ -1,18 +1,18 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 const flexible_node_1 = require("../../flexible-node");
 class StreamMergeNode extends flexible_node_1.FlexibleNode {
     constructor() {
         super();
         this.dynamicSettingsExist = false;
-        this.dynamicInputsType = node_1.Type.ANY;
+        this.dynamicInputsType = node_io_1.Type.ANY;
         this.title = 'Stream Merge';
         this.description =
             "This node merges multiple inputs into a single stream/output.  Any new 'input' ('in #') value will be passed to 'output'.  The number of inputs can be modified from settings.";
-        this.addOutput('output', node_1.Type.ANY);
+        this.addOutput('output', node_io_1.Type.ANY);
     }
     onAdded() {
         this.onInputUpdated();

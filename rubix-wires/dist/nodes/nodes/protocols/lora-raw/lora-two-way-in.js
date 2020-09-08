@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../../node");
 const container_1 = require("../../../container");
+const node_io_1 = require("../../../node-io");
 var LORA_DATA_TYPE_NAMES;
 (function (LORA_DATA_TYPE_NAMES) {
     LORA_DATA_TYPE_NAMES[LORA_DATA_TYPE_NAMES["INT8"] = 0] = "INT8";
@@ -52,8 +53,8 @@ class LoRaRawTwoWayInput extends node_1.Node {
             type: node_1.SettingType.STRING,
             value: '',
         };
-        this.addInput('rawInput', node_1.Type.STRING);
-        this.addOutput('error', node_1.Type.STRING);
+        this.addInput('rawInput', node_io_1.Type.STRING);
+        this.addOutput('error', node_io_1.Type.STRING);
     }
     init() {
         this.updateOutputs();
@@ -144,7 +145,7 @@ class LoRaRawTwoWayInput extends node_1.Node {
                 this.removeOutput(i);
             }
             for (let i = 0; i < data.length; i++) {
-                this.addOutput(i.toString(), node_1.Type.NUMBER);
+                this.addOutput(i.toString(), node_io_1.Type.NUMBER);
             }
             this.updateNodeOutput();
         }

@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const moment = require("moment-timezone");
 const node_1 = require("../../node");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 const time_utils_1 = require("../../utils/time-utils");
 const setting_utils_1 = require("../../utils/setting-utils");
@@ -39,11 +40,11 @@ class HistoryBase extends node_1.Node {
         this.tagCount = 0;
     }
     addHistoryConfiguration() {
-        this.addInput('histTrigger', node_1.Type.BOOLEAN);
-        this.addInput('clearStoredHis', node_1.Type.BOOLEAN);
-        this.addOutput('histError', node_1.Type.ANY);
-        this.addOutput('storedHistCount', node_1.Type.NUMBER);
-        this.addOutput('lastHistExport', node_1.Type.STRING);
+        this.addInput('histTrigger', node_io_1.Type.BOOLEAN);
+        this.addInput('clearStoredHis', node_io_1.Type.BOOLEAN);
+        this.addOutput('histError', node_io_1.Type.ANY);
+        this.addOutput('storedHistCount', node_io_1.Type.NUMBER);
+        this.addOutput('lastHistExport', node_io_1.Type.STRING);
         this.settings['history_group'] = {
             description: 'History Settings',
             value: '',
@@ -70,7 +71,7 @@ class HistoryBase extends node_1.Node {
             value: '',
             type: node_1.SettingType.STRING,
         };
-        this.addInputWithSettings('pointName', node_1.Type.STRING, '', 'Point Name');
+        this.addInputWithSettings('pointName', node_io_1.Type.STRING, '', 'Point Name');
         this.settings['historyMode'] = {
             description: 'History Logging Mode',
             type: node_1.SettingType.DROPDOWN,
@@ -88,12 +89,12 @@ class HistoryBase extends node_1.Node {
             type: node_1.SettingType.DROPDOWN,
             config: {
                 items: [
-                    { value: node_1.Type.NUMBER, text: 'Number' },
-                    { value: node_1.Type.BOOLEAN, text: 'Boolean' },
-                    { value: node_1.Type.STRING, text: 'String' },
+                    { value: node_io_1.Type.NUMBER, text: 'Number' },
+                    { value: node_io_1.Type.BOOLEAN, text: 'Boolean' },
+                    { value: node_io_1.Type.STRING, text: 'String' },
                 ],
             },
-            value: node_1.Type.NUMBER,
+            value: node_io_1.Type.NUMBER,
         };
         this.settings['threshold'] = {
             description: 'COV Threshold',
@@ -177,14 +178,14 @@ class HistoryBase extends node_1.Node {
         if (this.tableNameInput === -1 && settings['databaseType'].value === DataBaseType.InfluxDB) {
             if (this.pointNameInput)
                 this.removeInput(this.pointNameInput);
-            this.addInput('[tableName]', node_1.Type.STRING, { exist: true, nullable: false, hidden: false });
-            this.addInput('[pointName]', node_1.Type.STRING, { exist: true, nullable: false, hidden: false });
+            this.addInput('[tableName]', node_io_1.Type.STRING, { exist: true, nullable: false, hidden: false });
+            this.addInput('[pointName]', node_io_1.Type.STRING, { exist: true, nullable: false, hidden: false });
         }
         else if (this.tableNameInput !== -1 && settings['databaseType'].value === DataBaseType.POSTGRES) {
             if (this.pointNameInput)
                 this.removeInput(this.pointNameInput);
             this.removeInput(this.tableNameInput);
-            this.addInput('[pointName]', node_1.Type.STRING, { exist: true, nullable: false, hidden: false });
+            this.addInput('[pointName]', node_io_1.Type.STRING, { exist: true, nullable: false, hidden: false });
         }
     }
     onAdded() {
@@ -486,7 +487,7 @@ class HistoryBase extends node_1.Node {
         let diff = targetCount - this.alarmCount;
         if (diff == 0)
             return;
-        this.changeInputsCount(targetCount + this.dynamicInputStartPosition, node_1.Type.STRING);
+        this.changeInputsCount(targetCount + this.dynamicInputStartPosition, node_io_1.Type.STRING);
         const alarmsToAdd = {};
         if (diff > 0) {
             for (let i = this.alarmCount + 1; i <= targetCount; i++) {

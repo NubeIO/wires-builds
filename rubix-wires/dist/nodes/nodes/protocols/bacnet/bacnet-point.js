@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../../node");
 const container_1 = require("../../../container");
+const node_io_1 = require("../../../node-io");
 const bacnet_utils_1 = require("./bacnet-utils");
 const constants_1 = require("../../../constants");
 const bacnet_constant_1 = require("./bacnet-constant");
@@ -27,16 +28,16 @@ class BACnetPoint extends HistoryBase_1.default {
         this.dynamicOutputsExist = false;
         this.dynamicInputsStartName = 'in';
         this.dynamicOutputsStartName = 'out';
-        this.dynamicInputsType = node_1.Type.NUMBER;
+        this.dynamicInputsType = node_io_1.Type.NUMBER;
         this.points = [];
         this.obj = [];
         this.title = 'BACnet Point';
         this.description =
             'All bacnet-point nodes should be added within the bacnet-device container node. Configuration of BACnet points are set from settings.  If the bacnet-network, and bacnet-device are configured correctly, the BACnet points will be available to select from the ‘Select a point’ setting; otherwise the point can be set manually. For information on History settings, see History/History node. Configuration is the same for bacnet-point histories.';
-        this.addInput('input', node_1.Type.NUMBER);
-        this.addOutput('output', node_1.Type.STRING);
-        this.addOutput('output json', node_1.Type.STRING);
-        this.addOutput('error', node_1.Type.STRING);
+        this.addInput('input', node_io_1.Type.NUMBER);
+        this.addOutput('output', node_io_1.Type.STRING);
+        this.addOutput('output json', node_io_1.Type.STRING);
+        this.addOutput('error', node_io_1.Type.STRING);
         this.settings['pointEnable'] = {
             description: 'Point enable',
             value: false,

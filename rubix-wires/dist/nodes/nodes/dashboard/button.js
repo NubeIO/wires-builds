@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const ui_node_1 = require("./ui-node");
 const node_1 = require("../../node");
 class UiButtonNode extends ui_node_1.UiNode {
@@ -10,7 +11,7 @@ class UiButtonNode extends ui_node_1.UiNode {
         this.description =
             "Dashboard node which displays a push button on the dashboard.  When clicked it will send 'true' from the node 'output'.";
         this.title = 'Button';
-        this.addOutput('output', node_1.Type.BOOLEAN);
+        this.addOutput('output', node_io_1.Type.BOOLEAN);
         this.settings['button-text'] = {
             description: 'Button Text',
             value: 'ON',

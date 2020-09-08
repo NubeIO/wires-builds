@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 const psychrolib = require('../../lib/psychrolib');
 class AtmosphericPressureNode extends node_1.Node {
@@ -11,8 +12,8 @@ class AtmosphericPressureNode extends node_1.Node {
         this.title = 'Atmospheric Pressure (Meters-> Pa)';
         this.description =
             "This node converts 'altitude' to Atmospheric Pressure in various units: Pascal (Pa), Standard Atmosphere (atm), Bar (bar), and Pound-force per square inch (lbf/in2) . 'altitude' units can be set from settings to be in:  Metric/SI (Meters-> Pa),  or Imperial/IP (Feet-> Psi).";
-        this.addInput('altitude', node_1.Type.NUMBER);
-        this.addOutput('pressure', node_1.Type.NUMBER);
+        this.addInput('altitude', node_io_1.Type.NUMBER);
+        this.addOutput('pressure', node_io_1.Type.NUMBER);
         this.settings['units'] = {
             description: 'Select Units',
             type: node_1.SettingType.DROPDOWN,

@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const find = require('local-devices');
 class NetworkScan extends node_1.Node {
     constructor() {
@@ -10,7 +11,7 @@ class NetworkScan extends node_1.Node {
         this.description = 'A node for doing an IP and MAC network scan. Returns JSON output';
         this.addInput('trigger');
         this.addOutput('out');
-        this.addOutput('error', node_1.Type.STRING);
+        this.addOutput('error', node_io_1.Type.STRING);
     }
     onInputUpdated() {
         if (this.side !== container_1.Side.server)

@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../../node");
 const container_1 = require("../../../container");
+const node_io_1 = require("../../../node-io");
 const utils_1 = require("../../../utils");
 const ip_address_utils_1 = require("../../../utils/ip-address-utils");
 const child_process_1 = require("child_process");
@@ -25,13 +26,13 @@ class UpdateIP extends node_1.Node {
         this.title = 'Network Interfaces';
         this.description =
             'This node is used to configure the network (IP) interfaces for the device.  Changes made to settings will only be saved if ‘Save changes on save’ is toggled ON.  In some cases a reboot will be required to save the changes, if ‘Reboot’ is toggled ON, then clicking ‘save’ will reboot the controller.      NOTE: Making changes on a remote device could cause the device to become inaccessible.';
-        this.addInput('get interface address', node_1.Type.BOOLEAN);
-        this.addInput('enable eth0 ', node_1.Type.BOOLEAN);
-        this.addInput('enable eth1 ', node_1.Type.BOOLEAN);
-        this.addOutput('ip eth0', node_1.Type.STRING);
-        this.addOutput('ip eth1', node_1.Type.STRING);
-        this.addOutput('message', node_1.Type.STRING);
-        this.addOutput('error', node_1.Type.STRING);
+        this.addInput('get interface address', node_io_1.Type.BOOLEAN);
+        this.addInput('enable eth0 ', node_io_1.Type.BOOLEAN);
+        this.addInput('enable eth1 ', node_io_1.Type.BOOLEAN);
+        this.addOutput('ip eth0', node_io_1.Type.STRING);
+        this.addOutput('ip eth1', node_io_1.Type.STRING);
+        this.addOutput('message', node_io_1.Type.STRING);
+        this.addOutput('error', node_io_1.Type.STRING);
         this.settings['writeChanges'] = {
             description: 'Save changes on save',
             type: node_1.SettingType.BOOLEAN,

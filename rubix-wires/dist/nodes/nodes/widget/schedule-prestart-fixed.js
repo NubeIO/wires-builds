@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const time_utils_1 = require("../../utils/time-utils");
 class SchedulePrestartFixedNode extends node_1.Node {
     constructor() {
@@ -9,12 +10,12 @@ class SchedulePrestartFixedNode extends node_1.Node {
         this.title = 'Schedule Prestart Fixed';
         this.description =
             'This node provides a pre-start function based on fixed settings.  Conditions are evaluated every 30 seconds.';
-        this.addInputWithSettings('enable', node_1.Type.BOOLEAN, true, 'Enable');
-        this.addInput('temp', node_1.Type.NUMBER);
-        this.addInput('SP', node_1.Type.NUMBER);
-        this.addInput('scheduleNextStart', node_1.Type.NUMBER);
-        this.addInput('reset', node_1.Type.NUMBER);
-        this.addOutput('output', node_1.Type.STRING);
+        this.addInputWithSettings('enable', node_io_1.Type.BOOLEAN, true, 'Enable');
+        this.addInput('temp', node_io_1.Type.NUMBER);
+        this.addInput('SP', node_io_1.Type.NUMBER);
+        this.addInput('scheduleNextStart', node_io_1.Type.NUMBER);
+        this.addInput('reset', node_io_1.Type.NUMBER);
+        this.addOutput('output', node_io_1.Type.STRING);
         this.settings['condition1_range1'] = {
             description: 'temp > (SP + ?):',
             value: 1,

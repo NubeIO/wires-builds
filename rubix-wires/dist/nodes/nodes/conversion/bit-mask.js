@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const container_1 = require("../../container");
 const node_1 = require("../../node");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 class BitMaskSingle extends node_1.Node {
     constructor() {
@@ -18,8 +19,8 @@ class BitMaskSingle extends node_1.Node {
             type: node_1.SettingType.NUMBER,
             value: 0,
         };
-        this.addInput('input', node_1.Type.ANY);
-        this.addOutput('output', node_1.Type.NUMBER);
+        this.addInput('input', node_io_1.Type.ANY);
+        this.addOutput('output', node_io_1.Type.NUMBER);
     }
     onAdded() {
         this.onInputUpdated();
@@ -66,9 +67,9 @@ class BitMaskMultiple extends node_1.Node {
             type: node_1.SettingType.NUMBER,
             value: 0,
         };
-        this.addInput('input', node_1.Type.ANY);
-        this.addOutput('output', node_1.Type.NUMBER);
-        this.addOutput('error', node_1.Type.STRING);
+        this.addInput('input', node_io_1.Type.ANY);
+        this.addOutput('output', node_io_1.Type.NUMBER);
+        this.addOutput('error', node_io_1.Type.STRING);
     }
     init() {
         this.updateMask();

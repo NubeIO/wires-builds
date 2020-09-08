@@ -85,6 +85,20 @@ function replaceEdge28Config() {
   shell.sed('-i', /\$EDGE_28_API_VER/g, process.env.EDGE_28_API_VER || '', configDestinationFile);
 }
 
+
+function replaceMQTTConfig() {
+  shell.sed(
+    '-i',
+    /\$MQTT_PROTOCOL/g,
+    process.env.MQTT_PROTOCOL === 'https' ? 'https' : 'http',
+    configDestinationFile,
+  );
+  shell.sed('-i', /\$MQTT_HOST/g, process.env.MQTT_HOST || 'localhost', configDestinationFile);
+  shell.sed('-i', /'\$MQTT_PORT'/g, process.env.MQTT_PORT || 1883, configDestinationFile);
+  shell.sed('-i', /\$MQTT_USERNAME/g, process.env.MQTT_USERNAME || '', configDestinationFile);
+  shell.sed('-i', /\$MQTT_PASSWORD/g, process.env.MQTT_PASSWORD || '', configDestinationFile);
+}
+
 const updateEnv = () => {
   let dataDir = process.env.DATA_DIR || (process.env.NODE_ENV === 'production' ? '/data/rubix-wires' : './db');
   dotenv.config({ path: `${dataDir}/.env` });
@@ -99,6 +113,7 @@ const updateEnv = () => {
   replacePostgresConfig();
   replaceInfluxDbConfig();
   replaceEdge28Config();
+  replaceMQTTConfig();
 };
 
 updateEnv();

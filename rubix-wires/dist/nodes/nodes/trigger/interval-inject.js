@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const time_utils_1 = require("../../utils/time-utils");
 class InjectNode extends node_1.Node {
     constructor() {
@@ -11,10 +12,10 @@ class InjectNode extends node_1.Node {
         this.title = 'Interval Inject';
         this.description =
             "While 'enable' is 'true', ‘output’ will send 'message' value at every 'interval' period. When 'enable' is 'false', ‘output’ will be 'null'.  ‘interval’ units can be configured from settings. Maximum ‘interval’ setting is 587 hours.";
-        this.addInputWithSettings('enable', node_1.Type.BOOLEAN, true, 'Enable');
-        this.addInputWithSettings('message', node_1.Type.STRING, 'true', 'Message');
-        this.addInputWithSettings('interval', node_1.Type.NUMBER, 1, 'Interval');
-        this.addOutput('output', node_1.Type.BOOLEAN);
+        this.addInputWithSettings('enable', node_io_1.Type.BOOLEAN, true, 'Enable');
+        this.addInputWithSettings('message', node_io_1.Type.ANY, 'true', 'Message');
+        this.addInputWithSettings('interval', node_io_1.Type.NUMBER, 1, 'Interval');
+        this.addOutput('output', node_io_1.Type.BOOLEAN);
         this.settings['time'] = {
             description: 'Units',
             type: node_1.SettingType.DROPDOWN,

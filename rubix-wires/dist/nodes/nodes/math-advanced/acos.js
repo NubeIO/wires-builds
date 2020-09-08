@@ -2,14 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class MathAcosNode extends node_1.Node {
     constructor() {
         super();
         this.title = 'Acos';
         this.description =
             "'acos(x)' is the result of arccos('x').  The Inverse Cosine function of input 'x'.";
-        this.addInput('x', node_1.Type.NUMBER);
-        this.addOutput('acos(x)', node_1.Type.NUMBER);
+        this.addInput('x', node_io_1.Type.NUMBER);
+        this.addOutput('acos(x)', node_io_1.Type.NUMBER);
     }
     onAdded() {
         this.onInputUpdated();

@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("./node");
+const node_io_1 = require("./node-io");
 const utils_1 = require("./utils");
 class FlexibleNode extends node_1.Node {
     constructor() {
@@ -14,8 +15,8 @@ class FlexibleNode extends node_1.Node {
         this.dynamicInputStartPosition = 0;
         this.dynamicInputsStartName = 'in';
         this.dynamicOutputsStartName = 'out';
-        this.dynamicInputsType = node_1.Type.ANY;
-        this.dynamicOutputsType = node_1.Type.ANY;
+        this.dynamicInputsType = node_io_1.Type.ANY;
+        this.dynamicOutputsType = node_io_1.Type.ANY;
         this.dynamicMinInputs = 2;
         this.dynamicMaxInputs = 100;
         this.dynamicMinOutputs = 2;
@@ -63,7 +64,7 @@ class FlexibleNode extends node_1.Node {
             this.addDynamicSettings(startingCount, targetCount);
         };
         this.settingWiseDynamicInputsAndSettingsUpdateForBoolean = (save = true) => {
-            this.dynamicInputsType = node_1.Type.BOOLEAN;
+            this.dynamicInputsType = node_io_1.Type.BOOLEAN;
             const startingCount = this.getInputsCount();
             this.addDynamicInputsOnRange(save);
             const targetCount = this.getInputsCount();
@@ -117,7 +118,7 @@ class FlexibleNode extends node_1.Node {
         this.addDynamicSettings = (startingCount, targetCount) => {
             const value = node_1.SettingType.STRING ? '' : null;
             const name = this.dynamicInputsStartName;
-            const type = node_1.convertType(this.dynamicInputsType);
+            const type = node_io_1.convertType(this.dynamicInputsType);
             for (let i = startingCount; i < targetCount; i++) {
                 if (!this.settings[`${name} ${this.dynamicIndex(i)}`]) {
                     this.settings[`${name} ${this.dynamicIndex(i)}`] = {
@@ -167,7 +168,7 @@ class FlexibleNode extends node_1.Node {
     }
     changeDynamicInputsAndSettings(save = true) {
         if (this.dynamicSettingsExist) {
-            if (this.dynamicInputsType === node_1.Type.BOOLEAN) {
+            if (this.dynamicInputsType === node_io_1.Type.BOOLEAN) {
                 this.settingWiseDynamicInputsAndSettingsUpdateForBoolean(save);
             }
             else {

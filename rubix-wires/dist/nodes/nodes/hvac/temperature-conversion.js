@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 const psychrolib = require('../../lib/psychrolib');
 class TempConvertNode extends node_1.Node {
@@ -11,8 +12,8 @@ class TempConvertNode extends node_1.Node {
         this.title = 'Temperature Conversion (C-> F)';
         this.description =
             'This node converts between Temperature units: Celsius, Fahrenheit, Kelvin, and Rankine .  Input type can be selected from settings. Outputs will change based on selected input type.';
-        this.addInput('input', node_1.Type.NUMBER);
-        this.addOutput('output', node_1.Type.NUMBER);
+        this.addInput('input', node_io_1.Type.NUMBER);
+        this.addOutput('output', node_io_1.Type.NUMBER);
         this.settings['convertType'] = {
             description: 'Conversion Type',
             type: node_1.SettingType.DROPDOWN,

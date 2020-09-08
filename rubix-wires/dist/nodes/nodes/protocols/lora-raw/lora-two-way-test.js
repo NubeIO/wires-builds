@@ -2,13 +2,14 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../../node");
 const container_1 = require("../../../container");
+const node_io_1 = require("../../../node-io");
 class LoRaRawTwoWayTest extends node_1.Node {
     constructor() {
         super();
         this.title = `Nube LoRaRAW Two Way Test Node`;
         this.description = 'Acts as the transport layer for testing only';
-        this.addInput('input', node_1.Type.ANY);
-        this.addOutput('output', node_1.Type.STRING);
+        this.addInput('input', node_io_1.Type.ANY);
+        this.addOutput('output', node_io_1.Type.STRING);
     }
     onInputUpdated() {
         let buffer = this.getInputData(0);

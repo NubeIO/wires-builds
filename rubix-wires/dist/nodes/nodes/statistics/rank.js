@@ -3,13 +3,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
 const flexible_node_1 = require("../../flexible-node");
+const node_io_1 = require("../../node-io");
 class RankNode extends flexible_node_1.FlexibleNode {
     constructor() {
         super();
         this.dynamicOutputsExist = true;
         this.dynamicSettingsExist = false;
-        this.dynamicInputsType = node_1.Type.NUMBER;
-        super.dynamicOutputsType = node_1.Type.NUMBER;
+        this.dynamicInputsType = node_io_1.Type.NUMBER;
+        super.dynamicOutputsType = node_io_1.Type.NUMBER;
         this.dynamicDefaultInputs = 5;
         this.dynamicDefaultOutputs = 3;
         this.title = 'Rank (Highest)';

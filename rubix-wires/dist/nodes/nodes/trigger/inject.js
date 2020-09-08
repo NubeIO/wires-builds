@@ -2,16 +2,17 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class TriggeredInjectNode extends node_1.Node {
     constructor() {
         super();
         this.title = 'Inject';
         this.description =
             "While 'enable' is 'true', ‘output’ will send 'message' value when 'trigger' transitions from 'false' to 'true";
-        this.addInputWithSettings('enable', node_1.Type.BOOLEAN, true, 'Enable');
-        this.addInputWithSettings('message', node_1.Type.STRING, 'true', 'Message');
-        this.addInput('trigger', node_1.Type.BOOLEAN);
-        this.addOutput('output', node_1.Type.BOOLEAN);
+        this.addInputWithSettings('enable', node_io_1.Type.BOOLEAN, true, 'Enable');
+        this.addInputWithSettings('message', node_io_1.Type.STRING, 'true', 'Message');
+        this.addInput('trigger', node_io_1.Type.BOOLEAN);
+        this.addOutput('output', node_io_1.Type.BOOLEAN);
     }
     onCreated() {
         this.lastTrigger = false;

@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 const time_utils_1 = require("../../utils/time-utils");
 const moment = require('moment-timezone');
@@ -11,10 +12,10 @@ class AnyDataStoreNode extends node_1.Node {
         this.title = 'Data Store';
         this.description =
             'The data-store node is used to store history log data locally.  The data-store node has limited memory so the capacity is limited to 50 log entries; beware of using too many data-store nodes as it could affect the operation of Wires.  The history logs can be configured to log in UTC or local timezone, and the output format can be set to ‘Array’, ‘CSV’, or ‘JSON’.  If ‘Round up in increments of’ setting is used (not zero), then the timestamp will be rounded up to the nearest increment value step.';
-        this.addInput('input', node_1.Type.ANY);
-        this.addInput('clear', node_1.Type.BOOLEAN);
-        this.addOutput('output', node_1.Type.ANY);
-        this.addOutput('storedCount', node_1.Type.NUMBER);
+        this.addInput('input', node_io_1.Type.ANY);
+        this.addInput('clear', node_io_1.Type.BOOLEAN);
+        this.addOutput('output', node_io_1.Type.ANY);
+        this.addOutput('storedCount', node_io_1.Type.NUMBER);
         this.settings['time-conversation-enable'] = {
             description: 'Timestamp in system timezone?',
             value: false,

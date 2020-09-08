@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
 const fs = require("fs");
+const node_io_1 = require("../../node-io");
 class SystemJsonFileNode extends node_1.Node {
     constructor() {
         super();
@@ -14,13 +15,13 @@ class SystemJsonFileNode extends node_1.Node {
                 'Specify the key that you want to read/write. <br/>' +
                 'The value that you want to write, send to Value input. <br/>' +
                 'Read value will be sent to the output.';
-        this.addInput('file name', node_1.Type.STRING);
-        this.addInput('key', node_1.Type.STRING);
-        this.addInput('value', node_1.Type.STRING);
-        this.addInput('read', node_1.Type.BOOLEAN);
-        this.addInput('write', node_1.Type.BOOLEAN);
-        this.addInput('delete', node_1.Type.BOOLEAN);
-        this.addOutput('value', node_1.Type.STRING);
+        this.addInput('file name', node_io_1.Type.STRING);
+        this.addInput('key', node_io_1.Type.STRING);
+        this.addInput('value', node_io_1.Type.STRING);
+        this.addInput('read', node_io_1.Type.BOOLEAN);
+        this.addInput('write', node_io_1.Type.BOOLEAN);
+        this.addInput('delete', node_io_1.Type.BOOLEAN);
+        this.addOutput('value', node_io_1.Type.STRING);
     }
     onInputUpdated() {
         if (this.inputs[3].updated && this.inputs[3].data) {

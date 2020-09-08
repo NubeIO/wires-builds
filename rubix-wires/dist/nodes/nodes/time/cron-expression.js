@@ -2,6 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
+const helper_1 = require("../../../utils/helper");
 const CronJob = require('cron').CronJob;
 const jsonata = require('jsonata');
 const construe = require('cronstrue');
@@ -14,12 +16,12 @@ class CronExpressionNode extends node_1.Node {
         this.title = 'Cron Expression';
         this.description =
             "This node triggers 'output' to transition from 'false' to 'true' for 500 milliseconds at times triggered by the 'input' CRON expression. 'info' will show information about the status of the node. 'cronDescription' represents the configured scheduled timings in plain english. 'nextExecution' is a String output representing the datetime that the next 'message' will be sent from 'output'. For more information on Cron Expressions see: (https://www.freeformatter.com/cron-expression-generator-quartz.html)";
-        this.addInputWithSettings('enable', node_1.Type.BOOLEAN, true, 'Enable', false);
-        this.addInputWithSettings('cronExpression', node_1.Type.STRING, '', 'Cron Expression');
-        this.addOutput('output', node_1.Type.BOOLEAN);
-        this.addOutput('info', node_1.Type.STRING);
-        this.addOutput('cronDescription', node_1.Type.STRING);
-        this.addOutput('nextExecution', node_1.Type.STRING);
+        this.addInputWithSettings('enable', node_io_1.Type.BOOLEAN, true, 'Enable', false);
+        this.addInputWithSettings('cronExpression', node_io_1.Type.STRING, '', 'Cron Expression');
+        this.addOutput('output', node_io_1.Type.BOOLEAN);
+        this.addOutput('info', node_io_1.Type.STRING);
+        this.addOutput('cronDescription', node_io_1.Type.STRING);
+        this.addOutput('nextExecution', node_io_1.Type.STRING);
         this.settings['timezone'] = {
             description: 'Enter the cron time zone',
             value: 'Australia/Sydney',
@@ -46,11 +48,9 @@ class CronExpressionNode extends node_1.Node {
         const enable = this.getInputData(0);
         const cronExp = this.getInputData(1);
         const valid = cronValidator.isValidCron(cronExp);
-        console.log('valid?', valid);
         if (!enable || !valid) {
             if (!valid) {
                 this.setOutputData(1, 'invalid CRON Expression');
-                console.log('I set the info');
             }
             else
                 this.setOutputData(1, 'CRON job stopped');
@@ -59,7 +59,6 @@ class CronExpressionNode extends node_1.Node {
                     this.job.stop();
             }
             catch (err) {
-                console.log('err', err);
                 this.setOutputData(1, err);
             }
             this.job = null;
@@ -84,6 +83,8 @@ class CronExpressionNode extends node_1.Node {
                 this.timeoutFunc = setTimeout(() => {
                     this.setOutputData(0, false);
                 }, 500);
+                if (helper_1.isNull(this.job))
+                    return;
                 let nextJobs = this.job.nextDates(1);
                 this.setOutputData(3, this.jsonataQuery(nextJobs));
             }, null, null, timezone);

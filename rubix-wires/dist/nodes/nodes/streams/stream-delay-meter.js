@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class DelayMeterNode extends node_1.Node {
     constructor() {
         super();
@@ -9,8 +10,8 @@ class DelayMeterNode extends node_1.Node {
         this.description =
             "This node measures the delay between the incoming events.  Any value sent to 'input' (excluding null) will be accepted.  'ms' output is the time between the lastest 'input', and the previous 'input'.   'ms' is reset when 'reset' transitions from 'false' to 'true'.  'ms' output is in millis.";
         this.addInput('input');
-        this.addInput('reset', node_1.Type.BOOLEAN);
-        this.addOutput('ms', node_1.Type.NUMBER);
+        this.addInput('reset', node_io_1.Type.BOOLEAN);
+        this.addOutput('ms', node_io_1.Type.NUMBER);
         this.lastReset = false;
     }
     onInputUpdated() {

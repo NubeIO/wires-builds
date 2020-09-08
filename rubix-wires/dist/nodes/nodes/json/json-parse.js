@@ -2,84 +2,27 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
-var JsonParseType;
-(function (JsonParseType) {
-    JsonParseType["Stringify"] = "Stringify";
-    JsonParseType["Parse"] = "Parse";
-})(JsonParseType = exports.JsonParseType || (exports.JsonParseType = {}));
+const node_io_1 = require("../../node-io");
+const helper_1 = require("../../../utils/helper");
 class JsonParse extends node_1.Node {
     constructor() {
         super();
-        this.out = 0;
-        this.outValidJson = 1;
-        this.outValidJsonAfterParse = 2;
-        this.error = 3;
         this.title = 'Json Parse';
         this.description = 'Return JSON.stringify or a JSON.parse';
-        this.addInput('input');
-        this.addOutput('output');
-        this.addOutput('is valid json');
-        this.addOutput('is valid json after parse');
-        this.addOutput('error', node_1.Type.STRING);
-        this.settings['operation'] = {
-            description: 'Output type',
-            type: node_1.SettingType.DROPDOWN,
-            config: {
-                items: [
-                    { value: JsonParseType.Stringify, text: JsonParseType.Stringify },
-                    { value: JsonParseType.Parse, text: JsonParseType.Parse },
-                ],
-            },
-            value: JsonParseType.Stringify,
-        };
-    }
-    isJsonString(str) {
-        try {
-            JSON.parse(str);
-        }
-        catch (e) {
-            return false;
-        }
-        return true;
+        this.addInput('json-input', node_io_1.Type.JSON);
+        this.addOutput('output', node_io_1.Type.JSON);
     }
     onInputUpdated() {
         let input = this.getInputData(0);
-        let checkJson = this.isJsonString(input);
-        let out = this.out;
-        let outValidJson = this.outValidJson;
-        let outValidJsonAfterParse = this.outValidJsonAfterParse;
-        let error = this.error;
-        this.setOutputData(outValidJson, checkJson);
-        this.setOutputData(error, null);
-        if (input === null) {
-            this.setOutputData(out, null);
-            this.setOutputData(outValidJson, null);
-            this.setOutputData(outValidJsonAfterParse, null);
-            this.setOutputData(error, null);
+        if (helper_1.isNull(input))
             return;
-        }
-        const operation = this.settings['operation'].value;
         try {
-            input = JSON.parse(input);
-            if (operation === JsonParseType.Stringify) {
-                let outStringify = JSON.stringify(input);
-                checkJson = this.isJsonString(outStringify);
-                this.setOutputData(out, outStringify);
-                this.setOutputData(outValidJsonAfterParse, checkJson);
-            }
-            else if (operation === JsonParseType.Parse) {
-                checkJson = this.isJsonString(input);
-                this.setOutputData(out, input);
-                this.setOutputData(outValidJsonAfterParse, checkJson);
-            }
-            this.setOutputData(error, null);
+            this.setOutputData(0, input);
         }
-        catch (e) {
-            this.setOutputData(out, null);
-            this.setOutputData(outValidJson, null);
-            this.setOutputData(outValidJsonAfterParse, null);
-            this.setOutputData(error, e);
+        catch (err) {
+            this.debugInfo(`JSON PARSE: try/catch , ${err}`);
         }
+        ;
     }
     onAfterSettingsChange() {
         this.onInputUpdated();

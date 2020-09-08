@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const time_utils_1 = require("../../utils/time-utils");
 class RateLimitNode extends node_1.Node {
     constructor() {
@@ -39,9 +40,9 @@ class RateLimitNode extends node_1.Node {
             },
             value: 'time',
         };
-        this.addInput('run', node_1.Type.BOOLEAN);
-        this.addInput('reset', node_1.Type.BOOLEAN);
-        this.addInputWithSettings('interval', node_1.Type.NUMBER, 1, 'Count Interval', false);
+        this.addInput('run', node_io_1.Type.BOOLEAN);
+        this.addInput('reset', node_io_1.Type.BOOLEAN);
+        this.addInputWithSettings('interval', node_io_1.Type.NUMBER, 1, 'Count Interval', false);
         this.settings['time'] = {
             description: 'Units',
             type: node_1.SettingType.DROPDOWN,
@@ -58,9 +59,9 @@ class RateLimitNode extends node_1.Node {
         this.setSettingsConfig({
             groups: [{ interval: { weight: 2 }, time: {} }],
         });
-        this.addOutput('out', node_1.Type.NUMBER);
-        this.addOutput('locked', node_1.Type.BOOLEAN);
-        this.addOutput('messages', node_1.Type.STRING);
+        this.addOutput('out', node_io_1.Type.NUMBER);
+        this.addOutput('locked', node_io_1.Type.BOOLEAN);
+        this.addOutput('messages', node_io_1.Type.STRING);
         this.settings['time'] = {
             description: 'Time',
             type: node_1.SettingType.DROPDOWN,

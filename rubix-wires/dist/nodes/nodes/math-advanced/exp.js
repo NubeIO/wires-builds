@@ -2,14 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class MathExpNode extends node_1.Node {
     constructor() {
         super();
         this.title = 'Exp';
         this.description =
             "('exp(x)' = E^'x') 'exp(x)' is the result of raising E (Euler's Number 2.71828) to the power of 'x'.  The Natural Exponential function.";
-        this.addInput('x', node_1.Type.NUMBER);
-        this.addOutput('exp(x)', node_1.Type.NUMBER);
+        this.addInput('x', node_io_1.Type.NUMBER);
+        this.addOutput('exp(x)', node_io_1.Type.NUMBER);
     }
     onAdded() {
         this.onInputUpdated();

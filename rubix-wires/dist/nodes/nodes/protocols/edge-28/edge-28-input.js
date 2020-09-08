@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../../node");
 const container_1 = require("../../../container");
+const node_io_1 = require("../../../node-io");
 const edge_constant_1 = require("./edge-constant");
 const edge_utils_1 = require("./edge-utils");
 const edge_gpio_utils_1 = require("./edge-gpio-utils");
@@ -44,9 +45,9 @@ class Edge28InputPointNode extends HistoryBase_1.default {
         super();
         this.title = 'Edge IO 28 Input';
         this.description = edge_28_1.default.inputsDesc;
-        this.addOutput('output', node_1.Type.NUMBER);
-        this.addOutput('output-json', node_1.Type.STRING);
-        this.addOutput('error', node_1.Type.STRING);
+        this.addOutput('output', node_io_1.Type.NUMBER);
+        this.addOutput('output-json', node_io_1.Type.STRING);
+        this.addOutput('error', node_io_1.Type.STRING);
         this.settings['pointEnable'] = {
             description: 'Point enable',
             value: false,

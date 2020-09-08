@@ -56,6 +56,13 @@ const config = {
     port: '$EDGE_28_PORT',
     apiVer: '$EDGE_28_API_VER',
   },
+  mqtt: {
+    protocol: '$MQTT_PROTOCOL',
+    host: '$MQTT_HOST',
+    port: '$MQTT_PORT',
+    username: '$MQTT_USERNAME',
+    password: '$MQTT_PASSWORD',
+  },
 };
 
 const footerPrefix = `-${config.rubix.hash}${config.rubix.build && `-${config.rubix.build}`}`;

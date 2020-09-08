@@ -2,14 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class MathAtanNode extends node_1.Node {
     constructor() {
         super();
         this.title = 'Atan';
         this.description =
             "'atan(x)' is the result of arctan('x').  The Inverse Tangent function of input 'x'.";
-        this.addInput('x', node_1.Type.NUMBER);
-        this.addOutput('atan(x)', node_1.Type.NUMBER);
+        this.addInput('x', node_io_1.Type.NUMBER);
+        this.addOutput('atan(x)', node_io_1.Type.NUMBER);
     }
     onAdded() {
         this.onInputUpdated();

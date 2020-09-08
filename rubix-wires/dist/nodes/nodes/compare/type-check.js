@@ -2,27 +2,28 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class TypeCheckNode extends node_1.Node {
     constructor() {
         super();
         this.title = 'Type Check (string)';
         this.description =
             "'output' is 'true' when 'input' type matches 'Type to check' setting.  'isType' outputs the type of the 'input' value.";
-        this.addInput('input', node_1.Type.ANY);
-        this.addOutput('output', node_1.Type.BOOLEAN);
-        this.addOutput('isType', node_1.Type.STRING);
+        this.addInput('input', node_io_1.Type.ANY);
+        this.addOutput('output', node_io_1.Type.BOOLEAN);
+        this.addOutput('isType', node_io_1.Type.STRING);
         this.settings['type'] = {
             description: 'Type to check',
             type: node_1.SettingType.DROPDOWN,
             config: {
                 items: [
-                    { value: node_1.Type.STRING, text: node_1.Type.STRING },
-                    { value: node_1.Type.NUMBER, text: node_1.Type.NUMBER },
-                    { value: node_1.Type.BOOLEAN, text: node_1.Type.BOOLEAN },
-                    { value: node_1.Type.JSON, text: node_1.Type.JSON },
+                    { value: node_io_1.Type.STRING, text: node_io_1.Type.STRING },
+                    { value: node_io_1.Type.NUMBER, text: node_io_1.Type.NUMBER },
+                    { value: node_io_1.Type.BOOLEAN, text: node_io_1.Type.BOOLEAN },
+                    { value: node_io_1.Type.JSON, text: node_io_1.Type.JSON },
                 ],
             },
-            value: node_1.Type.STRING,
+            value: node_io_1.Type.STRING,
         };
     }
     onAdded() {
@@ -39,16 +40,16 @@ class TypeCheckNode extends node_1.Node {
         const dataType = typeof data;
         this.setOutputData(1, dataType);
         switch (type) {
-            case node_1.Type.STRING:
-                this.setOutputData(0, typeof data === node_1.Type.STRING, true);
+            case node_io_1.Type.STRING:
+                this.setOutputData(0, typeof data === node_io_1.Type.STRING, true);
                 break;
-            case node_1.Type.NUMBER:
-                this.setOutputData(0, typeof data === node_1.Type.NUMBER, true);
+            case node_io_1.Type.NUMBER:
+                this.setOutputData(0, typeof data === node_io_1.Type.NUMBER, true);
                 break;
-            case node_1.Type.BOOLEAN:
-                this.setOutputData(0, typeof data === node_1.Type.BOOLEAN, true);
+            case node_io_1.Type.BOOLEAN:
+                this.setOutputData(0, typeof data === node_io_1.Type.BOOLEAN, true);
                 break;
-            case node_1.Type.JSON:
+            case node_io_1.Type.JSON:
                 if (typeof data === 'string') {
                     try {
                         JSON.parse(data);
@@ -78,16 +79,16 @@ class TypeCheckNode extends node_1.Node {
     updateTitle() {
         const type = this.settings['type'].value;
         switch (type) {
-            case node_1.Type.STRING:
+            case node_io_1.Type.STRING:
                 this.title = 'Type Check (string)';
                 break;
-            case node_1.Type.NUMBER:
+            case node_io_1.Type.NUMBER:
                 this.title = 'Type Check (number)';
                 break;
-            case node_1.Type.BOOLEAN:
+            case node_io_1.Type.BOOLEAN:
                 this.title = 'Type Check (boolean)';
                 break;
-            case node_1.Type.JSON:
+            case node_io_1.Type.JSON:
                 this.title = 'Type Check (json)';
                 break;
         }

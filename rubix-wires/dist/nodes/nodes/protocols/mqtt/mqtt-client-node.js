@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const container_1 = require("../../../container");
 const node_1 = require("../../../node");
+const node_io_1 = require("../../../node-io");
 const registry_1 = require("../../../registry");
 const crypto_utils_1 = require("../../../utils/crypto-utils");
 const point_node_1 = require("../model/point-node");
@@ -59,7 +60,7 @@ class MqttClientNode extends ProtocolDeviceNode_1.ProtocolDeviceNode {
                 password: setting => !!setting['authentication'].value,
             },
         });
-        this.addOutput('topics', node_1.Type.JSON);
+        this.addOutput('topics', node_io_1.Type.JSON);
     }
     static createMqttConnectionOptions(settings) {
         const options = { host: settings['server'].value };

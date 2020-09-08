@@ -2,16 +2,17 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class MathTriggerPowNode extends node_1.Node {
     constructor() {
         super();
         this.title = 'Trigger Power';
         this.description =
             "When 'trigger' transitions from 'false' to 'true', 'output' is updated with the result of 'in1' to the power of 'in2' ('in 1' ^ 'in 2'). Input values can be set from settings. ";
-        this.addInput('trigger', node_1.Type.BOOLEAN);
-        this.addInputWithSettings('in 1', node_1.Type.NUMBER, 0, 'in 1');
-        this.addInputWithSettings('in 2', node_1.Type.NUMBER, 2, 'in 2');
-        this.addOutput('output', node_1.Type.NUMBER);
+        this.addInput('trigger', node_io_1.Type.BOOLEAN);
+        this.addInputWithSettings('in 1', node_io_1.Type.NUMBER, 0, 'in 1');
+        this.addInputWithSettings('in 2', node_io_1.Type.NUMBER, 2, 'in 2');
+        this.addOutput('output', node_io_1.Type.NUMBER);
     }
     onAdded() {
         this.lastTrigger = false;

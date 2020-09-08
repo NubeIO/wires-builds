@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const time_utils_1 = require("../../utils/time-utils");
 class COVNode extends node_1.Node {
     constructor() {
@@ -9,10 +10,10 @@ class COVNode extends node_1.Node {
         this.title = 'Change Of Value';
         this.description =
             "when 'input' changes value, output becomes 'true' for 'interval' duration, then 'output' changes back to 'false'.  For Numeric 'input' values, the change of value must be greater than the 'threshold' value to trigger the output.";
-        this.addInput('input', node_1.Type.ANY);
-        this.addInputWithSettings('interval', node_1.Type.NUMBER, 1, 'Interval');
-        this.addInputWithSettings('threshold', node_1.Type.NUMBER, 0, 'COV Threshold');
-        this.addOutput('output', node_1.Type.BOOLEAN);
+        this.addInput('input', node_io_1.Type.ANY);
+        this.addInputWithSettings('interval', node_io_1.Type.NUMBER, 1, 'Interval');
+        this.addInputWithSettings('threshold', node_io_1.Type.NUMBER, 0, 'COV Threshold');
+        this.addOutput('output', node_io_1.Type.BOOLEAN);
         this.settings['time'] = {
             description: 'Units',
             type: node_1.SettingType.DROPDOWN,

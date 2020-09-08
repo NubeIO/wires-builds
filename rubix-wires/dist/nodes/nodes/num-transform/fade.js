@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const time_utils_1 = require("../../utils/time-utils");
 class TimeFadeNode extends node_1.Node {
     constructor() {
@@ -10,8 +11,8 @@ class TimeFadeNode extends node_1.Node {
         this.title = 'Fade';
         this.description =
             "This node makes a smooth transition from 'from' to 'to' over the 'interval' period when 'enable' transitions from 'false' to 'true'; after this 'interval' period 'output' will match the 'to' value while 'enable' is 'true'.  During the 'interval' period, the rate of 'output' change cannot be changed.  Once the 'interval' period is complete 'out=to' becomes 'true' until 'enable' becomes 'false' again.";
-        this.addInput('enable', node_1.Type.BOOLEAN);
-        this.addInputWithSettings('interval', node_1.Type.NUMBER, 1, 'Interval', false);
+        this.addInput('enable', node_io_1.Type.BOOLEAN);
+        this.addInputWithSettings('interval', node_io_1.Type.NUMBER, 1, 'Interval', false);
         this.settings['time'] = {
             description: 'Units',
             type: node_1.SettingType.DROPDOWN,
@@ -28,8 +29,8 @@ class TimeFadeNode extends node_1.Node {
         this.setSettingsConfig({
             groups: [{ interval: { weight: 2 }, time: {} }],
         });
-        this.addInputWithSettings('from', node_1.Type.NUMBER, 0, 'To Value', false);
-        this.addInputWithSettings('to', node_1.Type.NUMBER, 100, 'From Value', false);
+        this.addInputWithSettings('from', node_io_1.Type.NUMBER, 0, 'To Value', false);
+        this.addInputWithSettings('to', node_io_1.Type.NUMBER, 100, 'From Value', false);
         this.addOutput('output');
         this.addOutput('out=to');
         this.updateInterval = 250;

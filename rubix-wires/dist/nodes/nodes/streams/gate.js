@@ -2,15 +2,16 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 class GateNode extends node_1.Node {
     constructor() {
         super();
         this.title = 'Message Gate';
         this.description =
             "This node can allow(gate open) or block(gate close) the transfer of the 'input' to 'output'.  When 'open' is 'true', 'input' is passed to 'output'.  When 'open' is 'false', 'output' will maintain its last value.  If 'Send null when closed' setting is ticked, 'output' will be 'null' when 'open' is 'false'. ";
-        this.addInput('input', node_1.Type.STRING);
-        this.addInput('open', node_1.Type.BOOLEAN);
-        this.addOutput('output', node_1.Type.STRING);
+        this.addInput('input', node_io_1.Type.STRING);
+        this.addInput('open', node_io_1.Type.BOOLEAN);
+        this.addOutput('output', node_io_1.Type.STRING);
         this.settings['send-null'] = {
             description: 'Send null when closed',
             value: false,

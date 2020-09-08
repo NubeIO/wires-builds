@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const os = require('os');
 function getSysInfo(val) {
     switch (val) {
@@ -33,9 +34,9 @@ class SystemInfo extends node_1.Node {
         this.title = 'System Info';
         this.description =
             'This node outputs various linux system information.  Once a system property has been selected from settings, a ‘false’ to ‘true’ transition on the ‘trigger’ input will update the ‘output’.  ‘error’ will display error information if the request is not successful.';
-        this.addInput('trigger', node_1.Type.BOOLEAN);
-        this.addOutput('output', node_1.Type.STRING);
-        this.addOutput('error', node_1.Type.STRING);
+        this.addInput('trigger', node_io_1.Type.BOOLEAN);
+        this.addOutput('output', node_io_1.Type.STRING);
+        this.addOutput('error', node_io_1.Type.STRING);
         this.settings['output-type'] = {
             description: 'Output type',
             type: node_1.SettingType.DROPDOWN,

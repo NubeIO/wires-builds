@@ -1,15 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const express = require("express");
-const morgan = require("morgan");
-const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
+const express = require("express");
 const http = require("http");
+const morgan = require("morgan");
 const socket = require("socket.io");
-const editor_server_socket_1 = require("./editor-server-socket");
-const dashboard_server_socket_1 = require("./dashboard-server-socket");
 const config_1 = require("../config");
+const dashboard_server_socket_1 = require("./dashboard-server-socket");
+const editor_server_socket_1 = require("./editor-server-socket");
 const middleware_1 = require("./middleware");
+const ping_pong_server_socket_1 = require("./ping-pong-server-socket");
 const wire_name_server_socket_1 = require("./wire-name-server-socket");
 const expressValidator = require('express-validator');
 const log = require('logplease').create('server', { color: 3 });
@@ -42,12 +43,13 @@ class Server {
         }));
     }
     middleware() {
-        if (config.webServer.debug)
+        if (config.webServer.debug) {
             this.express.use(morgan('dev', {
                 skip: function (req, res) {
                     return res.statusCode < 400;
                 },
             }));
+        }
         this.express.use(bodyParser.json({ limit: '5mb' }));
         this.express.use(bodyParser.urlencoded({ extended: false }));
         this.express.use(cookieParser());
@@ -92,12 +94,15 @@ class Server {
         this.server.on('listening', onListening);
         function normalizePort(val) {
             const port = typeof val === 'string' ? parseInt(val, 10) : val;
-            if (isNaN(port))
+            if (isNaN(port)) {
                 return val;
-            else if (port >= 0)
+            }
+            else if (port >= 0) {
                 return port;
-            else
+            }
+            else {
                 return false;
+            }
         }
         const that = this;
         function onError(error) {
@@ -128,6 +133,7 @@ class Server {
         this.editorSocket = new editor_server_socket_1.EditorServerSocket(io_root);
         this.dashboardSocket = new dashboard_server_socket_1.DashboardServerSocket(io_root);
         this.wireNameSocket = new wire_name_server_socket_1.WireNameServerSocket(io_root);
+        this.pingPongSocket = new ping_pong_server_socket_1.PingPongServerSocket(this.server, io_root);
     }
 }
 exports.Server = Server;

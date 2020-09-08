@@ -9,6 +9,7 @@ const promise_actor_1 = require("../../../promise-actor");
 const constants_1 = require("../../constants");
 const container_1 = require("../../container");
 const node_1 = require("../../node");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 const api_container_node_1 = require("./shared/api-container-node");
 const mixin_1 = require("./shared/mixin");
@@ -249,8 +250,8 @@ class PointNode extends node_1.Node {
             value: 1,
             type: node_1.SettingType.NUMBER,
         };
-        this.addOutput('value', node_1.Type.NUMBER);
-        this.addInput('in', node_1.Type.NUMBER);
+        this.addOutput('value', node_io_1.Type.NUMBER);
+        this.addInput('in', node_io_1.Type.NUMBER);
     }
     entryFactory() {
         return new entry_1.Point();

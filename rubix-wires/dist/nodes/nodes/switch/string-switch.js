@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 class StringSwitchNode extends node_1.Node {
     constructor() {
@@ -9,10 +10,10 @@ class StringSwitchNode extends node_1.Node {
         this.title = 'String Switch';
         this.description =
             "Boolean 'switch' passes corresponding String input to 'output'.  If 'switch' is 'true', String 'inTrue' value will be passed to 'output'  'inTrue' and 'inFalse' values can be set in settings.";
-        this.addInput('switch', node_1.Type.BOOLEAN);
-        this.addInputWithSettings('inTrue', node_1.Type.STRING, '', 'True Value');
-        this.addInputWithSettings('inFalse', node_1.Type.STRING, '', 'False Value');
-        this.addOutput('output', node_1.Type.NUMBER);
+        this.addInput('switch', node_io_1.Type.BOOLEAN);
+        this.addInputWithSettings('inTrue', node_io_1.Type.STRING, '', 'True Value');
+        this.addInputWithSettings('inFalse', node_io_1.Type.STRING, '', 'False Value');
+        this.addOutput('output', node_io_1.Type.NUMBER);
     }
     onAdded() {
         this.onInputUpdated();

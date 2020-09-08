@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../../node");
 const container_1 = require("../../../container");
+const node_io_1 = require("../../../node-io");
 const time_utils_1 = require("../../../utils/time-utils");
 var SensorType;
 (function (SensorType) {
@@ -27,20 +28,20 @@ class LoraSensorDecoderNode extends node_1.Node {
             },
             value: 'Droplet',
         };
-        this.addInput('rawInput', node_1.Type.STRING);
-        this.addInputWithSettings('nodeID', node_1.Type.STRING, '', 'NodeID');
-        this.addInputWithSettings('topic', node_1.Type.STRING, '', 'Set topic for use elsewhere in wires');
-        this.addOutput('json', node_1.Type.STRING);
-        this.addOutput('id', node_1.Type.STRING);
-        this.addOutput('voltage', node_1.Type.NUMBER);
-        this.addOutput('rssi', node_1.Type.NUMBER);
-        this.addOutput('lowBatteryAlm', node_1.Type.BOOLEAN);
-        this.addOutput('watchdog', node_1.Type.BOOLEAN);
-        this.addOutput('temperature', node_1.Type.NUMBER);
-        this.addOutput('humidity', node_1.Type.NUMBER);
-        this.addOutput('lux', node_1.Type.NUMBER);
-        this.addOutput('pressure', node_1.Type.NUMBER);
-        this.addOutput('movement', node_1.Type.BOOLEAN);
+        this.addInput('rawInput', node_io_1.Type.STRING);
+        this.addInputWithSettings('nodeID', node_io_1.Type.STRING, '', 'NodeID');
+        this.addInputWithSettings('topic', node_io_1.Type.STRING, '', 'Set topic for use elsewhere in wires');
+        this.addOutput('json', node_io_1.Type.STRING);
+        this.addOutput('id', node_io_1.Type.STRING);
+        this.addOutput('voltage', node_io_1.Type.NUMBER);
+        this.addOutput('rssi', node_io_1.Type.NUMBER);
+        this.addOutput('lowBatteryAlm', node_io_1.Type.BOOLEAN);
+        this.addOutput('watchdog', node_io_1.Type.BOOLEAN);
+        this.addOutput('temperature', node_io_1.Type.NUMBER);
+        this.addOutput('humidity', node_io_1.Type.NUMBER);
+        this.addOutput('lux', node_io_1.Type.NUMBER);
+        this.addOutput('pressure', node_io_1.Type.NUMBER);
+        this.addOutput('movement', node_io_1.Type.BOOLEAN);
         this.settings['microEdgeA1'] = {
             description: 'MicroEdge a1 Input Type',
             type: node_1.SettingType.DROPDOWN,
@@ -330,11 +331,11 @@ class LoraSensorDecoderNode extends node_1.Node {
                     this.removeOutput(9);
                     if (this.outputs[10])
                         this.removeOutput(10);
-                    this.addOutput('temperature', node_1.Type.NUMBER);
-                    this.addOutput('humidity', node_1.Type.NUMBER);
-                    this.addOutput('lux', node_1.Type.NUMBER);
-                    this.addOutput('pressure', node_1.Type.NUMBER);
-                    this.addOutput('movement', node_1.Type.BOOLEAN);
+                    this.addOutput('temperature', node_io_1.Type.NUMBER);
+                    this.addOutput('humidity', node_io_1.Type.NUMBER);
+                    this.addOutput('lux', node_io_1.Type.NUMBER);
+                    this.addOutput('pressure', node_io_1.Type.NUMBER);
+                    this.addOutput('movement', node_io_1.Type.BOOLEAN);
                     this.clearOutputs();
                     break;
                 case SensorType.MicroEdge:
@@ -345,10 +346,10 @@ class LoraSensorDecoderNode extends node_1.Node {
                     this.removeOutput(10);
                     if (this.outputs[11])
                         this.removeOutput(11);
-                    this.addOutput('pulses', node_1.Type.NUMBER);
-                    this.addOutput('a1', node_1.Type.NUMBER);
-                    this.addOutput('a2', node_1.Type.NUMBER);
-                    this.addOutput('a3', node_1.Type.NUMBER);
+                    this.addOutput('pulses', node_io_1.Type.NUMBER);
+                    this.addOutput('a1', node_io_1.Type.NUMBER);
+                    this.addOutput('a2', node_io_1.Type.NUMBER);
+                    this.addOutput('a3', node_io_1.Type.NUMBER);
                     this.clearOutputs();
                     break;
             }

@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const time_utils_1 = require("../../utils/time-utils");
 class IntervalRampNode extends node_1.Node {
     constructor() {
@@ -9,13 +10,13 @@ class IntervalRampNode extends node_1.Node {
         this.title = 'Interval Ramp';
         this.description =
             "‘output' changes at every 'interval' period, while 'enable' is set to 'true'. 'output' will change by the 'step' value on each change (if a full 'step' would cause the output to be greater than 'max', or less than 'min' it will be limited by 'max' or 'min' respectively). 'output' will first ramp up to 'max' then it will change directions and ramp down to 'min'. 'output' will be reset to 'min' when 'reset' transitions from 'false' to 'true. If ‘Ramp Up Only’ setting is ticked, the ramp down stage will be bypassed and ‘output’ will be reset back to ‘min’ value when it reaches the ‘max’ value. 'interval’ units can be configured from settings.  Maximum ‘interval’ setting is 587 hours.";
-        this.addInputWithSettings('enable', node_1.Type.BOOLEAN, 0, 'Enable', false);
-        this.addInputWithSettings('min', node_1.Type.NUMBER, 0, 'min', false);
-        this.addInputWithSettings('max', node_1.Type.NUMBER, 10, 'max', false);
-        this.addInputWithSettings('step', node_1.Type.NUMBER, 1, 'Step Size', false);
-        this.addInputWithSettings('interval', node_1.Type.NUMBER, 1, 'Count Interval', false);
-        this.addInput('reset', node_1.Type.BOOLEAN);
-        this.addOutput('out', node_1.Type.NUMBER);
+        this.addInputWithSettings('enable', node_io_1.Type.BOOLEAN, 0, 'Enable', false);
+        this.addInputWithSettings('min', node_io_1.Type.NUMBER, 0, 'min', false);
+        this.addInputWithSettings('max', node_io_1.Type.NUMBER, 10, 'max', false);
+        this.addInputWithSettings('step', node_io_1.Type.NUMBER, 1, 'Step Size', false);
+        this.addInputWithSettings('interval', node_io_1.Type.NUMBER, 1, 'Count Interval', false);
+        this.addInput('reset', node_io_1.Type.BOOLEAN);
+        this.addOutput('out', node_io_1.Type.NUMBER);
         this.settings['time'] = {
             description: 'Units',
             type: node_1.SettingType.DROPDOWN,

@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../../node");
 const container_1 = require("../../../container");
 const _ = require("lodash");
+const node_io_1 = require("../../../node-io");
 const LORA_OUT_RATE_LIMIT_MS = 1000;
 class ModbusToMqtt extends node_1.Node {
     constructor() {
@@ -10,9 +11,9 @@ class ModbusToMqtt extends node_1.Node {
         this.title = 'Modbus To MQTT';
         this.description = 'Modbus To MQTT';
         this.settings['host'] = { description: 'Device Name', value: '', type: node_1.SettingType.STRING };
-        this.addInput('in', node_1.Type.JSON);
-        this.addOutput('out', node_1.Type.JSON);
-        this.addOutput('error', node_1.Type.STRING);
+        this.addInput('in', node_io_1.Type.JSON);
+        this.addOutput('out', node_io_1.Type.JSON);
+        this.addOutput('error', node_io_1.Type.STRING);
     }
     onInputUpdated() {
         let payload = this.getInputData(0);
@@ -151,10 +152,10 @@ class MqttToModbus extends node_1.Node {
         this.title = 'MQTT To Modbus';
         this.description = 'MQTT To Modbus';
         this.settings['host'] = { description: 'Device Name', value: '', type: node_1.SettingType.STRING };
-        this.addInput('in', node_1.Type.JSON);
-        this.addOutput('out', node_1.Type.JSON);
-        this.addOutput('error', node_1.Type.STRING);
-        this.addOutput('queue', node_1.Type.NUMBER);
+        this.addInput('in', node_io_1.Type.JSON);
+        this.addOutput('out', node_io_1.Type.JSON);
+        this.addOutput('error', node_io_1.Type.STRING);
+        this.addOutput('queue', node_io_1.Type.NUMBER);
     }
     onAdded() {
         this.onInputUpdated();
@@ -184,10 +185,10 @@ class MqttToModbus extends node_1.Node {
         const reg = parseInt(topic[5]);
         let write_value = null;
         if (obj.hasOwnProperty('payload') && obj.payload) {
-            if (typeof obj.payload === node_1.Type.STRING) {
+            if (typeof obj.payload === node_io_1.Type.STRING) {
                 obj.payload = JSON.parse(obj.payload);
             }
-            if (typeof obj.payload.value === node_1.Type.NUMBER || typeof obj.payload.value === node_1.Type.BOOLEAN) {
+            if (typeof obj.payload.value === node_io_1.Type.NUMBER || typeof obj.payload.value === node_io_1.Type.BOOLEAN) {
                 write_value = obj.payload.value;
             }
             else if (isNaN(parseInt(obj.payload.value))) {

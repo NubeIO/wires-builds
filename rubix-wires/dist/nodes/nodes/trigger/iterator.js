@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const time_utils_1 = require("../../utils/time-utils");
 class TimeIteratorNode extends node_1.Node {
     constructor() {
@@ -17,13 +18,13 @@ class TimeIteratorNode extends node_1.Node {
         this.title = 'Iterator';
         this.description =
             "This node generates a sequence of 'true' messages at 'output'. If the 'Generate False' setting is ticked (default), then a 'false' message will be sent between each 'true' at 'output'. The number of 'true' messages sent will be equal to 'iterations' value; these values are sent over the 'interval' duration (unless interrupted by ‘stop’ inputs). For example, if 'interval' is set to 5 (seconds) and 'iterations' is set to 5, a 'true' message will be sent from 'output' every 1000 millis. If 'stop’ input is ‘true’ then the next ‘true’ value will not be sent from ‘output’ until ‘stop’ is ‘false’ again. ‘interval’ units can be configured from settings. Maximum ‘interval’ setting is 587 hours.";
-        this.addInputWithSettings('interval', node_1.Type.NUMBER, 10, 'Interval', false);
-        this.addInputWithSettings('iterations', node_1.Type.NUMBER, 5, 'Iterations', false);
-        this.addInput('start', node_1.Type.BOOLEAN);
-        this.addInput('stop', node_1.Type.BOOLEAN);
-        this.addOutput('output', node_1.Type.BOOLEAN);
-        this.addOutput('complete', node_1.Type.BOOLEAN);
-        this.addOutput('count', node_1.Type.NUMBER);
+        this.addInputWithSettings('interval', node_io_1.Type.NUMBER, 10, 'Interval', false);
+        this.addInputWithSettings('iterations', node_io_1.Type.NUMBER, 5, 'Iterations', false);
+        this.addInput('start', node_io_1.Type.BOOLEAN);
+        this.addInput('stop', node_io_1.Type.BOOLEAN);
+        this.addOutput('output', node_io_1.Type.BOOLEAN);
+        this.addOutput('complete', node_io_1.Type.BOOLEAN);
+        this.addOutput('count', node_io_1.Type.NUMBER);
         this.settings['time'] = {
             description: 'Units',
             type: node_1.SettingType.DROPDOWN,

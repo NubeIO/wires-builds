@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const file_utils_1 = require("../../utils/file-utils");
 class PasswordNode extends node_1.Node {
     constructor() {
@@ -11,7 +12,7 @@ class PasswordNode extends node_1.Node {
         this.description =
             'This node is used to retrieve the Nube API password for the local device.  The Nube API password is used with the nube/login node to authenticate with Nube devices (see nube/login node, above).  ‘password’ output will be a String of the Nube API password for the local device.';
         this.settings[''] = { description: '' };
-        this.addOutput('password', node_1.Type.STRING);
+        this.addOutput('password', node_io_1.Type.STRING);
     }
     onAdded() {
         const fileName = 'admin_password.txt';

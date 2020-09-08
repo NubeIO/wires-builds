@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const utils_1 = require("../../utils");
 class VolumeUnitConversionNode extends node_1.Node {
     constructor() {
@@ -9,10 +10,10 @@ class VolumeUnitConversionNode extends node_1.Node {
         this.title = 'Volume Conversion (L)';
         this.description =
             'This node converts between Volume units Litre (L), Cubic Metre (m³), Cubic Foot (ft³), and Gallon (gal).  Input type can be selected from settings. Outputs will change based on selected input type.';
-        this.addInput('L', node_1.Type.NUMBER);
-        this.addOutput('M³', node_1.Type.NUMBER);
-        this.addOutput('ft³', node_1.Type.NUMBER);
-        this.addOutput('gal', node_1.Type.NUMBER);
+        this.addInput('L', node_io_1.Type.NUMBER);
+        this.addOutput('M³', node_io_1.Type.NUMBER);
+        this.addOutput('ft³', node_io_1.Type.NUMBER);
+        this.addOutput('gal', node_io_1.Type.NUMBER);
         this.settings['inputType'] = {
             description: 'Input Type',
             type: node_1.SettingType.DROPDOWN,

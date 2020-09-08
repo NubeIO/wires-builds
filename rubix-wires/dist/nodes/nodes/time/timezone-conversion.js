@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../node");
 const container_1 = require("../../container");
+const node_io_1 = require("../../node-io");
 const timezone_utils_1 = require("../../utils/timezone-utils");
 const moment = require("moment-timezone");
 class TimezoneConvertNode extends node_1.Node {
@@ -11,9 +12,9 @@ class TimezoneConvertNode extends node_1.Node {
         this.description =
             `## Description\n ` +
                 ` The is node is used to convert two timestamps\n `;
-        this.addInput('input', node_1.Type.ANY);
-        this.addOutput('out-time-converted', node_1.Type.ANY);
-        this.addOutput('out-local-converted', node_1.Type.ANY);
+        this.addInput('input', node_io_1.Type.ANY);
+        this.addOutput('out-time-converted', node_io_1.Type.ANY);
+        this.addOutput('out-local-converted', node_io_1.Type.ANY);
         this.settings['region'] = {
             description: 'Select Region',
             type: node_1.SettingType.DROPDOWN,

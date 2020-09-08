@@ -4,6 +4,7 @@ const container_node_1 = require("../../../container-node");
 const container_1 = require("../../../container");
 const node_1 = require("../../../node");
 const constants_1 = require("../../../constants");
+const node_io_1 = require("../../../node-io");
 const net = require('net');
 class ModbusSerialDeviceNode extends container_node_1.ContainerNode {
     constructor(container) {
@@ -49,9 +50,9 @@ class ModbusSerialDeviceNode extends container_node_1.ContainerNode {
                 ` If device is TCP when the node is added or after the setting a change a device ping will be sent to see if the device is online\n ` +
                 ` If device is online **status** will be sent to true and the **error** will be sent to false. If the device if offline the **status** will be sent to false and the **error** true \n ` +
                 `   \n `;
-        this.addOutput('status', node_1.Type.BOOLEAN);
-        this.addOutput('error', node_1.Type.STRING);
-        this.addOutput('message', node_1.Type.JSON);
+        this.addOutput('status', node_io_1.Type.BOOLEAN);
+        this.addOutput('error', node_io_1.Type.STRING);
+        this.addOutput('message', node_io_1.Type.JSON);
         this.settings['deviceEnable'] = {
             description: 'Device enable',
             value: false,
