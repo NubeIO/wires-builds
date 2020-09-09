@@ -69,7 +69,9 @@ class ConnectionLocalReceiverNode extends node_1.Node {
         this.topicList = [];
         transmitters.forEach(transmitter => {
             this.topicList.push(transmitter.getInputData(1));
-            this.setOutputData(0, transmitter.getInputData(0));
+            if (this.settings['channel'].value === transmitter.getInputData(1)) {
+                this.setOutputData(0, transmitter.getInputData(0), true);
+            }
         });
         this.pushSettings();
     }

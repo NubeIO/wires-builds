@@ -3,6 +3,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.isNull = (value) => value == null;
 exports.isNotNull = (value) => !exports.isNull(value);
 exports.isJSON = (value) => exports.isNotNull(value) && (typeof value === 'object' || Array.isArray(value));
+exports.isString = (value) => {
+    if (typeof value === 'string' || value instanceof String) {
+        return true;
+    }
+    else
+        return false;
+};
 exports.isEmpty = (value) => {
     if (exports.isNull(value)) {
         return true;

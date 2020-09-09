@@ -186,6 +186,7 @@ require("./streams/queue");
 require("./streams/stream-delay");
 require("./streams/stream-delay-meter");
 require("./streams/frequency-meter");
+require("./string/string-acronyms");
 require("./string/string-compare");
 require("./string/substring-cut");
 require("./string/string-join");
