@@ -17,6 +17,7 @@ const constants_1 = require("../../../constants");
 const bacnet_constant_1 = require("./bacnet-constant");
 const utils_1 = require("../../../utils");
 const HistoryBase_1 = require("../../history/HistoryBase");
+const helper_1 = require("../../../../utils/helper");
 class BACnetPoint extends HistoryBase_1.default {
     constructor() {
         super();
@@ -179,11 +180,17 @@ class BACnetPoint extends HistoryBase_1.default {
         }
         if (selectPoint) {
             bacnet_utils_1.default.getPresentValue(this.getParentNode(), selectPoint).then(msg => {
-                this.setPointValue(msg);
+                if (!helper_1.isNull(msg)) {
+                    this.setPointValue(msg);
+                }
             });
         }
     }
     setPointValue(msg) {
+        if (helper_1.isNull(msg.value.values[0].value)) {
+            this.setOutputData(2, true, true);
+            return;
+        }
         let pointValue = msg.value.values[0].value;
         let objectType;
         let objectInstance;
@@ -192,6 +199,8 @@ class BACnetPoint extends HistoryBase_1.default {
         const priority = this.settings['priority'].value;
         const manualPoint = this.settings['manualPoint'].value;
         const selectPoint = this.settings['pointsList'].value;
+        const pointsList = this.settings['pointsList'].config.items;
+        let bacnetPointName;
         if (manualPoint) {
             objectType = this.settings['objectType'].value;
             objectInstance = this.settings['objectInstance'].value;
@@ -199,6 +208,15 @@ class BACnetPoint extends HistoryBase_1.default {
         if (selectPoint) {
             objectType = selectPoint.type;
             objectInstance = selectPoint.instance;
+            if (!helper_1.isNull(pointsList)) {
+                let obj = pointsList;
+                for (var key in obj) {
+                    if (obj[key].value.type === selectPoint.type && obj[key].value.instance === selectPoint.instance) {
+                        bacnetPointName = obj[key];
+                    }
+                }
+                ;
+            }
         }
         const json = {
             name: this.name,
@@ -207,12 +225,13 @@ class BACnetPoint extends HistoryBase_1.default {
             pointWriteEnable: pointWriteEnable,
             objectType: objectType,
             objectInstance: objectInstance,
-            priority: priority
+            priority: priority,
+            bacnetPointName: bacnetPointName
         };
         if (msg.value) {
             this.setOutputData(0, pointValue, true);
             this.setOutputData(1, json, true);
-            this.setOutputData(2, null);
+            this.setOutputData(2, null, true);
         }
         else {
             this.setOutputData(0, null, true);
@@ -226,7 +245,7 @@ class BACnetPoint extends HistoryBase_1.default {
         this.settings['pointsList'].config.items = this.points.map(point => {
             return {
                 value: { type: point.type, instance: point.objectInfo },
-                text: `${point.name} -> ${this.readObjectName(point.type)}: ${point.objectInfo}`,
+                text: point.name,
             };
         });
         this.persistConfiguration();
