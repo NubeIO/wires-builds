@@ -38,6 +38,8 @@ class DelayOnNode extends node_1.Node {
         this.setOutputData(0, false);
         this.setOutputData(1, false);
         this.setOutputData(2, 0);
+        this.lastInput = false;
+        this.lastReset = false;
     }
     onAdded() {
         this.onAfterSettingsChange();
@@ -55,14 +57,15 @@ class DelayOnNode extends node_1.Node {
         if (input !== true)
             input = false;
         const reset = this.getInputData(2);
-        if (reset && this.inputs[2].updated && this.enabled) {
+        if (reset && this.inputs[2].updated && !this.lastReset && this.enabled) {
             this.clearTimers();
             this.setOutputData(0, input);
             this.setOutputData(1, false);
             this.setOutputData(2, 0);
             this.enabled = false;
         }
-        if (input && this.inputs[0].updated) {
+        this.lastReset = reset;
+        if (input && this.inputs[0].updated && !this.lastInput) {
             this.setOutputData(1, true);
             this.setOutputData(2, delay);
             this.enabled = true;
@@ -97,6 +100,7 @@ class DelayOnNode extends node_1.Node {
                 this.setOutputData(2, remaining);
             }, this.remainingUpdateMillis);
         }
+        this.lastInput = input;
         if (!input) {
             this.setOutputData(0, false, true);
             this.setOutputData(1, false, true);

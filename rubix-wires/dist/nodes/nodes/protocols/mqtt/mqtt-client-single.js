@@ -4,7 +4,6 @@ const mqtt = require("mqtt");
 const container_1 = require("../../../container");
 const node_1 = require("../../../node");
 const node_io_1 = require("../../../node-io");
-const utils_1 = require("../../../utils");
 const crypto_utils_1 = require("../../../utils/crypto-utils");
 const config_1 = require("../../../../config");
 const helper_1 = require("../../../../utils/helper");
@@ -19,6 +18,7 @@ class MqttClientSingleNode extends node_1.Node {
         this.inEnable = 1;
         this.inData = 2;
         this.inTopic = 3;
+        this.enableDebug = false;
         this.title = 'MQTT Single Topic client';
         this.description =
             `## Description\n ` +
@@ -44,11 +44,25 @@ class MqttClientSingleNode extends node_1.Node {
                 `   \n `;
         this.addInput('[name]', node_io_1.Type.STRING);
         this.addInputWithSettings('enable', node_io_1.Type.BOOLEAN, false, 'enable broker');
-        this.addInputWithSettings('input', node_io_1.Type.STRING, '{ "payload": 22, "topic": "my topic", "name": "my node node"}', 'JSON input or input value');
-        this.addInputWithSettings('topic', node_io_1.Type.STRING, 'my topic', 'enter topic if not used from input');
+        this.addInputWithSettings('input', node_io_1.Type.STRING, '', 'JSON input or input value');
+        this.addInputWithSettings('topic', node_io_1.Type.STRING, '', 'enter topic if not used from input');
         this.addOutput('connected', node_io_1.Type.BOOLEAN);
         this.addOutput('output', node_io_1.Type.ANY);
         this.addOutput('output-json', node_io_1.Type.JSON);
+        this.settings['retain'] = { description: 'Retain message on publish', value: true, type: node_1.SettingType.BOOLEAN };
+        this.settings['qos'] = {
+            description: 'MQTT Quality Of Service (QoS)',
+            type: node_1.SettingType.DROPDOWN,
+            config: {
+                items: [
+                    { value: -1, text: 'na' },
+                    { value: 0, text: 'QoS 0' },
+                    { value: 1, text: 'QoS 1' },
+                    { value: 2, text: 'QoS 2' },
+                ],
+            },
+            value: 0,
+        };
         this.settings['broker_group'] = {
             description: 'Broker settings',
             value: '',
@@ -94,13 +108,22 @@ class MqttClientSingleNode extends node_1.Node {
             this.setOutputData(0, false);
             if (this.getInputData(this.inEnable) === true) {
                 this.connectToBroker();
-                this.debugInfo(`MQTT-CLIENT-SINGLE NODE: connect to Broker`);
+                if (this.enableDebug)
+                    this.debugInfo(`MQTT-CLIENT-SINGLE NODE: connect to Broker`);
             }
         }
     }
     connectToBroker() {
         let { protocol, host, port, username, password } = config_1.default.mqtt;
         let options = {};
+        const retain = this.settings['retain'].value;
+        if (retain) {
+            options.retain = true;
+        }
+        const qos = this.settings['qos'].value;
+        if (qos !== -1) {
+            options.qos = qos;
+        }
         if (this.settings['useEnv'].value) {
             if (this.settings['server'].value != null && this.settings['server'].value != '')
                 options.host = this.settings['server'].value;
@@ -129,43 +152,49 @@ class MqttClientSingleNode extends node_1.Node {
         }
         this.client = mqtt.connect(options);
         this.client.on('connect', () => {
+            if (this.enableDebug)
+                this.debugInfo(`MQTT-CLIENT-SINGLE NODE: this.client = mqtt.connect options: ${JSON.stringify(options)}`);
             this.setOutputData(0, true);
             let data = this.getInputData(this.inData);
-            if (data) {
+            let topic = this.getInputData(this.inTopic);
+            if (data || topic) {
                 let isJSON = true;
                 try {
-                    if (helper_1.isNull(data))
-                        return;
                     data = JSON.parse(data);
                 }
                 catch (_a) {
-                    this.debugInfo(`MQTT-CLIENT-SINGLE NODE: input isn't JSON`);
+                    if (this.enableDebug)
+                        this.debugInfo(`MQTT-CLIENT-SINGLE NODE: input isn't JSON`);
                     isJSON = false;
                 }
                 if (isJSON && data.hasOwnProperty('topic') && typeof data.topic === node_io_1.Type.STRING) {
-                    if (helper_1.isNull(data.topic))
-                        return;
-                    this.client.subscribe(data.topic);
+                    if (!helper_1.isNull(data.topic)) {
+                        this.client.subscribe(data.topic);
+                        if (this.enableDebug)
+                            this.debugInfo(`MQTT-CLIENT-SINGLE NODE:  subscribe on json topic ${data.topic}`);
+                    }
                 }
                 else {
-                    let topic = this.getInputData(this.inTopic);
-                    if (helper_1.isNull(topic))
-                        return;
-                    this.client.subscribe(topic);
+                    if (!helper_1.isNull(topic)) {
+                        if (this.enableDebug)
+                            this.debugInfo(`MQTT-CLIENT-SINGLE NODE:  subscribe on node input topic ${topic}`);
+                        this.client.subscribe(topic);
+                    }
+                    ;
                 }
             }
         });
         this.client.on('close', () => {
             this.setOutputData(0, false);
-            this.setOutputData(1, null);
         });
         this.client.on('error', error => {
             this.debugWarn(error);
         });
         this.client.on('message', (topic, message) => {
             let obj = { topic: topic, message: message.toString() };
-            this.setOutputData(1, obj.message);
-            this.setOutputData(2, obj);
+            if (this.enableDebug)
+                this.debugInfo(`MQTT-CLIENT-SINGLE NODE:  this.client.on('message' ${JSON.stringify(obj)}`);
+            this.processMessage(obj);
         });
     }
     disconnectFromBroker() {
@@ -176,23 +205,34 @@ class MqttClientSingleNode extends node_1.Node {
         if (this.inputs[this.inEnable].updated) {
             if (this.getInputData(this.inEnable) === true) {
                 this.connectToBroker();
-                this.debugInfo(`MQTT-CLIENT-SINGLE NODE: connect to Broker`);
+                if (this.enableDebug)
+                    this.debugInfo(`MQTT-CLIENT-SINGLE NODE: connect to Broker`);
             }
             else if (this.getInputData(this.inEnable) === false) {
                 this.disconnectFromBroker();
-                this.debugInfo(`MQTT-CLIENT-SINGLE NODE: disconnect From Broker`);
+                if (this.enableDebug)
+                    this.debugInfo(`MQTT-CLIENT-SINGLE NODE: disconnect From Broker`);
             }
             else if (helper_1.isNull(this.getInputData(this.inEnable))) {
                 this.onAfterSettingsChange();
-                this.debugInfo(`MQTT-CLIENT-SINGLE NODE: disconnect enable input from node`);
+                if (this.enableDebug)
+                    this.debugInfo(`MQTT-CLIENT-SINGLE NODE: disconnect enable input from node`);
             }
         }
         if (this.inputs[this.inName].updated) {
             let nodeName = this.getInputData(this.inName);
-            this.name = nodeName;
-            this.broadcastNameToClients();
+            if (!helper_1.isNull(nodeName)) {
+                this.name = nodeName;
+                this.broadcastNameToClients();
+            }
+            ;
         }
-        if (this.settings['enable'].value && this.client && this.client.connected) {
+        if (this.getInputData(this.inEnable) && this.inputs[this.inTopic].updated) {
+            this.connectToBroker();
+            if (this.enableDebug)
+                this.debugInfo(`MQTT-CLIENT-SINGLE NODE: node input topic updated`);
+        }
+        if (this.getInputData(this.inEnable) && this.client && this.client.connected) {
             let data = this.getInputData(this.inData);
             if (data && this.inputs[this.inData].updated) {
                 let isJSON = true;
@@ -200,7 +240,8 @@ class MqttClientSingleNode extends node_1.Node {
                     data = JSON.parse(data);
                 }
                 catch (_a) {
-                    this.debugInfo(`MQTT-CLIENT-SINGLE NODE: input isn't JSON`);
+                    if (this.enableDebug)
+                        this.debugInfo(`MQTT-CLIENT-SINGLE NODE: input isn't JSON`);
                     isJSON = false;
                 }
                 let topic;
@@ -211,6 +252,8 @@ class MqttClientSingleNode extends node_1.Node {
                     data.hasOwnProperty('payload')) {
                     payload = JSON.stringify(data.payload);
                     this.client.publish(data.topic, '' + payload);
+                    if (this.enableDebug)
+                        this.debugInfo(`MQTT-CLIENT-SINGLE NODE: publish on input topic from json${data.topic}, '' + ${payload}`);
                 }
                 else {
                     topic = this.getInputData(this.inTopic);
@@ -219,6 +262,8 @@ class MqttClientSingleNode extends node_1.Node {
                     else
                         payload = String(data);
                     this.client.publish(topic, '' + payload);
+                    if (this.enableDebug)
+                        this.debugInfo(`MQTT-CLIENT-SINGLE NODE: publish on input topic from node input ${topic}, '' + ${payload}`);
                 }
             }
         }
@@ -232,33 +277,16 @@ class MqttClientSingleNode extends node_1.Node {
             this.disconnectFromBroker();
             if (this.getInputData(this.inEnable)) {
                 this.connectToBroker();
-                this.debugInfo(`MQTT-CLIENT-SINGLE NODE: connect to Broker from settings`);
+                if (this.enableDebug)
+                    this.debugInfo(`MQTT-CLIENT-SINGLE NODE: connect to Broker from settings`);
             }
         }
     }
-    onExecute() {
-        if (this.messageQueue && this.messageQueue.length > 0) {
-            this.processQueue(this.messageQueue.shift());
-        }
-    }
-    setMQTTOutput(mqttMessage, outputNum) {
-        if (this.settings['outputType' + outputNum].value) {
-            this.setOutputData(outputNum, { topic: mqttMessage.topic, payload: mqttMessage.message });
-            return;
-        }
-        else {
-            let msgAsNum = Number(mqttMessage.message);
-            if (isNaN(msgAsNum)) {
-                this.setOutputData(outputNum, mqttMessage.message);
-                return;
-            }
-            this.setOutputData(outputNum, utils_1.default.toFixedNumber(msgAsNum, this.settings['decimals'].value).toString());
-        }
-    }
-    processQueue(mqttMessage) {
-        for (let outInd = 1; outInd <= this.topicsCount; outInd++) {
-            if (matchMQTT(this.settings['topic' + outInd].value, mqttMessage.topic))
-                this.setMQTTOutput(mqttMessage, outInd);
+    processMessage(mqttMessage) {
+        let topic = this.getInputData(this.inTopic);
+        if (matchMQTT(topic, mqttMessage.topic)) {
+            this.setOutputData(1, mqttMessage.message);
+            this.setOutputData(2, mqttMessage);
         }
     }
 }

@@ -4,6 +4,7 @@ const node_1 = require("../../node");
 const container_1 = require("../../container");
 const node_io_1 = require("../../node-io");
 const time_utils_1 = require("../../utils/time-utils");
+const helper_1 = require("../../../utils/helper");
 class PointPersistence extends node_1.Node {
     constructor() {
         super();
@@ -16,7 +17,7 @@ class PointPersistence extends node_1.Node {
         this.addInput('input', node_io_1.Type.ANY);
         this.addInputWithSettings('interval', node_io_1.Type.NUMBER, 30, 'Interval');
         this.addInput('trigger', node_io_1.Type.BOOLEAN);
-        this.addOutput('output', node_io_1.Type.BOOLEAN);
+        this.addOutput('output', node_io_1.Type.ANY);
         this.properties['output'] = null;
         this.settings['time'] = {
             description: 'Units',
@@ -63,6 +64,12 @@ class PointPersistence extends node_1.Node {
             if (this.properties['output'] !== undefined &&
                 this.properties['output'] !== null &&
                 this.properties['output'].length) {
+                this.setOutputData(0, this.properties['output']);
+            }
+        }
+        if (this.inputs[1].updated) {
+            if (!helper_1.isNull(message)) {
+                this.properties['output'] = message;
                 this.setOutputData(0, this.properties['output']);
             }
         }

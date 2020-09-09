@@ -16,18 +16,31 @@ class CounterNode extends node_1.Node {
         this.addOutput('count', node_io_1.Type.NUMBER);
         this.properties['pointVal'] = 0;
     }
+    onCreated() {
+        this.setOutputData(1, false);
+        this.setOutputData(2, false);
+        this.lastUp = false;
+        this.lastDown = false;
+        this.lastReset = false;
+    }
     onAdded() {
         this.onInputUpdated();
     }
     onInputUpdated() {
-        let old = this.outputs[0].data;
-        if (this.inputs[1].updated && this.inputs[1].data == true)
+        const old = this.outputs[0].data;
+        const up = this.getInputData(1) || false;
+        const down = this.getInputData(2) || false;
+        const reset = this.getInputData(3) || false;
+        if (this.inputs[1].updated && up && !this.lastUp)
             this.properties['pointVal']++;
-        if (this.inputs[2].updated && this.inputs[2].data == true)
+        this.lastUp = up;
+        if (this.inputs[2].updated && down && !this.lastDown)
             this.properties['pointVal']--;
+        this.lastDown = down;
         const setValue = this.getInputData(0);
-        if (this.inputs[3].updated && this.inputs[3].data == true)
+        if (this.inputs[3].updated && reset && !this.lastReset)
             this.properties['pointVal'] = setValue;
+        this.lastReset = reset;
         if (this.properties['pointVal'] !== old) {
             this.setOutputData(0, this.properties['pointVal']);
             this.properties['pointVal'] = this.properties['pointVal'];

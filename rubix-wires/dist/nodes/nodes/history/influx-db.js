@@ -21,6 +21,7 @@ class InfluxDBNode extends node_1.Node {
         super();
         this.title = 'Influx-DB';
         this.description = 'A node for sending data to influxDB';
+        this.addInput('[name]', node_io_1.Type.STRING);
         this.addInput('json-input', node_io_1.Type.JSON);
         this.addOutput('error', node_io_1.Type.BOOLEAN);
         this.addOutput('lastExport', node_io_1.Type.STRING);
@@ -106,7 +107,15 @@ class InfluxDBNode extends node_1.Node {
             return;
         if (!this.settings['enable'].value)
             return;
-        const input = this.getInputData(0);
+        if (this.inputs[0].updated) {
+            let nodeName = this.getInputData(0);
+            if (!helper_1.isNull(nodeName)) {
+                this.name = nodeName;
+                this.broadcastNameToClients();
+            }
+            ;
+        }
+        const input = this.getInputData(1);
         if (helper_1.isNull(input))
             return;
         const measurementHas = input.hasOwnProperty('measurement');

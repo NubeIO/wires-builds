@@ -86,7 +86,7 @@ class GetSchedulesNode extends node_1.Node {
                         'Authorization': `Basic ${btoa(`${username}:${password}`)}`,
                     },
                 });
-                this.setOutputData(0, response.data);
+                this.setOutputData(0, response.data, false);
                 this.setOutputData(1, false);
                 this.properties['scheduleData'] = response.data;
                 this.persistProperties(false, true);

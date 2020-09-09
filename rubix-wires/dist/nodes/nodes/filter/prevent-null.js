@@ -10,11 +10,14 @@ class FiltersPreventNullNode extends node_1.Node {
         this.description = "This node filters 'input' values.  All 'input' values are passed to 'output' EXCEPT 'null'.";
         this.addInput('input');
         this.addOutput('output');
+        this.properties['value'];
     }
     onInputUpdated() {
         let val = this.getInputData(0);
         if (helper_1.isNotNull(val) && val !== '') {
             this.setOutputData(0, val);
+            this.properties['value'] = val;
+            this.persistProperties(false, true);
         }
     }
 }

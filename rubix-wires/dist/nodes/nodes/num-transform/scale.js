@@ -19,6 +19,9 @@ class ScaleNode extends node_1.Node {
         this.addOutput('output', node_io_1.Type.NUMBER);
         this.lastTime = Date.now();
     }
+    onAfterSettingsChange() {
+        this.onInputUpdated();
+    }
     onInputUpdated() {
         let now = Date.now();
         if (now - this.lastTime >= this.interval) {

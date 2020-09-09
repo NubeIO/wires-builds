@@ -1979,6 +1979,10 @@ class Renderer extends events_1.EventEmitter {
                 content: 'Move to Container',
                 callback: this.onMenuNodeMoveToContainer.bind(this),
             });
+        if (Object.keys(this.selected_nodes).length > 1) {
+            options.push({ content: 'Align left', callback: () => this.onMenuNodeAlignLeft() });
+            options.push({ content: 'Align right', callback: () => this.onMenuNodeAlignRight() });
+        }
         if (node.removable !== false)
             options.push({ content: 'Remove', callback: this.onMenuNodeRemove.bind(this) });
         if (node['onGetInputs']) {
@@ -2130,6 +2134,39 @@ class Renderer extends events_1.EventEmitter {
     onMenuNodeMoveToContainer(node, e, prev_menu, renderer, first_event) {
         const ids = Renderer.getSelectedNodesIds(renderer, node);
         this.editor.socket.sendMoveToNewContainer(ids);
+    }
+    onMenuNodeAlignLeft() {
+        var sortable = [];
+        for (var key in this.selected_nodes) {
+            sortable.push([key, this.selected_nodes[key].pos[0]]);
+        }
+        sortable.sort((a, b) => {
+            return a[1] - b[1];
+        });
+        const leftMostPos = sortable[0][1];
+        Object.keys(this.selected_nodes).forEach(k => {
+            if (this.selected_nodes[k].pos[0] !== leftMostPos) {
+                this.selected_nodes[k].pos[0] = leftMostPos;
+                this.editor.socket.sendUpdateNodePosition(this.selected_nodes[k]);
+            }
+        });
+    }
+    onMenuNodeAlignRight() {
+        var sortable = [];
+        for (var key in this.selected_nodes) {
+            sortable.push([key, this.selected_nodes[key].pos[0] + this.selected_nodes[key].size[0]]);
+        }
+        sortable.sort((a, b) => {
+            return b[1] - a[1];
+        });
+        const rightMost = sortable[0][1];
+        Object.keys(this.selected_nodes).forEach(k => {
+            const newPos = rightMost - this.selected_nodes[k].size[0];
+            if (this.selected_nodes[k].pos[0] !== newPos) {
+                this.selected_nodes[k].pos[0] = newPos;
+                this.editor.socket.sendUpdateNodePosition(this.selected_nodes[k]);
+            }
+        });
     }
     onMenuNodeExport(node, e, prev_menu, renderer, first_event) {
         node_exporter_1.default.exportNodes(this.selected_nodes, this.editor).then(({ hasNonCloneable }) => {

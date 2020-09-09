@@ -4,6 +4,7 @@ const node_1 = require("../../node");
 const container_1 = require("../../container");
 const node_icons_1 = require("../../node-icons");
 const node_io_1 = require("../../node-io");
+const helper_1 = require("../../../utils/helper");
 const icon = node_icons_1.default.aiIcon;
 class ConnectionLocalReceiverNode extends node_1.Node {
     constructor() {
@@ -37,6 +38,11 @@ class ConnectionLocalReceiverNode extends node_1.Node {
         this.onAfterSettingsChange();
         this.setOutputData(0, this.properties['val']);
     }
+    onCreated() {
+        if (helper_1.isNull(this.settings['channel'].value)) {
+            this.onAfterSettingsChange();
+        }
+    }
     onAfterSettingsChange() {
         this.updateTitle();
         if (this.side !== container_1.Side.server)
@@ -63,6 +69,7 @@ class ConnectionLocalReceiverNode extends node_1.Node {
         this.topicList = [];
         transmitters.forEach(transmitter => {
             this.topicList.push(transmitter.getInputData(1));
+            this.setOutputData(0, transmitter.getInputData(0));
         });
         this.pushSettings();
     }

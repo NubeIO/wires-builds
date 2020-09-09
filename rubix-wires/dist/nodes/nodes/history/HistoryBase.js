@@ -38,6 +38,7 @@ class HistoryBase extends node_1.Node {
         this.dynamicInputStartPosition = 2;
         this.alarmCount = 0;
         this.tagCount = 0;
+        this.lastTrigger = false;
     }
     addHistoryConfiguration() {
         this.addInput('histTrigger', node_io_1.Type.BOOLEAN);
@@ -172,6 +173,7 @@ class HistoryBase extends node_1.Node {
     }
     init(properties) {
         this.historyFunctionsForAfterSettingsChange(properties['settings'], false);
+        this.lastTrigger = false;
     }
     changeInputDynamically(settings) {
         this.assignInputsOutputs();
@@ -434,9 +436,10 @@ class HistoryBase extends node_1.Node {
         });
     }
     checkTriggered() {
-        return (this.settings['historyMode'].value === HistoryMode.TRIGGER_ONLY &&
-            this.getInputData(this.histTriggerInput) &&
-            this.inputs[this.histTriggerInput].updated);
+        const trigger = this.getInputData(this.histTriggerInput) || false;
+        const result = this.inputs[this.histTriggerInput].updated && trigger && !this.lastTrigger;
+        this.lastTrigger = trigger;
+        return result;
     }
     checkCOV(input) {
         if (this.settings['historyMode'].value === HistoryMode.COV) {

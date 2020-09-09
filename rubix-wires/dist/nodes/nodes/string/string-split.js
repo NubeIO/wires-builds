@@ -19,16 +19,24 @@ class TextSplitStringsNode extends node_1.Node {
         this.setOutputData(0, null);
         this.setOutputData(1, 0);
     }
+    onCreated() {
+        this.lastStart = false;
+        this.lastNext = false;
+    }
     onAdded() {
         this.onInputUpdated();
     }
     onInputUpdated() {
-        if (this.inputs[2].updated && this.inputs[2].data) {
+        const start = this.getInputData(2) || false;
+        const next = this.getInputData(3) || false;
+        if (this.inputs[2].updated && start && !this.lastStart) {
             this.currentIndex = 0;
             this.splitNext();
         }
-        if (this.inputs[3].updated && this.inputs[3].data)
+        this.lastStart = start;
+        if (this.inputs[3].updated && next && !this.lastNext)
             this.splitNext();
+        this.lastNext = next;
     }
     onAfterSettingsChange() {
         this.onInputUpdated();

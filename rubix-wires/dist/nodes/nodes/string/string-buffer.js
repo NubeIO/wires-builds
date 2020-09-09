@@ -28,23 +28,36 @@ class StringBufferNode extends node_1.Node {
         this.useTrigger = true;
         this.bufferData = '';
     }
+    onCreated() {
+        this.lastSend = false;
+        this.lastClear = false;
+        this.lastAdd = false;
+    }
     onAdded() {
         this.onInputUpdated();
     }
     onInputUpdated() {
-        if (this.getInputData(1) && this.inputs[1].updated) {
+        const send = this.getInputData(1) || false;
+        const clear = this.getInputData(2) || false;
+        let addTrigger = false;
+        if (this.useTrigger)
+            addTrigger = this.getInputData(3) || false;
+        if (this.inputs[1].updated && send && !this.lastSend) {
             this.setOutputData(0, this.bufferData);
             this.bufferData = '';
         }
-        if (this.getInputData(2) && this.inputs[2].updated)
+        this.lastSend = send;
+        if (this.inputs[2].updated && clear && !this.lastClear)
             this.bufferData = '';
+        this.lastClear = clear;
         if ((!this.useTrigger && this.inputs[0].updated) ||
-            (this.useTrigger && this.getInputData(3) && this.inputs[3].updated)) {
+            (this.useTrigger && this.inputs[3].updated && addTrigger && !this.lastAdd)) {
             const input = this.getInputData(0);
             if (input == null)
                 return;
             this.bufferData += String(input);
         }
+        this.lastAdd = addTrigger;
         this.setOutputData(1, this.bufferData);
     }
     onAfterSettingsChange() {

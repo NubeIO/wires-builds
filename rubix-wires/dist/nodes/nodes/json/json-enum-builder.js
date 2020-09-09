@@ -4,7 +4,7 @@ const node_1 = require("../../node");
 const container_1 = require("../../container");
 const node_io_1 = require("../../node-io");
 const helper_1 = require("../../../utils/helper");
-class JSONBuilderNode2 extends node_1.Node {
+class JSONEnumBuilderNode extends node_1.Node {
     constructor() {
         super();
         this.filterKeys = [];
@@ -24,7 +24,7 @@ class JSONBuilderNode2 extends node_1.Node {
         this.onAfterSettingsChange();
     }
     onInputUpdated() {
-        const trigger = this.getInputData(0);
+        this.getInputData(0);
         this.onAfterSettingsChange();
     }
     onAfterSettingsChange() {
@@ -49,6 +49,6 @@ class JSONBuilderNode2 extends node_1.Node {
             this.setOutputData(1, false);
     }
 }
-exports.JSONBuilderNode2 = JSONBuilderNode2;
-container_1.Container.registerNodeType('json/json-builder 2', JSONBuilderNode2);
+exports.JSONEnumBuilderNode = JSONEnumBuilderNode;
+container_1.Container.registerNodeType('json/json-enum-builder', JSONEnumBuilderNode);
 //# sourceMappingURL=json-enum-builder.js.map

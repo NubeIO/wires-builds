@@ -17,8 +17,12 @@ class SystemExecuteNode extends node_1.Node {
         this.addOutput('out stderr', node_io_1.Type.STRING);
         this.addOutput('error', node_io_1.Type.STRING);
     }
+    onCreated() {
+        this.lastTrigger = false;
+    }
     onInputUpdated() {
-        if (this.inputs[1].updated && this.inputs[1].data) {
+        const trigger = this.getInputData(1) || false;
+        if (this.inputs[1].updated && trigger && !this.lastTrigger) {
             var command = this.inputs[0].data;
             try {
                 child_process_1.exec(command, (err, stdout, stderr) => {
@@ -40,6 +44,7 @@ class SystemExecuteNode extends node_1.Node {
                 this.setOutputData(3, true);
             }
         }
+        this.lastTrigger = trigger;
     }
 }
 container_1.Container.registerNodeType('system/execute-cmd', SystemExecuteNode);
