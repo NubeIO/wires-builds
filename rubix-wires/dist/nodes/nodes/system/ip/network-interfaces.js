@@ -220,7 +220,7 @@ class UpdateIP extends node_1.Node {
         }
         os_utils_1.default.systemInfo()
             .then(e => {
-            if (e.system.model === "GENERIC AM33XX (FLATTENED DEVICE TREE)") {
+            if (e.system.model === "BCM2835") {
                 if (checkIpSettingsEth0 && checkIpSettingsEth1 && writeChanges) {
                     let interfacesArray = [];
                     if (interfaceTypeEth0 == 0) {
@@ -273,7 +273,7 @@ class UpdateIP extends node_1.Node {
             }
             else {
                 node_colour_change_1.default.nodeColourChange(this, node_1.NodeState.ERROR);
-                this.msgOut(this.messageOutput, `'ERROR: incorrect device type`);
+                this.msgOut(this.messageOutput, `'ERROR: incorrect device type ${e.system.model}`);
             }
         }).catch(err => this.msgOut(this.messageOutput, `'ERROR: incorrect device type' ${err}`));
         if (!writeChanges) {

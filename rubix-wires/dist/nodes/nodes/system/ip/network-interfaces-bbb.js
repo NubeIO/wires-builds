@@ -185,7 +185,7 @@ class UpdateIPEdge28 extends node_1.Node {
             }
             else {
                 node_colour_change_1.default.nodeColourChange(this, node_1.NodeState.ERROR);
-                this.msgOut(this.messageOutput, `'ERROR: incorrect device type`);
+                this.msgOut(this.messageOutput, `'ERROR: incorrect device type ${e.system.model}`);
             }
         }).catch(err => this.msgOut(this.messageOutput, `'ERROR: incorrect device type' ${err}`));
         if (!writeChanges) {
