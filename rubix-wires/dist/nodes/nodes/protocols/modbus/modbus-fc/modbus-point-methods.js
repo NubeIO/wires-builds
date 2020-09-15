@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const utils_1 = require("../../../../utils");
 const modbus_point_byte_order_1 = require("./modbus-point-byte-order");
+const helper_1 = require("../../../../../utils/helper");
 class ModbusMethods {
     static readBool(res) {
         return res.data[0];
@@ -83,15 +84,22 @@ class ModbusMethods {
                 }
                 else if (type === 5 || type === 25) {
                     funcType = 'writeCoil';
-                    methodType = [regAddr, nodeInputValue];
+                    if (nodeInputValue === 1 || nodeInputValue === 0) {
+                        methodType = [regAddr, nodeInputValue];
+                    }
                 }
                 else if (type === 6) {
                     funcType = 'writeRegister';
-                    methodType = [regAddr, nodeInputValue];
+                    if (helper_1.isNumeric(nodeInputValue)) {
+                        methodType = [regAddr, nodeInputValue];
+                    }
+                    ;
                 }
                 else if (type === 16) {
                     funcType = 'writeRegisters';
-                    methodType = [regAddr, modbus_point_byte_order_1.default.writeValue(nodeInputValue, pntDataType, pntDataEndian)];
+                    if (helper_1.isNumeric(nodeInputValue)) {
+                        methodType = [regAddr, modbus_point_byte_order_1.default.writeValue(nodeInputValue, pntDataType, pntDataEndian)];
+                    }
                 }
                 return {
                     funcType: funcType,
@@ -106,7 +114,10 @@ class ModbusMethods {
 }
 exports.default = ModbusMethods;
 ModbusMethods.modbusMethods = (thisInstance, id, type, regAddr, regLength, nodeInputValue, pntDataType, pntDataEndian, deviceAddressOffset) => __awaiter(void 0, void 0, void 0, function* () {
-    let ft = yield ModbusMethods.pntSwitch(type, regAddr - deviceAddressOffset, regLength, nodeInputValue, pntDataType, pntDataEndian);
+    let pointAddress = regAddr - deviceAddressOffset;
+    if (pointAddress < 0)
+        pointAddress = 0;
+    let ft = yield ModbusMethods.pntSwitch(type, pointAddress, regLength, nodeInputValue, pntDataType, pntDataEndian);
     yield thisInstance.setID(id);
     yield utils_1.default.sleep(5);
     return yield new Promise((resolve, reject) => {

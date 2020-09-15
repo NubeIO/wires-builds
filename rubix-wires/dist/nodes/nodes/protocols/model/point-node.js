@@ -15,6 +15,24 @@ const node_1 = require("../../../node");
 const node_io_1 = require("../../../node-io");
 const point_node_utils_1 = require("./point-node-utils");
 const logger = logplease_1.create('observer', { color: logplease_1.Colors.Yellow });
+class MockHasPointOutputObservers {
+    static cast(object) {
+        if (helper_1.isEmpty(object)) {
+            return MockHasPointOutputObservers.MOCK;
+        }
+        if (helper_1.isFunction(object['pointObservers'])) {
+            return object;
+        }
+        return MockHasPointOutputObservers.MOCK;
+    }
+    pointObservers() {
+        return [];
+    }
+    MockHasPointOutputObservers() {
+    }
+}
+exports.MockHasPointOutputObservers = MockHasPointOutputObservers;
+MockHasPointOutputObservers.MOCK = new MockHasPointOutputObservers();
 class PointOutputObserver {
     constructor(node, outputSlots) {
         this.node = node;

@@ -10,6 +10,10 @@ class FiltersPreventDuplicatesNode extends node_1.Node {
             "This node filters 'input' values.  All 'input' values are passed to 'output' EXCEPT 'input' values which are equal to the previous 'input' value.";
         this.addInput('input');
         this.addOutput('output');
+        this.properties['value'];
+    }
+    onAdded() {
+        this.onInputUpdated();
     }
     onInputUpdated() {
         let val = this.getInputData(0);
@@ -19,6 +23,8 @@ class FiltersPreventDuplicatesNode extends node_1.Node {
             return;
         this.lastVal = val;
         this.setOutputData(0, val, true);
+        this.properties['value'] = val;
+        this.persistProperties(false, true);
     }
 }
 container_1.Container.registerNodeType('filter/prevent-duplicates', FiltersPreventDuplicatesNode);

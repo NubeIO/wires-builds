@@ -31,7 +31,8 @@ class TimeUtils {
         return momentValue
             .clone()
             .minute(roundedMinutes)
-            .second(0);
+            .second(0)
+            .millisecond(0);
     }
     static timeDisplay(timeInMs, format = 5, timeType) {
         let duration = timeInMs;
@@ -148,14 +149,14 @@ class TimeUtils {
     }
     static timeConvertPlus(d) {
         try {
-            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-            const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
             let dts = d.toDateString();
             let e = d.getTime();
             let mnu = this.pad(d.getMonth() + 1, 2);
-            let mnt = (d.getMonth());
-            let mn = (monthNames[mnt]);
-            let dy = (dayNames[d.getDay()]);
+            let mnt = d.getMonth();
+            let mn = monthNames[mnt];
+            let dy = dayNames[d.getDay()];
             let dt = this.pad(d.getDate(), 2);
             let yr = d.getFullYear();
             let hr = d.getHours();
@@ -176,16 +177,16 @@ class TimeUtils {
                 thr = hr;
             }
             thr = '' + thr;
-            let amp = ((hr * 60) + mi);
+            let amp = hr * 60 + mi;
             if (amp < 720) {
-                amp = "AM";
+                amp = 'AM';
             }
             else {
-                amp = "PM";
+                amp = 'PM';
             }
-            let hm = (h + ":" + m);
-            let hms = (h + ":" + m + ":" + s);
-            let ms = (m + ":" + s);
+            let hm = h + ':' + m;
+            let hms = h + ':' + m + ':' + s;
+            let ms = m + ':' + s;
             let date = dts;
             let yearMonthDay = '' + yr + '-' + mnu + '-' + dt;
             let year = '' + yr;
@@ -231,14 +232,12 @@ class TimeUtils {
             console.log(error);
         }
     }
-    ;
     static pad(num, size) {
-        let s = num + "";
+        let s = num + '';
         while (s.length < size)
-            s = "0" + s;
+            s = '0' + s;
         return s;
     }
-    ;
 }
 exports.default = TimeUtils;
 //# sourceMappingURL=time-utils.js.map

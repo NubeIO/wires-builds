@@ -427,6 +427,7 @@ class Renderer extends events_1.EventEmitter {
                 if (!skip_action &&
                     utils_1.default.isInsideRectangle(e.canvasX, e.canvasY, n.pos[0] + widthOfNode - this.theme.NODE_TITLE_HEIGHT, n.pos[1] - this.getNodeHeaderHeight(n), this.theme.NODE_TITLE_HEIGHT, this.theme.NODE_TITLE_HEIGHT)) {
                     n.collapse();
+                    this.editor.socket.sendUpdateNodeCollapse(n);
                     skip_action = true;
                 }
                 if (isCategoryPanelClicked) {
@@ -2126,6 +2127,7 @@ class Renderer extends events_1.EventEmitter {
     onMenuNodeCollapse(node) {
         node.flags.collapsed = !node.flags.collapsed;
         node.setDirtyCanvas(true, true);
+        this.editor.socket.sendUpdateNodeCollapse(node);
     }
     onMenuNodeRemove(node, e, prev_menu, renderer, first_event) {
         const ids = Renderer.getSelectedNodesIds(renderer, node);

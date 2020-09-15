@@ -135,6 +135,22 @@ class EditorClientSocket {
                 node.setDirtyCanvas(true, true);
             }
         });
+        socket.on('node-update-collapsed', n => {
+            let container = container_1.Container.containers[n.cid];
+            if (!container) {
+                log.error(`Can't update node. Container id [${n.cid}] not found.`);
+                return;
+            }
+            let node = container.getNodeById(n.id);
+            if (!node) {
+                log.error(`Can't update node. Node id [${n.cid}/${n.id}] not found.`);
+                return;
+            }
+            if (node.flags.collapsed != n.flags.collapsed) {
+                node.flags.collapsed = n.flags.collapsed;
+                node.setDirtyCanvas(true, true);
+            }
+        });
         socket.on('nodeSettings', n => {
             var _a, _b;
             let container = container_1.Container.containers[n.cid];
@@ -377,6 +393,15 @@ class EditorClientSocket {
             contentType: 'application/json',
             type: 'PUT',
             data: JSON.stringify({ size: node.size }),
+        });
+    }
+    sendUpdateNodeCollapse(node) {
+        let that = this;
+        AjaxRequest_1.default.ajax({
+            url: `/api/editor/c/${that.editor.renderer.container.id}/n/${node.id}/collapse`,
+            contentType: 'application/json',
+            type: 'PUT',
+            data: JSON.stringify({ collapsed: node.flags.collapsed }),
         });
     }
     sendCreateLink(origin_id, origin_slot, target_id, target_slot, target_index) {

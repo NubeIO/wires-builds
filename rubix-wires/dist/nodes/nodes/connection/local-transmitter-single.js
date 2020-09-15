@@ -15,6 +15,11 @@ class ConnectionLocalTransmitterNode extends node_1.Node {
         this.addInput('input', node_io_1.Type.ANY);
         this.addInputWithSettings('channel', node_io_1.Type.STRING, '1', 'Topic Name', false);
         this.addInputWithSettings('enable', node_io_1.Type.BOOLEAN, true, 'Enable');
+        this.settings['ifNew'] = {
+            description: 'Only transmit on COV',
+            value: false,
+            type: node_1.SettingType.BOOLEAN,
+        };
     }
     init() {
         if (!this.properties['channel']) {
@@ -38,13 +43,14 @@ class ConnectionLocalTransmitterNode extends node_1.Node {
             return;
         const val = this.getInputData(0);
         const channel = this.getInputData(1);
+        const ifNew = this.settings['ifNew'].value;
         receivers.forEach(receiver => {
             if (receiver.settings['channel'].value === channel) {
                 const blockNull = receiver.settings['blockNull'].value;
                 if (receiver.getInputData(0) === true && ((blockNull && val != null) || !blockNull)) {
                     receiver.properties['val'] = val;
                     receiver.persistProperties(false, true);
-                    receiver.setOutputData(0, receiver.properties['val'], true);
+                    receiver.setOutputData(0, receiver.properties['val'], ifNew);
                 }
             }
         });

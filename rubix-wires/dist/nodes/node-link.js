@@ -90,6 +90,7 @@ class DefaultLinkHandler {
         return true;
     }
     disconnectOutput(slot, index) {
+        var _a, _b;
         if (!this.node.outputs || !this.node.outputs[slot]) {
             logger.error(`Can't disconnect, output slot: ${slot} not found on node: ${this.node.id}`);
             return false;
@@ -116,7 +117,7 @@ class DefaultLinkHandler {
                 logger.error(`Tried to delete input link on: ${targetNode} of slot: ${link.target_slot}`);
             }
             output.links.splice(i, 1);
-            logger.debug(`Disconnected from ${targetNode.getReadableId()}`);
+            logger.debug(`Disconnected from ${_b = (_a = targetNode) === null || _a === void 0 ? void 0 : _a.getReadableId(), (_b !== null && _b !== void 0 ? _b : link.target_node_id)}`);
         }
         delete output.links;
         this.emitChange(this.node, 'outputs');

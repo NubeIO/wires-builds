@@ -122,7 +122,9 @@ class ScheduleChecker extends node_1.Node {
             this.schedulePayload = null;
             if (!input)
                 input = this.getInputData(1) || { weekly: {}, events: {} };
+            console.log('input1', input);
             const key = this.settings['stringScheduleName'].value;
+            console.log('key', key);
             if (key == null || key === '') {
                 this.setOutputData(0, false, true);
                 this.setOutputData(1, null, true);
@@ -137,6 +139,7 @@ class ScheduleChecker extends node_1.Node {
                 timeZone = moment.tz.guess();
             }
             const now = moment.tz(timeZone);
+            console.log('now', now.format());
             const isEnabled = this.getInputData(0);
             if (input && key && isEnabled) {
                 let weeklyOutput = false;
@@ -146,11 +149,15 @@ class ScheduleChecker extends node_1.Node {
                         weeklyScheduleOutput = schedule_utils_1.ScheduleUtils.checkWeeklySchedule(input['weekly'][sched], now);
                         weeklyOutput = weeklyScheduleOutput.scheduleStatus || weeklyOutput;
                         this.schedulePayload = weeklyScheduleOutput.value || this.schedulePayload;
-                        if (this.nextStop == null || weeklyScheduleOutput.nextStop.isBefore(this.nextStop)) {
-                            this.nextStop = weeklyScheduleOutput.nextStop;
+                        if (weeklyScheduleOutput.nextStop != null) {
+                            if (this.nextStop == null || weeklyScheduleOutput.nextStop.isBefore(this.nextStop)) {
+                                this.nextStop = weeklyScheduleOutput.nextStop;
+                            }
                         }
-                        if (this.nextStart == null || weeklyScheduleOutput.nextStart.isBefore(this.nextStart)) {
-                            this.nextStart = weeklyScheduleOutput.nextStart;
+                        if (weeklyScheduleOutput.nextStart != null) {
+                            if (this.nextStart == null || weeklyScheduleOutput.nextStart.isBefore(this.nextStart)) {
+                                this.nextStart = weeklyScheduleOutput.nextStart;
+                            }
                         }
                     }
                 }

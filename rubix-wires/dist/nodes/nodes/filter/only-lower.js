@@ -12,6 +12,14 @@ class FiltersOnlyLowerNode extends node_1.Node {
         this.addInput('input', node_io_1.Type.NUMBER);
         this.addInputWithSettings('threshold', node_io_1.Type.NUMBER, 0, 'threshold', false);
         this.addOutput('output', node_io_1.Type.NUMBER);
+        this.properties['value'];
+    }
+    onAdded() {
+        this.setOutputData(0, this.properties['value']);
+        this.onInputUpdated();
+    }
+    onAfterSettingsChange() {
+        this.onInputUpdated();
     }
     onInputUpdated() {
         let val = this.getInputData(0);
@@ -19,8 +27,11 @@ class FiltersOnlyLowerNode extends node_1.Node {
         if (val == null || threshold == null) {
             this.setOutputData(0, null);
         }
-        else if (val < threshold)
+        else if (val < threshold) {
             this.setOutputData(0, val);
+            this.properties['value'] = val;
+            this.persistProperties(false, true);
+        }
     }
 }
 container_1.Container.registerNodeType('filter/only-lower', FiltersOnlyLowerNode);

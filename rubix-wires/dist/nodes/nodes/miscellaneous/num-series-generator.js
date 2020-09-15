@@ -12,18 +12,18 @@ class NumSeriesGenerator extends flexible_node_1.FlexibleNode {
         this.dynamicSettingsExist = true;
         super.dynamicOutputsType = node_io_1.Type.NUMBER;
         this.title = 'Numeric Series Generator';
-        this.description =
-            "";
+        this.description = "";
         this.addInputWithSettings('startVal', node_io_1.Type.NUMBER, 0, 'Start Value');
         this.addInputWithSettings('addVal', node_io_1.Type.NUMBER, 1, 'Added Value ');
-        this.settings['digits'] = {
-            description: 'Number of decimal places',
-            value: 1,
+        this.settings['factor'] = {
+            description: 'Multiply factor',
+            value: 0,
             type: node_1.SettingType.NUMBER,
         };
     }
     onInputUpdated() {
         let input = this.getInputData(0);
+        let factor = this.settings['factor'].value;
         if (typeof input === 'undefined')
             return;
         if (typeof input === 'number') {
@@ -32,7 +32,7 @@ class NumSeriesGenerator extends flexible_node_1.FlexibleNode {
             if (typeof diff !== 'number')
                 diff = 1;
             for (let i = 0; i < len; i++) {
-                this.setOutputData(i, i + (input * diff));
+                this.setOutputData(i, i + (input * diff) + (i * factor));
             }
         }
     }

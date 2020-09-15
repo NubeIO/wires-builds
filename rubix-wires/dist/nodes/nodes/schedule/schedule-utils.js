@@ -109,6 +109,7 @@ class ScheduleUtils {
                     if (weeklySchedule && Object.prototype.hasOwnProperty.call(weeklySchedule, 'value'))
                         scheduleValue = weeklySchedule.value;
                     nextOff = endMomentArray[x];
+                    nextOn = startMomentArray[x].add(1, 'weeks');
                 }
                 else if (startMomentArray[x].isAfter(dtUTC) &&
                     (nextOn == null || startMomentArray[x].isBefore(nextOn))) {

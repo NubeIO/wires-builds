@@ -121,6 +121,23 @@ router.put('/c/:cid/n/:id/size', function (req, res) {
     });
     res.send(`Node size updated: type [${node.type}] id [${node.container.id}/${node.id}]`);
 });
+router.put('/c/:cid/n/:id/collapse', function (req, res) {
+    let container = container_1.Container.containers[req.params.cid];
+    if (!container)
+        return res.status(404).send(`Can't update node collapse. Container id [${req.params.cid}] not found.`);
+    let node = container.getNodeById(req.params.id);
+    if (!node)
+        return res.status(404).send(`Can't update node collapse. Node id [${req.params.cid}/${req.params.id}] not found.`);
+    node.flags.collapsed = req.body.collapsed;
+    if (app_1.default.db)
+        app_1.default.db.updateNode(node.id, node.container.id, { $set: { "flags.collapsed": node.flags.collapsed } });
+    app_1.default.server.editorSocket.io.emit('node-update-collapsed', {
+        id: req.params.id,
+        cid: req.params.cid,
+        "flags.collapsed": node.flags.collapsed,
+    });
+    res.send(`Node collapsed updated: type [${node.type}] id [${node.container.id}/${node.id}]`);
+});
 router.put('/c/:cid/move', function (req, res) {
     const paramsCid = +req.params.cid;
     let container = container_1.Container.containers[paramsCid];

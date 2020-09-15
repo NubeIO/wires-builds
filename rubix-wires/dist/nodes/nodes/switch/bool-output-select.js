@@ -14,7 +14,7 @@ class BoolOutputSelectNode extends flexible_node_1.FlexibleNode {
         this.description =
             "Numeric integer 'select' passes Boolean 'input' to the corresponding Boolean 'output'.  If 'select' is 2, 'input' will be passed to 'out 2' (likewise for other integer 'select' values). If the 'select' value does not have a corresponding 'out #' value, no values will be passed.  The number of outputs  can be modified from settings.";
         this.addInput('select', node_io_1.Type.NUMBER);
-        this.addInput('input', node_io_1.Type.NUMBER);
+        this.addInput('input', node_io_1.Type.BOOLEAN);
     }
     onInputUpdated() {
         let active = this.getInputData(0);

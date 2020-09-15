@@ -226,13 +226,10 @@ class ModbusSerialNetworkNode extends container_node_1.ContainerNode {
         });
     }
     onAfterSettingsChange(oldSettings) {
-        const _super = Object.create(null, {
-            onAfterSettingsChange: { get: () => super.onAfterSettingsChange }
-        });
-        return __awaiter(this, void 0, void 0, function* () {
-            _super.onAfterSettingsChange.call(this, oldSettings);
+        super.onAfterSettingsChange(oldSettings);
+        setTimeout(() => __awaiter(this, void 0, void 0, function* () {
             yield this.setupForPolling();
-        });
+        }));
     }
     polling(poll) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -326,7 +323,6 @@ class ModbusSerialNetworkNode extends container_node_1.ContainerNode {
                         return;
                     try {
                         const response = yield modbus_point_methods_1.default.modbusMethods(client, deviceAddress, pntType, pntAddr, pntOffset, pntVal, pntDataType, pntDataEndian, deviceAddressOffset);
-                        modbus_functions_1.default.sendPointMessage(pointNode, response);
                         modbus_functions_1.default.sendPointMessage(pointNode, response);
                         modbus_functions_1.default.sendDeviceMessage(deviceNode, response);
                     }

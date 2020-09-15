@@ -59,7 +59,7 @@ class ConnectionLocalTransmitterNode extends node_1.Node {
         let diff = target_count - this.properties['inputsCount'];
         if (diff == 0)
             return;
-        this.changeInputsCount(target_count, node_io_1.Type.STRING);
+        this.changeInputsCount(target_count, node_io_1.Type.ANY);
         if (diff > 0) {
             for (let i = this.properties['inputsCount'] + 1; i <= target_count; i++) {
                 this.settings['in' + i] = {

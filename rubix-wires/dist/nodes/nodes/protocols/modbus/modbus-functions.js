@@ -25,11 +25,10 @@ class ModbusUtils {
                 if (!err) {
                     try {
                         docs.forEach(doc => {
-                            const { cid, id, name, sub_container, settings } = doc;
+                            const { cid, id, sub_container, settings } = doc;
                             output.push({
                                 deviceCID: cid,
                                 deviceID: id,
-                                deviceName: name,
                                 deviceSubCID: sub_container.id,
                                 deviceAddress: settings.address.value,
                                 ipAddress: settings.ipAddress.value,
@@ -62,12 +61,11 @@ class ModbusUtils {
                 if (!err) {
                     try {
                         docs.forEach(doc => {
-                            const { cid, id, name, settings, properties } = doc;
+                            const { cid, id, settings, properties } = doc;
                             output.push({
                                 pntCid: cid,
                                 pntId: id,
-                                pntAddr: settings.address.value,
-                                pntName: name,
+                                pntAddr: properties.address,
                                 pntType: settings.pointType.value,
                                 pntOffset: settings.offset.value,
                                 pntMathFunc: settings.mathFunc.value,

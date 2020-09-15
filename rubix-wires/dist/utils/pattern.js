@@ -1,6 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const helper_1 = require("./helper");
 class MockCentralizedListener {
+    static cast(object) {
+        if (helper_1.isEmpty(object)) {
+            return MockCentralizedListener.LISTENER;
+        }
+        if (helper_1.isFunction(object['listen'])) {
+            return object;
+        }
+        return MockCentralizedListener.LISTENER;
+    }
     listen({ action, payload }) {
         throw new Error(`Not found handler or parent to process action ${action}`);
     }

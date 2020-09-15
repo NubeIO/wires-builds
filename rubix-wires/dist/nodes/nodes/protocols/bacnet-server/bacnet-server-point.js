@@ -34,12 +34,11 @@ class BACnetServerPointNode extends connection_node_mixin_1.DependantConnectionN
         return this;
     }
     listener() {
-        var _a;
-        return _a = this.getParentNode(), (_a !== null && _a !== void 0 ? _a : pattern_1.MockCentralizedListener.LISTENER);
+        return pattern_1.MockCentralizedListener.cast(this.getParentNode());
     }
     pointObservers() {
         return [...super.pointObservers(),
-            ...(this.getParentNode().pointObservers())];
+            ...point_node_1.MockHasPointOutputObservers.cast(this.getParentNode()).pointObservers()];
     }
     notifyOutput(point, observers) {
         var _a, _b, _c;

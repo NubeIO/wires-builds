@@ -12,6 +12,10 @@ class FiltersPreventNullNode extends node_1.Node {
         this.addOutput('output');
         this.properties['value'];
     }
+    onAdded() {
+        this.setOutputData(0, this.properties['value']);
+        this.onInputUpdated();
+    }
     onInputUpdated() {
         let val = this.getInputData(0);
         if (helper_1.isNotNull(val) && val !== '') {

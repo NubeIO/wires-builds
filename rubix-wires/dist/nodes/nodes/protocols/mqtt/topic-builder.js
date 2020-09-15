@@ -22,9 +22,12 @@ class MQTTTopicBuilderNode extends flexible_node_1.FlexibleNode {
         const inputs = this.getInputsCount();
         let output = '';
         for (let i = this.dynamicInputStartPosition; i < inputs; i++) {
-            output = output.concat(this.getInputData(i));
-            if (i !== (inputs - 1))
-                output = output.concat('/');
+            const value = (this.getInputData(i) || '').toString();
+            if (value != '') {
+                if (output != '')
+                    output = output.concat('/');
+                output = output.concat(value);
+            }
         }
         this.setOutputData(0, output, true);
     }

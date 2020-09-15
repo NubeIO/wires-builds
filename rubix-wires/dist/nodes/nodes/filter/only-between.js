@@ -13,6 +13,14 @@ class FiltersOnlyFromRangeNode extends node_1.Node {
         this.addInputWithSettings('min', node_io_1.Type.NUMBER, 0, 'min', false);
         this.addInputWithSettings('max', node_io_1.Type.NUMBER, 10, 'max', false);
         this.addOutput('value', node_io_1.Type.NUMBER);
+        this.properties['value'];
+    }
+    onAdded() {
+        this.setOutputData(0, this.properties['value']);
+        this.onInputUpdated();
+    }
+    onAfterSettingsChange() {
+        this.onInputUpdated();
     }
     onInputUpdated() {
         const val = this.getInputData(0);
@@ -21,8 +29,11 @@ class FiltersOnlyFromRangeNode extends node_1.Node {
         if (val == null || min == null || max == null) {
             this.setOutputData(0, null);
         }
-        else if (val >= min && val <= max)
+        else if (val >= min && val <= max) {
             this.setOutputData(0, val);
+            this.properties['value'] = val;
+            this.persistProperties(false, true);
+        }
     }
 }
 container_1.Container.registerNodeType('filter/only-between', FiltersOnlyFromRangeNode);

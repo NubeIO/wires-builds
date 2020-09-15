@@ -12,6 +12,9 @@ class FiltersOnlyTrueNode extends node_1.Node {
         this.addInput('input', node_io_1.Type.BOOLEAN);
         this.addOutput('output', node_io_1.Type.BOOLEAN);
     }
+    onAdded() {
+        this.onInputUpdated();
+    }
     onInputUpdated() {
         if (this.getInputData(0) === true)
             this.setOutputData(0, true);

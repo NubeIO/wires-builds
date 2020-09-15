@@ -17,7 +17,7 @@ class CSVMergeColumnsNode extends node_1.Node {
     }
     onAdded() {
         this.setOutputData(0, '');
-        this.setOutputData(1, '');
+        this.onInputUpdated();
     }
     onInputUpdated() {
         if (this.side !== container_1.Side.server)

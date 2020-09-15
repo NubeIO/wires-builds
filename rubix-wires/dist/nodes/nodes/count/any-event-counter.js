@@ -23,6 +23,9 @@ class EventCounterNode extends node_1.Node {
         };
         this.properties['count'] = 0;
     }
+    onAdded() {
+        this.onInputUpdated();
+    }
     onInputUpdated() {
         const inputUpdated = this.inputs[0].updated;
         const inputData = this.inputs[0].data;

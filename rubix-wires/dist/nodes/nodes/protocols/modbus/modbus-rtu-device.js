@@ -15,7 +15,7 @@ class ModbusSerialDeviceNode extends container_node_1.ContainerNode {
         this.outStatus = 0;
         this.outError = 1;
         this.outMessageJson = 2;
-        this.title = 'Modbus 485 Device';
+        this.title = 'Modbus Device';
         this.description =
             `## Description\n ` +
                 ` This node is used as a modbus TCP or RTU(rs485) modbus device.\n ` +
@@ -120,6 +120,31 @@ class ModbusSerialDeviceNode extends container_node_1.ContainerNode {
         }
         delete container_1.Container.containers[this.sub_container.id];
     }
+    onAdded() {
+        super.onAdded();
+        this.broadcastNameToClients();
+        this.updateTitle();
+        if (this.side !== container_1.Side.server)
+            return;
+        this.uuid = this.id;
+        if (this.settings['transport'].value === 'tcp') {
+            this.ping();
+        }
+    }
+    updateTitle() {
+        const address = this.settings['address'].value;
+        const transport = this.settings['transport'].value;
+        const ipAddress = this.settings['ipAddress'].value;
+        const ipPort = this.settings['ipPort'].value;
+        if (transport === 'tcp') {
+            this.title = `Modbus Device (Type: ${this.settings['transport'].value}, AD: ${address} , IP: ${ipAddress}:${ipPort})`;
+            this.broadcastSettingsToClients();
+        }
+        else {
+            this.title = `Modbus Device (Type: ${this.settings['transport'].value}, AD: ${address})`;
+            this.broadcastSettingsToClients();
+        }
+    }
     ping() {
         const host = [this.settings['ipAddress'].value, this.settings['ipPort'].value];
         var sock = new net.Socket();
@@ -143,17 +168,8 @@ class ModbusSerialDeviceNode extends container_node_1.ContainerNode {
         })
             .connect(host[1], host[0]);
     }
-    onAdded() {
-        super.onAdded();
-        this.broadcastNameToClients();
-        if (this.side !== container_1.Side.server)
-            return;
-        this.uuid = this.id;
-        if (this.settings['transport'].value === 'tcp') {
-            this.ping();
-        }
-    }
     onAfterSettingsChange(oldSettings) {
+        this.updateTitle();
         super.onAfterSettingsChange(oldSettings);
         if (this.side !== container_1.Side.server)
             return;

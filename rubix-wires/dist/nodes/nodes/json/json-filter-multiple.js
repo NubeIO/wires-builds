@@ -37,6 +37,7 @@ class JsonFilterMultiple extends node_1.Node {
     }
     onAdded() {
         this.filterKeys = this.getFilterKeys();
+        this.onAfterSettingsChange();
     }
     onInputUpdated() {
         let input = this.getInputData(0);

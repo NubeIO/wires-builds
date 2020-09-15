@@ -52,8 +52,7 @@ function MqttGenericNodeMixin(Base) {
             }
         }
         listener() {
-            var _a;
-            return _a = this.getParentNode(), (_a !== null && _a !== void 0 ? _a : pattern_1.MockCentralizedListener.LISTENER);
+            return pattern_1.MockCentralizedListener.cast(this.getParentNode());
         }
         mixinMqttTopicInputSetting() {
             this.addInputWithSettings(this._iTopic, node_io_1.Type.STRING, '', 'MQTT Topic');

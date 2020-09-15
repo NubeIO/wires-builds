@@ -3,11 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_1 = require("../../../node");
 const container_1 = require("../../../container");
 const node_io_1 = require("../../../node-io");
-const check_types_1 = require("../../../utils/check-types");
 const constants_1 = require("../../../constants");
 const BACnet_enums_units_1 = require("../../../utils/points/BACnet-enums-units");
-const utils_1 = require("../../../utils");
 const MathUtils_1 = require("../../../utils/MathUtils");
+const helper_1 = require("../../../../utils/helper");
 class ModbusPointNode extends node_1.Node {
     constructor() {
         super();
@@ -28,39 +27,7 @@ class ModbusPointNode extends node_1.Node {
         this.outModbusMessage = 2;
         this.outMessageJson = 3;
         this.outAlarm = 3;
-        this.dynamicInputsCount = () => this.inputCount;
-        this.addDynamicInputsOnRange = (save = true) => {
-            let dynamicMaxInputs = 20;
-            const count = this.dynamicInputsCount();
-            const targetCount = utils_1.default.clamp(count, this.dynamicMinInputs, dynamicMaxInputs);
-            const currentCount = this.getInputsCount() - this.dynamicInputStartPosition;
-            const addedInputsCount = targetCount - currentCount;
-            if (addedInputsCount > 0) {
-                for (let i = 0; i < addedInputsCount; i++)
-                    this.addInputWithName();
-            }
-            else if (addedInputsCount < 0) {
-                const inputCount = this.getInputsCount();
-                for (let i = inputCount; i > inputCount + addedInputsCount; i--) {
-                    this.removeInput(i - 1);
-                }
-            }
-            save && this.updateNodeInput();
-        };
-        this.addInputWithName = () => {
-            let id = this.getFreeInputId();
-            let setting = this.getInputSetting();
-            let name = `${this.dynamicInputsStartName} ${id + 1 - this.dynamicInputStartPosition}`;
-            if (this.dynamicSettingsExist) {
-                name = `[${name}]`;
-            }
-            let input = { name, type: this.dynamicInputsType, setting };
-            if (!this.inputs)
-                this.inputs = {};
-            this.inputs[id] = input;
-            if (this['onInputAdded'])
-                this['onInputAdded'](input);
-        };
+        this.outArray = 4;
         this.title = 'Modbus Point';
         this.description =
             `## Description\n ` +
@@ -81,11 +48,14 @@ class ModbusPointNode extends node_1.Node {
                 `   \n ` +
                 ` This will enable/disable the point from polling \n ` +
                 `   \n `;
+        this.addInput('[name]', node_io_1.Type.STRING);
         this.addOutput('output', node_io_1.Type.NUMBER);
         this.addOutput('error', node_io_1.Type.STRING);
-        this.addOutput('output-modbus-array', node_io_1.Type.STRING);
+        this.addOutput('output-msg', node_io_1.Type.STRING);
         this.addOutput('output json', node_io_1.Type.STRING);
+        this.addOutput('output-modbus-array', node_io_1.Type.STRING);
         this.properties['pointVal'] = null;
+        this.properties['address'] = 0;
         this.settings['pointEnable'] = {
             description: 'Point enable',
             value: false,
@@ -96,11 +66,7 @@ class ModbusPointNode extends node_1.Node {
             value: '',
             type: node_1.SettingType.GROUP,
         };
-        this.settings['valRaw'] = {
-            description: 'Raw value',
-            value: '',
-            type: node_1.SettingType.READONLY,
-        };
+        this.addInputWithSettings('input', node_io_1.Type.NUMBER, 0, 'point write value', false);
         this.settings['valOffset'] = {
             description: 'Out value offset',
             value: 1000,
@@ -175,11 +141,7 @@ class ModbusPointNode extends node_1.Node {
                 ],
             },
         };
-        this.settings['address'] = {
-            description: 'Register address',
-            value: 1,
-            type: node_1.SettingType.NUMBER,
-        };
+        this.addInputWithSettings('address', node_io_1.Type.NUMBER, 1, 'Register address', false);
         this.settings['pointTimeout'] = {
             description: 'Point Timeout (MS)',
             value: 1000,
@@ -244,7 +206,7 @@ class ModbusPointNode extends node_1.Node {
         });
     }
     onCreated() {
-        this.updateNodeInputs(false);
+        this.updateTitle();
     }
     onAdded() {
         if (this.side !== container_1.Side.server)
@@ -252,21 +214,18 @@ class ModbusPointNode extends node_1.Node {
         this.onInputUpdated();
         this.updateTitle();
     }
+    updateTitle() {
+        let address = this.getInputData(1);
+        this.title = `Modbus Point (FC: ${this.settings['pointType'].value}, AD: ${address})`;
+        this.broadcastSettingsToClients();
+    }
     onInputUpdated() {
         let pointType = this.settings['pointType'].value;
         if ([5, 6, 15, 16, 25, 26].includes(pointType)) {
-            let InputStartPosition = 0;
-            let inputValue;
-            let priority;
-            for (let i = InputStartPosition; i < InputStartPosition + 1; i++) {
-                inputValue = this.getInputData(i);
-                if (inputValue != null) {
-                    priority = i;
-                    break;
-                }
-            }
-            let input = check_types_1.default.formatValueReturnType(inputValue);
-            this.setOutputData(this.outModbusMessage, `write val ${inputValue} @ priority ${priority - 1}`, true);
+            const input = this.getInputData(1);
+            if (helper_1.isNull(input))
+                return;
+            this.setOutputData(this.outModbusMessage, `write val ${input}`, true);
             if (input !== this.lastInputState) {
                 this.properties['pointVal'] = input;
                 this.persistProperties(false, true);
@@ -276,47 +235,52 @@ class ModbusPointNode extends node_1.Node {
                 this.lastInputState = input;
             }
         }
-    }
-    updateTitle() {
-        this.title = `Modbus Point (FC: ${this.settings['pointType'].value}, AD: ${this.settings['address'].value})`;
-        this.broadcastSettingsToClients();
-    }
-    onAfterSettingsChange() {
-        this.updateNodeInputs(true);
-        this.onInputUpdated();
-        this.updateTitle();
-    }
-    updateNodeInputs(save) {
-        let pointType = this.settings['pointType'].value;
-        if (this.previousPointType !== pointType) {
-            if ([5, 6, 15, 16, 25, 26].includes(pointType)) {
-                this.inputCount = 1;
-                this.addDynamicInputsOnRange(save);
+        if (this.inputs[2].updated) {
+            const address = this.getInputData(2);
+            if (!helper_1.isNull(address)) {
+                this.properties['address'] = address;
+                this.persistProperties(false, true);
             }
             else {
-                this.inputCount = 0;
-                this.addDynamicInputsOnRange(save);
+                this.properties['address'] = 0;
+                this.persistProperties(false, true);
             }
         }
-        this.previousPointType = pointType;
+        if (this.inputs[0].updated) {
+            let nodeName = this.getInputData(0);
+            if (!helper_1.isNull(nodeName)) {
+                this.name = nodeName;
+                this.broadcastNameToClients();
+            }
+            ;
+        }
     }
-    getInputSetting() {
-        return {
-            exist: this.dynamicSettingsExist,
-            nullable: this.nullableInputs,
-            hidden: false,
-        };
+    onAfterSettingsChange() {
+        const address = this.getInputData(2);
+        if (!helper_1.isNull(address)) {
+            this.properties['address'] = address;
+            this.persistProperties(false, true);
+        }
+        else {
+            this.properties['address'] = 0;
+            this.persistProperties(false, true);
+        }
+        this.onInputUpdated();
+        this.updateTitle();
     }
     sendJson(pointValue) {
         return {
             name: this.name,
             pointValue: pointValue,
-            enable: this.settings['pointEnable'].value
+            enable: this.settings['pointEnable'].value,
+            address: this.settings['address'].value,
+            offset: this.settings['offset'].value,
+            pointType: this.settings['pointType'].value
         };
     }
     subscribe(payload) {
         let pointType = this.settings['pointType'].value;
-        this.setOutputData(this.outModbusMessage, payload.res.data);
+        this.setOutputData(this.outArray, payload.res.data);
         this.setOutputData(this.outError, false, true);
         if ([5, 6, 15, 16, 25, 26].includes(pointType)) {
             if (payload.payload === 'writeOk') {
