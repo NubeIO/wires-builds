@@ -12,7 +12,6 @@ USER=""
 USER_GROUP=""
 HOME_PATH=""
 LOG=true
-CREATE_LOG=false
 SERVICE_NAME="nubeio-rubix-wires"
 
 createDirIfNotExist() {
@@ -27,15 +26,10 @@ createDirIfNotExist() {
 createLogger() {
     if ${LOG}
     then
-        if ${CREATE_LOG}
-        then
-            echo -e "${GREEN}Installing pm2-logrotate${DEFAULT}"
-            npm run install:pm2-logrotate
-        fi
         echo -e "${GREEN}Setting log rotate size of 50M${DEFAULT}"
         npm run pm2 set pm2-logrotate:max_size 50M
-        echo -e "${GREEN}Setting max date logs is of 10 days${DEFAULT}"
-        npm run pm2 set pm2-logrotate:retain 10
+        echo -e "${GREEN}Setting max date logs is of 5 days${DEFAULT}"
+        npm run pm2 set pm2-logrotate:retain 5
         echo -e "${GREEN}Setting log rotate compression (gzip compression) as true${DEFAULT}"
         npm run pm2 set pm2-logrotate:compress true
     else
@@ -51,14 +45,14 @@ start() {
         echo -e "${GREEN}Starting production run with PM2${DEFAULT}"
         if ${LOG}
         then
-            npm run start:prod
+            npm run pm2:start
         else
-            npm run start:prod:nolog
+            npm run pm2:start -- -o /dev/null -e /dev/null
         fi
         echo -e "${GREEN}Saving PM2 configuration${DEFAULT}"
-        npm run save:prod
+        npm run pm2:save
         echo -e "${GREEN}Creating Linux Service${DEFAULT}"
-        sudo npm run startup:prod -- -u ${USER} --hp ${HOME_PATH} --service-name ${SERVICE_NAME}
+        sudo npm run pm2:startup -- -u ${USER} --hp ${HOME_PATH} --service-name ${SERVICE_NAME}
         echo -e "${GREEN}Enabling Linux Service${DEFAULT}"
         sudo systemctl enable ${SERVICE_NAME}.service
         createLogger
@@ -88,9 +82,9 @@ delete() {
     if [[ ${USER} != "" ]]
     then
         echo -e "${GREEN}Deleting PM2 running app, if exist${DEFAULT}"
-        npm run delete:prod
+        npm run pm2:delete
         echo -e "${GREEN}Removing Linux Service${DEFAULT}"
-        sudo npm run unstartup:prod -- -u ${USER} --service-name ${SERVICE_NAME}
+        sudo npm run pm2:unstartup -- -u ${USER} --service-name ${SERVICE_NAME}
         echo -e "${GREEN}Service is deleted...${DEFAULT}"
     else
         echo -e "${RED}-u=<user> this parameters should be on you input (-h, --help for help)${DEFAULT}"
@@ -110,8 +104,8 @@ help() {
     echo -e "   ${GREEN}-ug --user-group=<user_group>${DEFAULT}             Data is associated with which <user_group>, DEFAULT <user>"
     echo -e "   ${GREEN}-hp --home-path=<home_path>:${DEFAULT}              Which <home_path> for storing PM2 files"
     echo -e "   ${GREEN}-l --log=<boolean>:${DEFAULT}                       by default true, for logging"
-    echo -e "   ${GREEN}-ilr --install-log-rotate=<boolean>:${DEFAULT}      by default false, if logging was stopped and \
-if you want to start logging again you need this command (it installs 'pm2-logrotate' which is removed out when we disable logging)"
+    echo -e "   ${GREEN}-ilr --install-log-rotate=<boolean>:${DEFAULT}      by default false, if you want to start \
+and your logs need to be rotated, you need this command (it installs 'pm2-logrotate' and start a process)"
 }
 
 parseCommand() {
@@ -133,9 +127,6 @@ parseCommand() {
         ;;
     -l=*|--log=*)
         LOG="${i#*=}"
-        ;;
-    -ilr=*|--install-log-rotate=*)
-        CREATE_LOG="${i#*=}"
         ;;
     start|disable|enable|delete)
         COMMAND=${i}
