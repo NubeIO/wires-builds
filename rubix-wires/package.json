@@ -1,6 +1,6 @@
 {
   "name": "rubix-wires",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "author": "NubeIO",
   "engines": {
     "node": ">=10.0.0",
@@ -14,7 +14,9 @@
     "pm2:save": "pm2 save",
     "pm2:startup": "pm2 startup",
     "pm2:unstartup": "pm2 unstartup",
-    "pm2": "pm2"
+    "pm2": "pm2",
+    "install:pm2-logrotate": "pm2 install pm2-logrotate",
+    "uninstall:pm2-logrotate": "pm2 uninstall pm2-logrotate"
   },
   "dependencies": {
     "@hapi/joi": "17.1.0",
@@ -47,10 +49,11 @@
     "mqtt-match": "2.0.3",
     "nedb": "1.8.0",
     "network": "0.5.0",
+    "ngeohash": "0.6.3",
+    "node-aes-cmac": "0.1.1",
     "node-bacnet": "0.1.2-beta.3",
     "nodemailer": "6.4.2",
     "pm2": "^4.2.2",
-    "pm2-logrotate": "^2.7.0",
     "serialport": "8.0.6",
     "set-ip-address": "0.2.0",
     "socket.io": "2.3.0",

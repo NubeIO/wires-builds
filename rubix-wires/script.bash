@@ -12,6 +12,7 @@ USER=""
 USER_GROUP=""
 HOME_PATH=""
 LOG=true
+CREATE_LOG=false
 SERVICE_NAME="nubeio-rubix-wires"
 
 createDirIfNotExist() {
@@ -26,6 +27,11 @@ createDirIfNotExist() {
 createLogger() {
     if ${LOG}
     then
+        if ${CREATE_LOG}
+        then
+            echo -e "${GREEN}Installing pm2-logrotate${DEFAULT}"
+            npm run install:pm2-logrotate
+        fi
         echo -e "${GREEN}Setting log rotate size of 50M${DEFAULT}"
         npm run pm2 set pm2-logrotate:max_size 50M
         echo -e "${GREEN}Setting max date logs is of 5 days${DEFAULT}"
@@ -104,8 +110,8 @@ help() {
     echo -e "   ${GREEN}-ug --user-group=<user_group>${DEFAULT}             Data is associated with which <user_group>, DEFAULT <user>"
     echo -e "   ${GREEN}-hp --home-path=<home_path>:${DEFAULT}              Which <home_path> for storing PM2 files"
     echo -e "   ${GREEN}-l --log=<boolean>:${DEFAULT}                       by default true, for logging"
-    echo -e "   ${GREEN}-ilr --install-log-rotate=<boolean>:${DEFAULT}      by default false, if you want to start \
-and your logs need to be rotated, you need this command (it installs 'pm2-logrotate' and start a process)"
+    echo -e "   ${GREEN}-ilr --install-log-rotate=<boolean>:${DEFAULT}      by default false, use this command to \
+restrict your logging for 5 days"
 }
 
 parseCommand() {
@@ -127,6 +133,9 @@ parseCommand() {
         ;;
     -l=*|--log=*)
         LOG="${i#*=}"
+        ;;
+    -ilr=*|--install-log-rotate=*)
+        CREATE_LOG="${i#*=}"
         ;;
     start|disable|enable|delete)
         COMMAND=${i}
