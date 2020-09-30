@@ -1,12 +1,13 @@
 {
   "name": "rubix-wires",
-  "version": "1.5.9",
+  "version": "1.6.0",
   "author": "NubeIO",
   "engines": {
     "node": ">=10.0.0",
     "npm": ">=6.0.0"
   },
   "scripts": {
+    "prod:start": "node app.js",
     "pm2:start": "npm run pm2:delete && NODE_ENV=production pm2 start ecosystem.config.js",
     "pm2:stop": "pm2 stop ecosystem.config.js",
     "pm2:delete": "pm2 delete ecosystem.config.js",
