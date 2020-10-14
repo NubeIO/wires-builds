@@ -1539,6 +1539,13 @@ div.vis-network div.vis-navigation div.vis-button.vis-zoomExtends {
   padding: 0px 15px 15px;
 }
 
+.code-area-container{position:relative;transition:height .2s ease}.code-area-container .codeflask pre,.code-area-container .codeflask code{letter-spacing:initial;overflow-wrap:initial}.code-area-container .codeflask code{background-color:transparent;font-size:13px;white-space:pre;box-shadow:none}.code-area-container .codeflask code::before,.code-area-container .codeflask code::after{content:none}
+.below-toolbar[data-v-43bff5e4]{margin-top:48px;height:calc(100% - 100px) !important}.body[data-v-43bff5e4]{overflow-y:auto;padding-bottom:48px;height:100%}.top-icon-right[data-v-43bff5e4]{margin-right:8px}.v-expansion-panel[data-v-43bff5e4]::before{box-shadow:none !important}.v-expansion-panel-header--active[data-v-43bff5e4]::before{background-color:gray !important}.header_icon[data-v-43bff5e4]{flex:0 !important;margin-right:16px}.horizontal[data-v-43bff5e4]{display:flex;align-items:center;flex-direction:row}.horizontal>*[data-v-43bff5e4]{flex:1}.horizontal>*[data-v-43bff5e4]:not(:first-child){margin-left:8px}
+
+.search-text[data-v-72feab35] {
+  margin-bottom: 12px;
+}
+
 
 .pointer[data-v-d0161214] {
   cursor: default;
@@ -1557,13 +1564,6 @@ div.vis-network div.vis-navigation div.vis-button.vis-zoomExtends {
 .search-text[data-v-101b551a] {
   margin-left: 12px;
   margin-right: 12px;
-}
-
-.code-area-container{position:relative;transition:height .2s ease}.code-area-container .codeflask pre,.code-area-container .codeflask code{letter-spacing:initial;overflow-wrap:initial}.code-area-container .codeflask code{background-color:transparent;font-size:13px;white-space:pre;box-shadow:none}.code-area-container .codeflask code::before,.code-area-container .codeflask code::after{content:none}
-.below-toolbar[data-v-2518f79b]{margin-top:48px;height:calc(100% - 100px) !important}.body[data-v-2518f79b]{overflow-y:auto;padding-bottom:48px;height:100%}.top-icon-right[data-v-2518f79b]{margin-right:8px}.v-expansion-panel[data-v-2518f79b]::before{box-shadow:none !important}.v-expansion-panel-header--active[data-v-2518f79b]::before{background-color:gray !important}.header_icon[data-v-2518f79b]{flex:0 !important;margin-right:16px}.horizontal[data-v-2518f79b]{display:flex;align-items:center;flex-direction:row}.horizontal>*[data-v-2518f79b]{flex:1}.horizontal>*[data-v-2518f79b]:not(:first-child){margin-left:8px}
-
-.search-text[data-v-5c9585f9] {
-  margin-bottom: 12px;
 }
 
 
