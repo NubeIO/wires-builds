@@ -1,6 +1,6 @@
 {
   "name": "rubix-wires",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "author": "NubeIO",
   "engines": {
     "node": ">=10.0.0",
@@ -21,6 +21,8 @@
   },
   "dependencies": {
     "@hapi/joi": "17.1.0",
+    "@influxdata/influxdb-client": "1.7.1",
+    "@influxdata/influxdb-client-apis": "1.7.1",
     "axios": "0.19.2",
     "body-parser": "1.19.0",
     "btoa": "1.2.1",
