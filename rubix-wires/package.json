@@ -62,7 +62,7 @@
     "slugid": "2.0.0",
     "socket.io": "2.3.0",
     "source-map-support": "0.5.16",
-    "systeminformation": "4.26.10",
+    "systeminformation": "4.27.11",
     "vm2": "3.9.2"
   }
 }
