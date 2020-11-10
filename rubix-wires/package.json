@@ -1,6 +1,6 @@
 {
   "name": "rubix-wires",
-  "version": "1.7.4",
+  "version": "1.7.5",
   "author": "NubeIO",
   "engines": {
     "node": ">=10.0.0",
@@ -59,6 +59,7 @@
     "pm2": "^4.2.2",
     "serialport": "8.0.6",
     "set-ip-address": "0.2.0",
+    "slugid": "2.0.0",
     "socket.io": "2.3.0",
     "source-map-support": "0.5.16",
     "systeminformation": "4.26.10",
