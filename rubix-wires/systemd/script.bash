@@ -44,7 +44,7 @@ start() {
         sudo systemctl enable ${SERVICE}
 
         echo -e "${GREEN}Starting Linux Service${DEFAULT}"
-        sudo systemctl start ${SERVICE}
+        sudo systemctl restart ${SERVICE}
 
         echo -e "${GREEN}Service is created and started, please reboot to confirm...${DEFAULT}"
     else
