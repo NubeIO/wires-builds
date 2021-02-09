@@ -1,0 +1,14 @@
+{
+  "version": "1.9.9",
+  "name": "Rubix Wires",
+  "description": null,
+  "icons": {
+    "60": "/assets/firefox_app_60x60.png",
+    "128": "/assets/firefox_app_128x128.png",
+    "512": "/assets/firefox_app_512x512.png"
+  },
+  "developer": {
+    "name": "NubeIO",
+    "url": null
+  }
+}
