@@ -9,10 +9,17 @@ COMMAND=""
 SERVICE_NAME="nubeio-rubix-wires.service"
 USER=""
 WORKING_DIR=""
-DATA_DIR="/data/rubix-wires"
+GLOBAL_DIR="/data/rubix-wires"
+DATA_DIR="data"
+CONFIG_DIR="config"
 PORT=1313
 
+ABS_CONFIG_DIR=""
+ABS_DATA_DIR=""
+
+GLOBAL_DIR_EDITED=false
 DATA_DIR_EDITED=false
+CONFIG_DIR_EDITED=false
 SERVICE_NAME_EDITED=false
 PORT_EDITED=false
 
@@ -21,8 +28,12 @@ SERVICE_DIR=/lib/systemd/system
 SERVICE_TEMPLATE=nubeio-rubix-wires.template.service
 
 createDirIfNotExist() {
-    mkdir -p ${DATA_DIR}
-    sudo chown -R ${USER}:${USER} ${DATA_DIR}
+    ABS_DATA_DIR=${GLOBAL_DIR}/${DATA_DIR}
+    ABS_CONFIG_DIR=${GLOBAL_DIR}/${CONFIG_DIR}
+    mkdir -p ${ABS_DATA_DIR}
+    mkdir -p ${ABS_CONFIG_DIR}
+    sudo chown -R ${USER}:${USER} ${ABS_DATA_DIR}
+    sudo chown -R ${USER}:${USER} ${ABS_CONFIG_DIR}
 }
 
 showServiceNameWarningIfNotEdited() {
@@ -33,8 +44,14 @@ showServiceNameWarningIfNotEdited() {
 
 showWarningIfNotEdited() {
     showServiceNameWarningIfNotEdited
+    if [ ${GLOBAL_DIR_EDITED} == false ]; then
+        echo -e "${RED}We are using by default global_dir=${GLOBAL_DIR}!${DEFAULT}"
+    fi
     if [ ${DATA_DIR_EDITED} == false ]; then
         echo -e "${RED}We are using by default data_dir=${DATA_DIR}!${DEFAULT}"
+    fi
+    if [ ${CONFIG_DIR_EDITED} == false ]; then
+        echo -e "${RED}We are using by default config_dir=${CONFIG_DIR}!${DEFAULT}"
     fi
     if [ ${PORT_EDITED} == false ]; then
         echo -e "${RED}We are using by default port=${PORT}!${DEFAULT}"
@@ -46,7 +63,9 @@ createLinuxService() {
     sudo cp ${SERVICE_TEMPLATE} ${SERVICE_DIR}/${SERVICE_NAME}
     sed -i -e 's/<user>/'"${USER}"'/' ${SERVICE_DIR}/${SERVICE_NAME}
     sed -i -e 's,<working_dir>,'"${WORKING_DIR}"',' ${SERVICE_DIR}/${SERVICE_NAME}
+    sed -i -e 's,<global_dir>,'"${GLOBAL_DIR}"',g' ${SERVICE_DIR}/${SERVICE_NAME}
     sed -i -e 's,<data_dir>,'"${DATA_DIR}"',g' ${SERVICE_DIR}/${SERVICE_NAME}
+    sed -i -e 's,<config_dir>,'"${CONFIG_DIR}"',g' ${SERVICE_DIR}/${SERVICE_NAME}
 }
 
 startNewLinuxService() {
@@ -68,7 +87,7 @@ startNewLinuxService() {
 }
 
 changePortOnEnv() {
-    env_file="${DATA_DIR}/.env"
+    env_file="${ABS_CONFIG_DIR}/.env"
     if [ ! -f ${env_file} ]; then
         echo -e "${RED}Environmental file ${env_file} doesn't exist so creating an example...${DEFAULT}"
         echo "PORT=${PORT}" >${env_file}
@@ -79,7 +98,7 @@ changePortOnEnv() {
     fi
 }
 
-start() {
+install() {
     if [[ ${USER} != "" && ${WORKING_DIR} != "" ]]; then
         createDirIfNotExist
         showWarningIfNotEdited
@@ -88,7 +107,7 @@ start() {
         startNewLinuxService
         echo -e "${GREEN}Service is created and started.${DEFAULT}"
     else
-        echo -e ${RED}"-u=<user> -dir=<working_dir> these parameters should be on you input (-h, --help for help)${DEFAULT}"
+        echo -e "${RED}Invalid parameters (-h, --help for help)${DEFAULT}"
     fi
 }
 
@@ -123,18 +142,34 @@ delete() {
     echo -e "${GREEN}Service is deleted.${DEFAULT}"
 }
 
+restart() {
+    showServiceNameWarningIfNotEdited
+    echo -e "${GREEN}Restarting Linux Service...${DEFAULT}"
+    sudo systemctl restart ${SERVICE_NAME}
+    echo -e "${GREEN}Service is restarted.${DEFAULT}"
+}
+
+
 help() {
     echo "Service commands:"
-    echo -e "   ${GREEN}start -service_name=<service_name> -u=<user> -dir=<working_dir> -data_dir=<data_dir> -p=<port>${DEFAULT}    Start the service"
-    echo -e "   ${GREEN}disable${DEFAULT}                                                                                           Disable the service"
-    echo -e "   ${GREEN}enable${DEFAULT}                                                                                            Enable the stopped service"
-    echo -e "   ${GREEN}delete -u=<user>${DEFAULT}                                                                                  Delete the service"
+    echo -e "   ${GREEN}install [-s=<service_name>] -u=<user> --working-dir=<working_dir> [-g=<global_dir>] [-d=<data_dir>] [-c=<config_dir>] [-p=<port>]${DEFAULT} Install and start the service"
+    echo -e "   ${GREEN}disable${DEFAULT}                                                                                                                           Disable the service"
+    echo -e "   ${GREEN}enable${DEFAULT}                                                                                                                            Enable the stopped service"
+    echo -e "   ${GREEN}delete${DEFAULT}                                                                                                                            Delete the service"
+    echo -e "   ${GREEN}restart${DEFAULT}                                                                                                                           Restart the service"
     echo
-    echo "Service parameters:"
-    echo -e "   ${GREEN}-h --help${DEFAULT}                                                                                         Show this help"
-    echo -e "   ${GREEN}-u --user=<user>${DEFAULT}                                                                                  Which <user> is starting the service"
-    echo -e "   ${GREEN}-ug --user-group=<user_group>${DEFAULT}                                                                     Data is associated with which <user_group>, DEFAULT <user>"
-    echo -e "   ${GREEN}-dir --working-dir=<working_dir>:${DEFAULT}                                                                 From where wires is starting"
+        echo -e "   ${GREEN}-h, --help${DEFAULT}                                                                                                                    Show this help"
+    echo
+    echo "Install parameters:"
+    echo "    required:"
+    echo -e "   ${GREEN}-u, --user=<user>${DEFAULT}                                                                                                                 Which <user> is starting the service"
+    echo -e "   ${GREEN}-d, --dir --working-dir=<working_dir>${DEFAULT}                                                                                             Project absolute dir"
+    echo "    optional:"
+    echo -e "   ${GREEN}-s, --service-name=<service_name>${DEFAULT}                                                                                                 Name of system service to create"
+    echo -e "   ${GREEN}-g=<global_dir>${DEFAULT}                                                                                                                   Absolute parent direct for data & config"
+    echo -e "   ${GREEN}-d=<data_dir>${DEFAULT}                                                                                                                     Relative data dir"
+    echo -e "   ${GREEN}-c=<config_dir>${DEFAULT}                                                                                                                   Relative config dir"
+    echo -e "   ${GREEN}-p, --port=<port>${DEFAULT}                                                                                                                 HTTP server port"
 }
 
 parseCommand() {
@@ -144,25 +179,33 @@ parseCommand() {
             help
             exit 0
             ;;
-        -service_name=*)
+        -s=* | --service-name=*)
             SERVICE_NAME="${i#*=}"
             SERVICE_NAME_EDITED=true
             ;;
         -u=* | --user=*)
             USER="${i#*=}"
             ;;
-        -dir=* | --working-dir=*)
+         --working-dir=*)
             WORKING_DIR="${i#*=}"
             ;;
-        -data_dir=*)
+         -g=* | --global-dir=*)
+            GLOBAL_DIR="${i#*=}"
+            GLOBAL_DIR_EDITED=true
+            ;;
+        -d=* | --data-dir=*)
             DATA_DIR="${i#*=}"
             DATA_DIR_EDITED=true
+            ;;
+        -c=* | --config-dir=*)
+            CONFIG_DIR="${i#*=}"
+            CONFIG_DIR_EDITED=true
             ;;
         -p=* | --port=*)
             PORT="${i#*=}"
             PORT_EDITED=true
             ;;
-        start | disable | enable | delete)
+        install | start | disable | enable | delete | restart)
             COMMAND=${i}
             ;;
         *)
@@ -174,8 +217,11 @@ parseCommand() {
 
 runCommand() {
     case ${COMMAND} in
+    install)
+        install
+        ;;
     start)
-        start
+        install
         ;;
     disable)
         disable
@@ -185,6 +231,9 @@ runCommand() {
         ;;
     delete)
         delete
+        ;;
+    restart)
+        restart
         ;;
     esac
 }
