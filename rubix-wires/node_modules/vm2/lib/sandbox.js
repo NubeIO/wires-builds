@@ -66,10 +66,12 @@ return ((vm, host) => {
 					let contents = fs.readFileSync(filename, 'utf8');
 					contents = vm._compiler(contents, filename);
 
-					const code = `(function (exports, require, module, __filename, __dirname) { 'use strict'; ${contents} \n});`;
+					const code = host.STRICT_MODULE_PREFIX + contents + host.MODULE_SUFFIX;
+
+					const ccode = vm._hook('run', [code]);
 
 					// Precompile script
-					script = new Script(code, {
+					script = new Script(ccode, {
 						__proto__: null,
 						filename: filename || 'vm.js',
 						displayErrors: false,
