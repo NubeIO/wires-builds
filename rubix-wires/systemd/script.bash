@@ -32,8 +32,8 @@ createDirIfNotExist() {
     ABS_CONFIG_DIR=${GLOBAL_DIR}/${CONFIG_DIR}
     mkdir -p ${ABS_DATA_DIR}
     mkdir -p ${ABS_CONFIG_DIR}
-    sudo chown -R ${USER}:${USER} ${ABS_DATA_DIR}
-    sudo chown -R ${USER}:${USER} ${ABS_CONFIG_DIR}
+    chown -R ${USER}:${USER} ${ABS_DATA_DIR}
+    chown -R ${USER}:${USER} ${ABS_CONFIG_DIR}
 }
 
 showServiceNameWarningIfNotEdited() {
@@ -60,7 +60,7 @@ showWarningIfNotEdited() {
 
 createLinuxService() {
     echo -e "${GREEN}Creating Linux Service...${DEFAULT}"
-    sudo cp ${SERVICE_TEMPLATE} ${SERVICE_DIR}/${SERVICE_NAME}
+    cp ${SERVICE_TEMPLATE} ${SERVICE_DIR}/${SERVICE_NAME}
     sed -i -e 's/<user>/'"${USER}"'/' ${SERVICE_DIR}/${SERVICE_NAME}
     sed -i -e 's,<working_dir>,'"${WORKING_DIR}"',' ${SERVICE_DIR}/${SERVICE_NAME}
     sed -i -e 's,<global_dir>,'"${GLOBAL_DIR}"',g' ${SERVICE_DIR}/${SERVICE_NAME}
@@ -71,19 +71,19 @@ createLinuxService() {
 startNewLinuxService() {
     echo -e "${GREEN}Starting New Linux Service...${DEFAULT}"
     echo -e "${GREEN}Soft Un-linking Linux Service...${DEFAULT}"
-    sudo unlink ${SERVICE_DIR_SOFT_LINK}/${SERVICE_NAME}
+    unlink ${SERVICE_DIR_SOFT_LINK}/${SERVICE_NAME}
 
     echo -e "${GREEN}Soft Linking Linux Service...${DEFAULT}"
-    sudo ln -s ${SERVICE_DIR}/${SERVICE} ${SERVICE_DIR_SOFT_LINK}/${SERVICE_NAME}
+    ln -s ${SERVICE_DIR}/${SERVICE} ${SERVICE_DIR_SOFT_LINK}/${SERVICE_NAME}
 
     echo -e "${GREEN}Hitting daemon-reload...${DEFAULT}"
-    sudo systemctl daemon-reload
+    systemctl daemon-reload
 
     echo -e "${GREEN}Enabling Linux Service...${DEFAULT}"
-    sudo systemctl enable ${SERVICE_NAME}
+    systemctl enable ${SERVICE_NAME}
 
     echo -e "${GREEN}Starting Linux Service...${DEFAULT}"
-    sudo systemctl restart ${SERVICE_NAME}
+    systemctl restart ${SERVICE_NAME}
 }
 
 changePortOnEnv() {
@@ -114,38 +114,38 @@ install() {
 disable() {
     showServiceNameWarningIfNotEdited
     echo -e "${GREEN}Stopping Linux Service...${DEFAULT}"
-    sudo systemctl stop ${SERVICE_NAME}
+    systemctl stop ${SERVICE_NAME}
     echo -e "${GREEN}Disabling Linux Service...${DEFAULT}"
-    sudo systemctl disable ${SERVICE_NAME}
+    systemctl disable ${SERVICE_NAME}
     echo -e "${GREEN}Service is disabled.${DEFAULT}"
 }
 
 enable() {
     showServiceNameWarningIfNotEdited
     echo -e "${GREEN}Enabling Linux Service...${DEFAULT}"
-    sudo systemctl enable ${SERVICE_NAME}
+    systemctl enable ${SERVICE_NAME}
     echo -e "${GREEN}Starting Linux Service...${DEFAULT}"
-    sudo systemctl start ${SERVICE_NAME}
+    systemctl start ${SERVICE_NAME}
     echo -e "${GREEN}Service is enabled.${DEFAULT}"
 }
 
 delete() {
     showServiceNameWarningIfNotEdited
     echo -e "${GREEN}Stopping Linux Service...${DEFAULT}"
-    sudo systemctl stop ${SERVICE_NAME}
+    systemctl stop ${SERVICE_NAME}
     echo -e "${GREEN}Un-linking Linux Service...${DEFAULT}"
-    sudo unlink ${SERVICE_DIR_SOFT_LINK}/${SERVICE_NAME}
+    unlink ${SERVICE_DIR_SOFT_LINK}/${SERVICE_NAME}
     echo -e "${GREEN}Removing Linux Service...${DEFAULT}"
-    sudo rm -r ${SERVICE_DIR}/${SERVICE_NAME}
+    rm -r ${SERVICE_DIR}/${SERVICE_NAME}
     echo -e "${GREEN}Hitting daemon-reload...${DEFAULT}"
-    sudo systemctl daemon-reload
+    systemctl daemon-reload
     echo -e "${GREEN}Service is deleted.${DEFAULT}"
 }
 
 restart() {
     showServiceNameWarningIfNotEdited
     echo -e "${GREEN}Restarting Linux Service...${DEFAULT}"
-    sudo systemctl restart ${SERVICE_NAME}
+    systemctl restart ${SERVICE_NAME}
     echo -e "${GREEN}Service is restarted.${DEFAULT}"
 }
 
