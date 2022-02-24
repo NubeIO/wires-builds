@@ -1,6 +1,6 @@
 {
   "name": "rubix-wires",
-  "version": "2.4.2",
+  "version": "2.4.3",
   "author": "NubeIO",
   "engines": {
     "node": ">=12",
